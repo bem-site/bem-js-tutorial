@@ -1,0 +1,18 @@
+{
+  "author": "Varvara Stepanova",
+  "name": "bem-js-tutorial",
+  "version": "0.0.1",
+  "repository": {
+    "type": "git",
+    "url": "git@github.com:toivonen/bem-js-tutorial.git"
+  },
+  "engines": {
+    "node": "0.6 | 0.8 | 0.10"
+  },
+  "dependencies": {
+    "bem" : "~0.6.4",
+    "bem-environ" : "~1.0.1"
+  },
+  "devDependencies": {},
+  "private": true
+}
