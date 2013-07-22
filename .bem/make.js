@@ -1,10 +1,10 @@
 /* jshint node:true */
 /* global MAKE */
 
-require('bem-environ/lib/nodes');
-
 //process.env.YENV = 'production';
 //process.env.XJST_ASYNCIFY = 'yes';
+
+require('bem-environ/lib/nodes');
 
 MAKE.decl('Arch', {
 
@@ -12,7 +12,7 @@ MAKE.decl('Arch', {
     bundlesLevelsRegexp: /^.+?\.bundles$/,
 
     libraries: [
-        'bem-core @ v1',
+        'bem-core @ 3090cd35889fb12131cb0a77b708f7c1e5b6e008',
         'bem-controls @ v2'
     ]
 
