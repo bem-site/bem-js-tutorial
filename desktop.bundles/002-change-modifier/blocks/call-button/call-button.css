@@ -1,11 +1,129 @@
+/* http://nicolasgallagher.com/pure-css-gui-icons/demo/#non
+ * http://tutorialzine.com/2010/10/css3-animated-bubble-buttons/
+ * */
+
 .call-button
 {
-    width: 100px;
-    height: 100px;
-    background: red;
+	font:30px Calibri, Arial, sans-serif;
+
+	/* A semi-transparent text shadow */
+	text-shadow:1px 1px 0 rgba(255,255,255,0.4);
+	
+	/* Overriding the default underline styling of the links */
+	text-decoration:none !important;
+	white-space:nowrap;
+	
+	display:inline-block;
+	vertical-align:baseline;
+	position:relative;
+	cursor:pointer;
+	padding:10px 20px;
+	
+	background-repeat:no-repeat;
+
+	/* The following two rules are fallbacks, in case
+	   the browser does not support multiple backgrounds. */
+
+	background-position:bottom left;
+	background-image:url('call-button.png');
+	
+	/* Multiple backgrounds version. The background images
+	   are defined individually in color classes */
+	
+	background-position:bottom left, top right, 0 0, 0 0;
+	background-clip:border-box;
+	
+	/* Applying a default border raidus of 8px */
+	
+	-moz-border-radius:8px;
+	-webkit-border-radius:8px;
+	border-radius:8px;
+	
+	/* A 1px highlight inside of the button */
+	
+	-moz-box-shadow:0 0 1px #fff inset;
+	-webkit-box-shadow:0 0 1px #fff inset;
+	box-shadow:0 0 1px #fff inset;
+	
+	/* Animating the background positions with CSS3 */
+	/* Currently works only in Safari/Chrome */
+	
+	-webkit-transition:background-position 1s;
+	-moz-transition:background-position 1s;
+	transition:background-position 1s;
+
+    /* Round corners */
+	-moz-border-radius:4em;
+	-webkit-border-radius:4em;
+	border-radius:4em;
+
+    /* Green color */
+	color:#345903 !important;
+	border:1px solid #96a37b !important;	
+	background-color: #79be1e;
+	
+	background-image:url('call-button.png'), url('call-button.png'), -moz-radial-gradient(center bottom, circle, rgba(162,211,30,1) 0,rgba(162,211,30,0) 100px),-moz-linear-gradient(#82cc27, #74b317);
+	background-image:url('call-button.png'), url('call-button.png'), -webkit-gradient(radial, 50% 100%, 0, 50% 100%, 100, from(rgba(162,211,30,1)), to(rgba(162,211,30,0))),-webkit-gradient(linear, 0% 0%, 0% 100%, from(#82cc27), to(#74b317));
 }
 
-.call-button_status_calling
+.call-button:hover
 {
-    background: green;
+	
+	/* The first rule is a fallback, in case the browser
+	   does not support multiple backgrounds
+	*/
+	
+	background-position:top left;
+	background-position:top left, bottom right, 0 0, 0 0;
+
+    /* Green color */
+	background-color:#89d228;
+	
+	background-image:url('call-button.png'), url('call-button.png'), -moz-radial-gradient(center bottom, circle, rgba(183,229,45,1) 0,rgba(183,229,45,0) 100px),-moz-linear-gradient(#90de31, #7fc01e);
+	background-image:url('call-button.png'), url('call-button.png'), -webkit-gradient(radial, 50% 100%, 0, 50% 100%, 100, from(rgba(183,229,45,1)), to(rgba(183,229,45,0))),-webkit-gradient(linear, 0% 0%, 0% 100%, from(#90de31), to(#7fc01e));
+}
+
+.call-button:active
+{
+	/* Moving the button 1px to the bottom when clicked */
+	bottom:-1px;
+}
+
+.call-button__link
+{
+    display: block;
+}
+
+.call-button__link:before,
+.call-button__link:after
+{
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 0;
+    margin:-8px 0 0;
+    background:#c55500;
+}
+
+.call-button__link:before
+{
+    left:5px;
+    width:4px;
+    height:8px;
+    border-width:5px 0 5px 2px;
+    border-style:solid;
+    border-color: white;
+    background:transparent;
+    /* css3 */
+    -webkit-border-top-left-radius:3px 5px;
+    -webkit-border-bottom-left-radius:3px 5px;
+    -moz-border-radius-topleft:3px 5px;
+    -moz-border-radius-bottomleft:3px 5px;
+    border-top-left-radius:3px 5px;
+    border-bottom-left-radius:3px 5px;
+    -webkit-transform:rotate(-30deg);
+    -moz-transform:rotate(-30deg);
+    -ms-transform:rotate(-30deg);
+    -o-transform:rotate(-30deg);
+    transform:rotate(-30deg);
 }

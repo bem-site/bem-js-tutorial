@@ -11,7 +11,7 @@
         {
             block: 'call-button',
             js: true,
-            content: 'Call'
+            content: 'Phone Call'
         },
         { elem: 'js', url: '_002-change-modifier.js' }
     ]
