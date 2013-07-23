@@ -1,0 +1,19 @@
+/* 002-change-modifier.css begin */
+/* blocks/square/square.css begin */
+.square
+{
+    width: 100px;
+    height: 100px;
+    background: red;
+}
+
+.square_theme_new-year
+{
+    background: green;
+}
+
+/* blocks/square/square.css end */
+
+
+/* 002-change-modifier.css end */
+
