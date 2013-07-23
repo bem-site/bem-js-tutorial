@@ -1,0 +1,11 @@
+.square
+{
+    width: 100px;
+    height: 100px;
+    background: red;
+}
+
+.square_theme_new-year
+{
+    background: green;
+}
