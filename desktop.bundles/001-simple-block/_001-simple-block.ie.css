@@ -1,0 +1,14 @@
+/* 001-simple-block.css begin */
+/* blocks/my-block/my-block.css begin */
+.my-block
+{
+    padding: 0.3em;
+    border: green 3px dashed;
+    width: 350px;
+}
+
+/* blocks/my-block/my-block.css end */
+
+
+/* 001-simple-block.css end */
+
