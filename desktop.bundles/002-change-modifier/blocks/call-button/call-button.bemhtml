@@ -1,0 +1,9 @@
+block('call-button')(
+    tag()('span'),
+    content()({
+        elem: 'link'
+    }),
+    elem('link')(
+        tag()('a')
+    )
+);
