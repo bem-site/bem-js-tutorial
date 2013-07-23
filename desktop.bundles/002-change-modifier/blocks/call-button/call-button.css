@@ -1,11 +1,11 @@
-.square
+.call-button
 {
     width: 100px;
     height: 100px;
     background: red;
 }
 
-.square_theme_new-year
+.call-button_status_calling
 {
     background: green;
 }

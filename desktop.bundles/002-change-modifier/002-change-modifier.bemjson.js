@@ -9,9 +9,9 @@
     ],
     content:[
         {
-            block: 'square',
+            block: 'call-button',
             js: true,
-            content: 'Click on me to apply fancy theme'
+            content: 'Call'
         },
         { elem: 'js', url: '_002-change-modifier.js' }
     ]
