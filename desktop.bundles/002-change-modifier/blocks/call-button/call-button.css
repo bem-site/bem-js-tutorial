@@ -92,6 +92,7 @@
 .call-button__link
 {
     display: block;
+    padding-left: 44px;
 }
 
 .call-button__link:before,
@@ -101,7 +102,7 @@
     position: absolute;
     top: 50%;
     left: 0;
-    margin:-8px 0 0;
+    margin:-18px 0 0;
     background:#c55500;
 }
 
@@ -110,7 +111,8 @@
     left:5px;
     width:4px;
     height:8px;
-    border-width:5px 0 5px 2px;
+    border-width:15px 0 15px 6px;
+    margin-left: 24px;
     border-style:solid;
     border-color: white;
     background:transparent;
@@ -126,4 +128,61 @@
     -ms-transform:rotate(-30deg);
     -o-transform:rotate(-30deg);
     transform:rotate(-30deg);
+}
+
+.call-button_status_calling
+{
+	color:#0f4b6d !important;
+	
+	border:1px solid #84acc3 !important;
+	
+	/* A fallback background color */
+	background-color: #48b5f2;
+	
+	/* Specifying a version with gradients according to */
+	
+	background-image:	url('call-button.png'), url('call-button.png'),
+						-moz-radial-gradient(	center bottom, circle,
+												rgba(89,208,244,1) 0,rgba(89,208,244,0) 100px),
+						-moz-linear-gradient(#4fbbf7, #3faeeb);
+
+	background-image:	url('call-button.png'), url('call-button.png'),
+						-webkit-gradient(	radial, 50% 100%, 0, 50% 100%, 100,
+											from(rgba(89,208,244,1)), to(rgba(89,208,244,0))),
+						-webkit-gradient(linear, 0% 0%, 0% 100%, from(#4fbbf7), to(#3faeeb));
+}
+
+.call-button_status_calling:hover
+{
+	background-color:#63c7fe;
+	
+	background-image:	url('call-button.png'), url('call-button.png'),
+						-moz-radial-gradient(	center bottom, circle,
+												rgba(109,217,250,1) 0,rgba(109,217,250,0) 100px),
+						-moz-linear-gradient(#63c7fe, #58bef7);
+						
+	background-image:	url('call-button.png'), url('call-button.png'),
+						-webkit-gradient(	radial, 50% 100%, 0, 50% 100%, 100,
+											from(rgba(109,217,250,1)), to(rgba(109,217,250,0))),
+						-webkit-gradient(linear, 0% 0%, 0% 100%, from(#63c7fe), to(#58bef7));
+}
+
+.call-button_status_calling .call-button__link:after
+{
+    left:38px;
+    width: 9px;
+    height: 9px;
+    margin-top:-16px;
+    border:double white;
+    border-width:12px 12px 0 0;
+    background:transparent;
+    /* css3 */
+    -webkit-border-radius:0 15px 0 0;
+    -moz-border-radius:0 15px 0 0;
+    border-radius:0 15px 0 0;
+    -webkit-transform:rotate(15deg);
+    -moz-transform:rotate(15deg);
+    -ms-transform:rotate(15deg);
+    -o-transform:rotate(15deg);
+    transform:rotate(15deg);
 }
