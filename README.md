@@ -132,13 +132,40 @@ write a code to be run after the block starts functioning.
 
 Here it is just a `console.log` call with the block's `outerHTML`.
 
+## Modifiers
+In BEM modifiers express block state. To put a block into a special state we
+set a modifier on it. Then, a block runs a callback associated with
+this modifier.
 
-##2
+### Setting a modifier on a block and react on that
+In the
+[002-change-modifier](http://varya.me/bem-js-tutorial/desktop.bundles/002-change-modifier/002-change-modifier.html)
+example you can see a button changing its state after a user clicks on it.
 
-Setting modifier to a block on event firing and reacting on that.
+The button is a BEM block named `call-button` and represented with CSS,
+JavaScript and templates placed into [the block
+folder](https://github.com/toivonen/bem-js-tutorial/tree/master/desktop.bundles/002-change-modifier/blocks/call-button).
 
-[![Phone call button in its default status](http://varya.me/bem-js-tutorial/desktop.bundles/002-change-modifier/blocks/call-button/call-button.screenshot.png)]
-[![Phone call button in its active
-status](http://varya.me/bem-js-tutorial/desktop.bundles/002-change-modifier/blocks/call-button/call-button_status_calling.screenshot.png)]
+In JavaScript
+[blocks/call-button/call-button.js](https://github.com/toivonen/bem-js-tutorial/blob/master/desktop.bundles/002-change-modifier/blocks/call-button/call-button.js)
+there is a common BEM DOM block declaration.
 
-http://varya.me/bem-js-tutorial/desktop.bundles/002-change-modifier/002-change-modifier.html
+The callback associated with `js_inited` modifier runs when a block is
+initialized by the core. Here it...
+
+```
+modules.define('i-bem__dom', function(provide, DOM) {
+
+DOM.decl('call-button', {
+    onSetMod: {
+        'js' : {
+            'inited' : function() {
+                this.bindTo('click', function() {
+                    this.setMod('status', 'calling');
+                });
+            }
+        }
+
+...
+
+```
