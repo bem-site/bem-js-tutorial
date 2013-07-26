@@ -9,28 +9,7 @@
     ],
     content:[
         {
-            block: 'dropdown',
-            content: [
-                {
-                    elem: 'title',
-                    content: 'Transport'
-                },
-                {
-                    elem: 'list',
-                    content: [
-                        {
-                            elem: 'list-item',
-                            mix: { block: 'ico', elem: 'envelope'},
-                            text: 'Classic mail',
-                        },
-                        {
-                            elem: 'list-item',
-                            mix: { block: 'ico', elem: 'truk'},
-                            text: 'UPS Delivery'
-                        }
-                    ]
-                }
-            ]
+            block: 'traffic-light'
         },
         { elem: 'js', url: '_003-element-modifier.js' }
     ]
