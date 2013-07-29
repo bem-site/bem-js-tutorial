@@ -1,0 +1,39 @@
+.sign
+{
+    padding-left: 2em;
+    top: 10px;
+    position: relative;
+    font-size: 20px;
+    margin-bottom: 1.6em;
+}
+
+.sign:before,
+.sign:after
+{
+    background: #333;
+    border-radius: 0.2em;
+    content: "";
+    display: block;
+    height: 0.5em;
+    position: absolute;
+    left: 0;
+    width: 1em;
+}
+
+.sign:before
+{
+    top: 0.15em;
+    -moz-transform:rotate(-45deg);
+    -o-transform:rotate(-45deg);
+    -webkit-transform:rotate(-45deg);
+    transform:rotate(-45deg)
+}
+
+.sign:after
+{
+    bottom: 0.15em;
+    -moz-transform:rotate(45deg);
+    -o-transform:rotate(45deg);
+    -webkit-transform:rotate(45deg);
+    transform:rotate(45deg)
+}

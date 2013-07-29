@@ -11,6 +11,16 @@
         {
             block: 'traffic-light'
         },
+        {
+            block: 'text',
+            content: [
+                {
+                    block: 'sign',
+                    content: 'the reset button'
+                },
+                'Turn on the sound when checking this example. :-)'
+            ]
+        },
         { elem: 'js', url: '_003-element-modifier.js' }
     ]
 })
