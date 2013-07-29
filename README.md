@@ -31,7 +31,7 @@ desktop.blocks/
 
 Then, just mark a block with a `js` flag when declaring it in the BEM tree.
 
-```
+```js
 {
     block: 'my-block',
     js: true
@@ -42,7 +42,7 @@ This gives (after running BEMHTML templates on the JSON) a corresponding DOM
 node marked with an `i-bem` class and having `onclick` attributes with block
 parameters.
 
-```
+```html
 <div class="my-block i-bem" onclick="return {"my-block":{}}">
     ...
 </div>
@@ -73,7 +73,7 @@ level with a JavaScript file. The
 [my-block.js](https://github.com/toivonen/bem-js-tutorial/blob/master/desktop.bundles/001-simple-block/blocks/my-block/my-block.js)
 file is filled with a simple piece of code.
 
-```
+```js
 modules.define('i-bem__dom', function(provide, DOM) {
 
 DOM.decl('my-block', {
@@ -108,7 +108,7 @@ Aside from custom properties, the hash can also contain some special ones. You c
 of them, an `onSetMod` property in the example. It is used to store callbacks to
 run when a block gets a modifier. The syntax is the following:
 
-```
+```js
 DOM.decl('my-block', {
     onSetMod: {
         'foo' : function() {
@@ -159,7 +159,7 @@ helper.<br/>
 In the callback it is said to set a modifier `status` with its `calling` value
 to the block and the `setMod` method serves for it.
 
-```
+```js
 modules.define('i-bem__dom', function(provide, DOM) {
 
 DOM.decl('call-button', {
@@ -180,7 +180,7 @@ The `setMod` method applies a modifier CSS class to the a which makes a
 block to change it apperance. If you also need other changes on a block,
 place them into a function corresponsing to the modifier. Like the following:
 
-```
+```js
 modules.define('i-bem__dom', function(provide, DOM) {
 
 DOM.decl('call-button', {
