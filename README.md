@@ -153,7 +153,11 @@ In JavaScript
 there is a common BEM DOM block declaration.
 
 The callback associated with `js_inited` modifier runs when a block is
-initialized by the core. Here it...
+initialized by the core. In this example it starts with binding to a `click`
+event on the DOM node corresponding to the block. This is done with the `bindTo`
+helper.<br/>
+In the callback it is said to set a modifier `status` with its `calling` value
+to the block and the `setMod` method serves for it.
 
 ```
 modules.define('i-bem__dom', function(provide, DOM) {
@@ -171,3 +175,38 @@ DOM.decl('call-button', {
 ...
 
 ```
+
+The `setMod` method applies a modifier CSS class to the a which makes a
+block to change it apperance. If you also need other changes on a block,
+place them into a function corresponsing to the modifier. Like the following:
+
+```
+modules.define('i-bem__dom', function(provide, DOM) {
+
+DOM.decl('call-button', {
+    onSetMod: {
+        'js' : { ... },
+        'status' : {
+            'calling' : function() {
+                this.elem('link').text('Calling...');
+            }
+        }
+    }
+});
+
+provide(DOM);
+
+});
+```
+In here you can run your calculations or code any functionality of the block. As
+there is an acces to the block DOM node and its children, the DOM structure can
+also be changed.<br/>
+With the `elem` helper you can get the elements of the block by its name.
+
+The conception of pre-defined block states expressed with modifiers is a very
+powerful and efficient way to describe an interface compomemnt.<br/>
+Everything related to a particular block state is encapsulated in a modifier.
+From ever you will change a block modifier, it knows what to do when it happens.<br/>
+Declarative manner of describing the modifiers also empowers to extend their code
+at the additional implementations or completely redefine it, as you will see shown
+below in the tutorial.
