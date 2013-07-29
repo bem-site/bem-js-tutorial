@@ -3530,7 +3530,7 @@ DOM.decl('traffic-light', {
         'go' : {
             'status' : {
                 'on' : function() {
-                    goSound.play();
+                    //goSound.play();
                 },
                 'off' : function() {
                     goSound.pause();
