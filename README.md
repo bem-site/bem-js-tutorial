@@ -135,16 +135,16 @@ In the example presented above, this code is a `console.log` call with the block
 
 ## Modifiers
 In BEM, modifiers express block states. To put a block into a special state we
-set a modifier on it. Then, a block runs a callback associated with
+set a modifier on it. Then a block runs a callback associated with
 this modifier.
 
-### Setting a modifier on a block and reacting on that
+### Setting a modifier on a block and reacting to it
 
 In the
 [002-change-modifier](http://varya.me/bem-js-tutorial/desktop.bundles/002-change-modifier/002-change-modifier.html)
 example you can see a button changing its state after a user clicks on it.
 
-The button is a BEM block named `call-button` and represented with CSS,
+The button is a BEM block named `call-button` and is represented by CSS,
 JavaScript and templates placed into [the block
 folder](https://github.com/toivonen/bem-js-tutorial/tree/master/desktop.bundles/002-change-modifier/blocks/call-button).
 
@@ -176,8 +176,8 @@ DOM.decl('call-button', {
 
 ```
 
-The `setMod` method applies a modifier CSS class to the a which makes a
-block to change it apperance. If you also need other changes on a block,
+The `setMod` method applies a modifier's CSS class to the blocks which makes the
+block change its appearance. If you need additional changes on a block,
 place them into a function corresponsing to the modifier. Like the following:
 
 ```js
@@ -198,33 +198,32 @@ provide(DOM);
 
 });
 ```
-In here you can run your calculations or code any functionality of the block. As
-there is an acces to the block DOM node and its children, the DOM structure can
+Here you can run your calculations, or code any functionality of the block. As
+there is access to the block DOM node and its children, the DOM structure can
 also be changed.<br/>
-With the `elem` helper you can get the elements of the block by its name.
+With the `elem` helper you can select the elements of the block by their names.
 
-The conception of pre-defined block states expressed with modifiers is a very
+The conception of pre-defined block states expressed with modifiers, is a very
 powerful and efficient way to describe an interface compomemnt.<br/>
-Everything related to a particular block state is encapsulated in a modifier.
-From ever you will change a block modifier, it knows what to do when it happens.<br/>
-Declarative manner of describing the modifiers also empowers to extend their code
-at the additional implementations or completely redefine it, as you will see shown
-below in the tutorial.
+Everything related to a particular block state is encapsulated in a relevant modifier.
+From wherever you change a block modifier, it knows what to do.<br/>
+Modifiers are described in a declarative manner, which empowers a programmer to extend
+the code with further implementations or to redefine it completely, as is shown
+in the tutorial below.
 
 ### Setting a modifier on an element
 
-According to BEM, elements can be modifiered similar to blocks. And the way of
-working with modifiers on elements is pretty similar is JavaScript. The next
+According to BEM, elements can be modified in the same way as blocks. JavaScript methods
+are similar in both. The next
 example
 [003-element-modifier](http://varya.me/bem-js-tutorial/desktop.bundles/003-element-modifier/003-element-modifier.html)
 illustrates this.
 
 The `traffic-light` block contains three light elements `stop`, `slow` and `go`
-which of those can have `status` modifier with its `on` and `off` value, all
-ruled in
+each of which can have a `status` modifier with its `on` and `off` value. As follows:
 [traffic-light.js](https://github.com/toivonen/bem-js-tutorial/blob/master/desktop.bundles/003-element-modifier/blocks/traffic-light/traffic-light.js).
 
-Similar to the previous example the `traffic-light` block is introduced to the
+Similar to the previous example, the `traffic-light` block is introduced to the
 `i-bem` core as a DOM-equiped block.
 
 ```js
@@ -246,12 +245,12 @@ provide(DOM);
 });
 ```
 
-The traffic light works switching its `status` modifier from the `stop` to the
+The traffic light works by switching its `status` modifier from the `stop` to the
 `slow` and then to the `go` values. In its initializing method it is said to set
-a modifier `status_stop` to the block, so the the cycle begins.
+a modifier `status_stop` to the block, so that the cycle begins.
 
-The `status` modifier declared with its callback, once for all its values. This
-is a nice way to get rid of copy&paste if the corresponsing states work similar.
+The `status` modifier is declared with its callback, once for all its values. This
+is a good way to get rid of copy&paste if the corresponsing states work similarly.
 
 ```js
 modules.define('i-bem__dom', function(provide, DOM) {
@@ -288,17 +287,17 @@ The arguments passed into the modifier callback are:
 
  1. Modifier name,
  1. Modifier value to be set,
- 1. Previous modifier value;
+ 1. Previous modifier value.
 
-With them the actions can be a bit different depending on a modifier value.
+With these, the actions can be a bit different depending on the modifier value.
 
-Here a corresponding element is given `status_on` modifier so that its light
-turns on as well as previously active projector is set `status_off`.
+Here a corresponding element is given the `status_on` modifier so that its light
+turns on and the previously active projector is set `status_off`.
 
 Modifiers are set on elements with the already familiar `setMod` helper with an
-optional first parameter which means and element.<br/>
+optional first parameter which means an element name.<br/>
 
-So, providing different parameters to the same `setMod` function you can:
+So, by providing different parameters to the same `setMod` function you can:
 
 ```js
 // apply a modifier to a current block
@@ -361,5 +360,5 @@ provide(DOM);
 });
 ```
 
-It makes a browser play a traffic light sound when an element is switched into
-`status_on` and keep silence when the modifier goes off.
+This makes a browser play a traffic light sound when an element is switched into
+`status_on` and to keep silent when the modifier goes off.
