@@ -210,3 +210,156 @@ From ever you will change a block modifier, it knows what to do when it happens.
 Declarative manner of describing the modifiers also empowers to extend their code
 at the additional implementations or completely redefine it, as you will see shown
 below in the tutorial.
+
+### Setting a modifier on an element
+
+According to BEM, elements can be modifiered similar to blocks. And the way of
+working with modifiers on elements is pretty similar is JavaScript. The next
+example
+[003-element-modifier](http://varya.me/bem-js-tutorial/desktop.bundles/003-element-modifier/003-element-modifier.html)
+illustrates this.
+
+The `traffic-light` block contains three light elements `stop`, `slow` and `go`
+which of those can have `status` modifier with its `on` and `off` value, all
+ruled in
+[traffic-light.js](https://github.com/toivonen/bem-js-tutorial/blob/master/desktop.bundles/003-element-modifier/blocks/traffic-light/traffic-light.js).
+
+Similar to the previous example the `traffic-light` block is introduced to the
+`i-bem` core as a DOM-equiped block.
+
+```js
+modules.define('i-bem__dom', function(provide, DOM) {
+
+DOM.decl('traffic-light', {
+    onSetMod: {
+        'js' : {
+            'inited' : function() {
+                ...
+                this.setMod('status', 'stop');
+            }
+        },
+        ...
+});
+
+provide(DOM);
+
+});
+```
+
+The traffic light works switching its `status` modifier from the `stop` to the
+`slow` and then to the `go` values. In its initializing method it is said to set
+a modifier `status_stop` to the block, so the the cycle begins.
+
+The `status` modifier declared with its callback, once for all its values. This
+is a nice way to get rid of copy&paste if the corresponsing states work similar.
+
+```js
+modules.define('i-bem__dom', function(provide, DOM) {
+
+var timer;
+
+DOM.decl('traffic-light', {
+    onSetMod: {
+        'js' : { ... },
+        'status' : function(modName, modVal, oldModVal) {
+            clearTimeout(timer);
+            var nextStatus = {
+                'stop' : 'slow',
+                'slow' : 'go',
+                'go' : 'stop'
+                },
+                _this = this;
+            oldModVal && this.setMod(this.elem(oldModVal), 'status', 'off');
+            this.setMod(this.elem(modVal), 'status', 'on');
+            timer = window.setTimeout(function(){
+                _this.setMod('status', nextStatus[modVal]);
+            }, 2000);
+        }
+    },
+    ...
+});
+
+provide(DOM);
+
+});
+```
+
+The arguments passed into the modifier callback are:
+
+ 1. Modifier name,
+ 1. Modifier value to be set,
+ 1. Previous modifier value;
+
+With them the actions can be a bit different depending on a modifier value.
+
+Here a corresponding element is given `status_on` modifier so that its light
+turns on as well as previously active projector is set `status_off`.
+
+Modifiers are set on elements with the already familiar `setMod` helper with an
+optional first parameter which means and element.<br/>
+
+So, providing different parameters to the same `setMod` function you can:
+
+```js
+// apply a modifier to a current block
+this.setMod('modName', 'modValue');
+
+// apply a modifier to an element of a current block
+this.setMod(this.elem('elemName'), 'modName', 'modValue');
+```
+
+Describing the actions related to element modifiers is similar to block modifier
+actions. By analogy to `onSetMod` property you can user `onElemSetMod` with the
+following syntax:
+
+```js
+DOM.decl('my-block', {
+    onElemSetMod: {
+        'elemName' : {
+          'foo' : function() {
+              // Runs when an element gets any value of `foo` modifier
+          },
+          'bar' : {
+              'qux' : function() {
+                  // Runs when an element gets 'qux' value of 'bar' modifier
+              },
+              '' : function() {
+                  // Runs when `bar` modifier is removed from an element
+              }
+          }
+        }
+    }
+});
+```
+
+In this example, only the `go` element is provided with a special functionality.
+
+```js
+modules.define('i-bem__dom', function(provide, DOM) {
+
+var goSound = new Audio('blocks/traffic-light/__go/traffic-light__go.mp3'),
+    timer;
+
+DOM.decl('traffic-light', {
+    onSetMod: { ... },
+    onElemSetMod: {
+        'go' : {
+            'status' : {
+                'on' : function() {
+                    goSound.play();
+                },
+                'off' : function() {
+                    goSound.pause();
+                }
+            }
+        }
+    }
+});
+
+provide(DOM);
+
+});
+```
+
+It makes a browser play a traffic light sound when an element is switched into
+`status_on` and keep silence when the modifier goes off.
