@@ -15,6 +15,7 @@
     margin:1em;
     float:left;
     display: none;
+    cursor: pointer;
 }
 
 .todo__task_visible_yes
