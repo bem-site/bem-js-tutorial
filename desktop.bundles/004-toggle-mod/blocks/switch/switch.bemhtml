@@ -1,0 +1,28 @@
+block('switch')(
+
+    js()(true),
+
+    content()([
+        {
+            elem: 'input',
+            name: this.ctx.name
+        },
+        {
+            elem: 'label',
+            content: '&#xF011;'
+        }
+    ]),
+
+    elem('input')(
+        tag()('input'),
+        attrs()({
+            type: 'checkbox',
+            name: this.ctx.name
+        })
+    ),
+
+    elem('label')(
+        tag()('label')
+    )
+
+);
