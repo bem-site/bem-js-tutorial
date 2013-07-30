@@ -1,0 +1,20 @@
+block('todo')(
+
+    tag()('ul'),
+
+    js()(true),
+
+    elem('task')(
+        tag()('li'),
+        mix()({ mods: { visible: 'yes' } }),
+        content()({
+            elem: 'task-inner',
+            tag: 'a',
+            content: [
+                { tag: 'h2', bem: false, content: this.ctx.title },
+                this.ctx.text
+            ]
+        })
+    )
+
+);
