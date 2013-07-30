@@ -1,0 +1,32 @@
+block('switch')(
+
+    content()([
+        {
+            elem: 'input',
+            name: this.ctx.name
+        },
+        {
+            elem: 'label',
+            content: {
+                elem: 'icon'
+            }
+        }
+    ]),
+
+    elem('input')(
+        tag()('input'),
+        attrs()({
+            type: 'checkbox',
+            name: this.ctx.name
+        })
+    ),
+
+    elem('label')(
+        tag()('label')
+    ),
+
+    elem('icon')(
+        tag()('i')
+    )
+
+);

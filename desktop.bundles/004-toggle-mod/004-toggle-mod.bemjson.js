@@ -8,6 +8,10 @@
         { elem: 'meta', attrs: { name: 'description', content: '' }}
     ],
     content:[
+        {
+            block: 'switch',
+            name: 'my-switch'
+        },
         { elem: 'js', url: '_004-toggle-mod.js' }
     ]
 })
