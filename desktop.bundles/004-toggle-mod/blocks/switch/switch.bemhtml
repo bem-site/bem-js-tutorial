@@ -1,5 +1,7 @@
 block('switch')(
 
+    js()(true),
+
     content()([
         {
             elem: 'input',
@@ -7,9 +9,7 @@ block('switch')(
         },
         {
             elem: 'label',
-            content: {
-                elem: 'icon'
-            }
+            content: '&#xF011;'
         }
     ]),
 
@@ -23,10 +23,6 @@ block('switch')(
 
     elem('label')(
         tag()('label')
-    ),
-
-    elem('icon')(
-        tag()('i')
     )
 
 );
