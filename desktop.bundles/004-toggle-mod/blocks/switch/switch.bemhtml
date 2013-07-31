@@ -2,6 +2,8 @@ block('switch')(
 
     js()(true),
 
+    mix()({ mods: { 'switched' : 'off' }}),
+
     content()([
         {
             elem: 'input',
