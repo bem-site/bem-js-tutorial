@@ -1,0 +1,100 @@
+/* 005-modifier-removing.css begin */
+/* blocks/todo/todo.css begin */
+/* CSS borrowed from http://net.tutsplus.com/tutorials/html-css-techniques/create-a-sticky-note-effect-in-5-easy-steps-with-css3-and-html5/ */
+.todo
+{
+    list-style: none;
+    overflow: hidden;
+    padding: 3em;
+    width: 750px;
+    margin: 2em auto 0;
+    font-family:"Reenie Beanie",arial,sans-serif;
+}
+
+.todo__task
+{
+    list-style:none;
+    margin:1em;
+    float:left;
+    display: none;
+}
+
+.todo__task_visible
+{
+    display: block;
+}
+
+.todo__task h2
+{
+    font-size:140%;
+    font-weight:bold;
+    padding-bottom:10px;
+}
+
+.todo__task-inner
+{
+  text-decoration:none;
+  color:#000;
+  background:#ffc;
+  display:block;
+  height:10em;
+  width:10em;
+  padding:1em;
+  -moz-box-shadow:5px 5px 7px rgba(33,33,33,1);
+  -webkit-box-shadow: 5px 5px 7px rgba(33,33,33,.7);
+  box-shadow: 5px 5px 7px rgba(33,33,33,.7);
+  -moz-transition:-moz-transform .15s linear;
+  -o-transition:-o-transform .15s linear;
+  -webkit-transition:-webkit-transform .15s linear;
+
+  -webkit-transform: rotate(-6deg);
+  -o-transform: rotate(-6deg);
+  -moz-transform:rotate(-6deg)
+}
+
+.todo .todo__task .todo__task-inner:hover,
+.todo .todo__task .todo__task-inner:focus
+{
+    box-shadow:10px 10px 7px rgba(0,0,0,.7);
+    -moz-box-shadow:10px 10px 7px rgba(0,0,0,.7);
+    -webkit-box-shadow: 10px 10px 7px rgba(0,0,0,.7);
+    -webkit-transform: scale(1.25);
+    -moz-transform: scale(1.25);
+    -o-transform: scale(1.25);
+    position:relative;
+    z-index:5;
+}
+
+.todo__task:nth-child(even) .todo__task-inner
+{
+    -o-transform:rotate(4deg);
+    -webkit-transform:rotate(4deg);
+    -moz-transform:rotate(4deg);
+    position:relative;
+    top:5px;
+    background:#cfc;
+}
+
+.todo__task:nth-child(3n) .todo__task-inner{
+  -o-transform:rotate(-3deg);
+  -webkit-transform:rotate(-3deg);
+  -moz-transform:rotate(-3deg);
+  position:relative;
+  top:-5px;
+  background:#ccf;
+}
+
+.todo__task:nth-child(5n) .todo__task-inner{
+    -o-transform:rotate(5deg);
+    -webkit-transform:rotate(5deg);
+    -moz-transform:rotate(5deg);
+    position:relative;
+    top:-10px;
+}
+
+
+/* blocks/todo/todo.css end */
+
+
+/* 005-modifier-removing.css end */
+
