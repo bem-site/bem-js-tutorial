@@ -362,3 +362,93 @@ provide(DOM);
 
 This makes a browser play a traffic light sound when an element is switched into
 `status_on` and to keep silent when the modifier goes off.
+
+### Toggling a modifier
+
+It is useful to toggle a modifier if there are 2 values of it to be changed one
+by one. This is what the
+[004-toggle-mod](http://varya.me/bem-js-tutorial/desktop.bundles/004-toggle-mod/004-toggle-mod.html)
+example demonstrates.
+
+It shows a `switch` block, which is a nice button, with its `switched_off`
+modifier meaning that the button is inactive at the moment. The
+[switch.js](https://github.com/toivonen/bem-js-tutorial/blob/master/desktop.bundles/004-toggle-mod/blocks/switch/switch.js)
+file of the block instucts the button to react to user clicks and toggle the
+modifier from `switched_off` to `switched_on` and backwards by using the
+`toggleMod` helper.
+
+```js
+modules.define('i-bem__dom', function(provide, DOM) {
+
+DOM.decl('switch', {
+    onSetMod: {
+        'js' : {
+            'inited' : function() {
+                this.bindTo('click', function() {
+                    this.toggleMod('switched', 'on', 'off');
+                });
+            }
+        }
+    }
+});
+
+provide(DOM);
+
+});
+```
+
+Indeed, the same goes for elements which an additional first parameter for the
+helper method.
+
+### Deleting a modifier
+
+Removing a modifier from an element (or a block) explained with
+[005-modifier-removing](http://varya.me/bem-js-tutorial/desktop.bundles/005-modifier-removing/005-modifier-removing.html)
+example. This is a kind of To-Do list, where each task is a sticky note and can
+be hidden (which means to be marked done) with a click.
+
+The list is represented as a `todo` block where every item is name a `task`
+block. As all the tasks are visible by default, it is emphasized by a
+`visible_yes` modifier.
+
+```html
+<ul class="todo ..." onclick="return { 'todo': {} }">
+  <li class="todo__task todo__task_visible_yes" title="Click to remove">
+    <a class="todo__task-inner">
+      <h2>Lean more about BEM</h2>
+      Visit bem.info to learn more.
+    </a>
+  </li>
+  ...
+```
+
+How the block behaves is described in its [todo.js](https://github.com/toivonen/bem-js-tutorial/blob/master/desktop.bundles/005-modifier-removing/blocks/todo/todo.js)
+file.
+
+```js
+modules.define('i-bem__dom', function(provide, DOM) {
+
+DOM.decl('todo', {
+    onSetMod: {
+        'js' : {
+            'inited' : function() {
+                this.bindTo(this.elem('task'), 'click', function(e) {
+                    this.delMod(e.domElem, 'visible');
+                });
+            }
+        }
+    }
+});
+
+provide(DOM);
+
+});
+```
+
+Whenever a user clicks on a `task` element the `visible` modifier is removed
+from it by `delMod` modifier.<br/>
+The `delMod` helper can also be used for blocks as the first parameter (an
+element object) is optional.
+
+Notice that the `bindTo` helper works not with a block but with its elements
+here.
