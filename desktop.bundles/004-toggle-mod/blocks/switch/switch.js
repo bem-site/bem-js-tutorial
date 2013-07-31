@@ -5,7 +5,7 @@ DOM.decl('switch', {
         'js' : {
             'inited' : function() {
                 this.bindTo('click', function() {
-                    this.toggleMod('switched', 'on', '');
+                    this.toggleMod('switched', 'on', 'off');
                 });
             }
         }
