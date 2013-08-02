@@ -24,9 +24,9 @@ Any BEM block can be equiped with JavaScript. To do this, you just need to place
 a JavaScript file into your block directory.
 
 ```
-desktop.blocks/
-    my-block/
-        my-block.js
+├── desktop.blocks/
+│   ├── my-block/
+│       └── my-block.js
 ```
 
 Then, just mark a block with a `js` flag when declaring it in the BEM tree.
@@ -56,6 +56,17 @@ the article: [JavaScript components low
 basics](http://varya.me/en/issues/javascript-component-solutions/).
 
 ## The console.log example
+
+<pre>├── desktop.bundles/
+│   ├── 001-simple-block/
+│   │   ├── blocks/
+│   │   │   ├── .bem/
+│   │   │   └── my-block/
+│   │   │       └── <a href="https://github.com/toivonen/bem-js-tutorial/blob/master/desktop.bundles/001-simple-block/blocks/my-block/my-block.js">my-block.js</a>
+│   │   └── <a href="https://github.com/toivonen/bem-js-tutorial/blob/master/desktop.bundles/001-simple-block/001-simple-block.bemjson.js">001-simple-block.bemjson.js</a>
+
+>> <a href="http://varya.me/bem-js-tutorial/desktop.bundles/001-simple-block/001-simple-block.html">001-simple-block.html</a></pre>
+
 The first example is the most simple. It demostrates the block structure and
 shows how the JavaScript starts working.<br/>
 Load the example page
@@ -140,6 +151,19 @@ this modifier.
 
 ### Setting a modifier on a block and reacting to it
 
+<pre>├── desktop.bundles/
+│   ├── 002-change-modifier/
+│   │   ├── blocks/
+│   │   │   ├── .bem/
+│   │   │   └── call-button/
+│   │   │       ├── <a href="https://github.com/toivonen/bem-js-tutorial/blob/master/desktop.bundles/002-change-modifier/blocks/call-button/call-button.bemhtml">call-button.bemhtml</a>
+│   │   │       ├── <a href="https://github.com/toivonen/bem-js-tutorial/blob/master/desktop.bundles/002-change-modifier/blocks/call-button/call-button.css">call-button.css</a>
+│   │   │       ├── <a href="https://github.com/toivonen/bem-js-tutorial/blob/master/desktop.bundles/002-change-modifier/blocks/call-button/call-button.js">call-button.js</a>
+│   │   │       └── call-button.png
+│   │   └── <a href="https://github.com/toivonen/bem-js-tutorial/blob/master/desktop.bundles/002-change-modifier/002-change-modifier.bemjson.js">002-change-modifier.bemjson.js</a>
+
+>> <a href="http://varya.me/bem-js-tutorial/desktop.bundles/002-change-modifier/002-change-modifier.html">002-change-modifier.html</a></pre>
+
 In the
 [002-change-modifier](http://varya.me/bem-js-tutorial/desktop.bundles/002-change-modifier/002-change-modifier.html)
 example you can see a button changing its state after a user clicks on it.
@@ -212,6 +236,23 @@ the code with further implementations or to redefine it completely, as is shown
 in the tutorial below.
 
 ### Setting a modifier on an element
+
+<pre>├── desktop.bundles/
+│   ├── 003-element-modifier/
+│   │   ├── blocks
+│   │   │   ├── .bem/
+│   │   │   ├── page/
+│   │   │   ├── sign/
+│   │   │   ├── text/
+│   │   │   └── traffic-light/
+│   │   │       ├── __go/
+│   │   │       │   └── traffic-light__go.mp3
+│   │   │       ├── <a href="https://github.com/toivonen/bem-js-tutorial/blob/master/desktop.bundles/003-element-modifier/blocks/traffic-light/traffic-light.bemhtml">traffic-light.bemhtml</a>
+│   │   │       ├── <a href="https://github.com/toivonen/bem-js-tutorial/blob/master/desktop.bundles/003-element-modifier/blocks/traffic-light/traffic-light.css">traffic-light.css</a>
+│   │   │       └── <a href="https://github.com/toivonen/bem-js-tutorial/blob/master/desktop.bundles/003-element-modifier/blocks/traffic-light/traffic-light.js">traffic-light.js</a>
+│   │   └── <a href="https://github.com/toivonen/bem-js-tutorial/blob/master/desktop.bundles/003-element-modifier/003-element-modifier.bemjson.js">003-element-modifier.bemjson.js</a>
+
+>> <a href="http://varya.me/bem-js-tutorial/desktop.bundles/003-element-modifier/003-element-modifier.html">003-element-modifier.html</a></pre>
 
 According to BEM, elements can be modified in the same way as blocks. JavaScript methods
 are similar in both. The next
@@ -365,6 +406,19 @@ This makes a browser play a traffic light sound when an element is switched into
 
 ### Toggling a modifier
 
+<pre>├── desktop.bundles/
+│   ├── 004-toggle-mod/
+│   │   ├── blocks/
+│   │   │   ├── .bem/
+│   │   │   ├── page/
+│   │   │   └── switch/
+│   │   │       ├── <a href="https://github.com/toivonen/bem-js-tutorial/blob/master/desktop.bundles/004-toggle-mod/blocks/switch/switch.bemhtml">switch.bemhtml</a>
+│   │   │       ├── <a href="https://github.com/toivonen/bem-js-tutorial/blob/master/desktop.bundles/004-toggle-mod/blocks/switch/switch.css">switch.css</a>
+│   │   │       └── <a href="https://github.com/toivonen/bem-js-tutorial/blob/master/desktop.bundles/004-toggle-mod/blocks/switch/switch.js">switch.js</a>
+│   │   └── <a href="https://github.com/toivonen/bem-js-tutorial/blob/master/desktop.bundles/004-toggle-mod/004-toggle-mod.bemjson.js">004-toggle-mod.bemjson.js</a>
+
+>> <a href="http://varya.me/bem-js-tutorial/desktop.bundles/004-toggle-mod/004-toggle-mod.html">004-toggle-mod.html</a></pre>
+
 It is useful to toggle a modifier if there are 2 values of it to be changed one
 by one. This is what the
 [004-toggle-mod](http://varya.me/bem-js-tutorial/desktop.bundles/004-toggle-mod/004-toggle-mod.html)
@@ -401,6 +455,19 @@ Indeed, the same goes for elements which an additional first parameter for the
 helper method.
 
 ### Deleting a modifier
+
+<pre>├── desktop.bundles/
+│   ├── 005-modifier-removing/
+│   │   ├── blocks/
+│   │   │   ├── .bem/
+│   │   │   ├── page/
+│   │   │   └── todo/
+│   │   │       ├── <a href="https://github.com/toivonen/bem-js-tutorial/blob/master/desktop.bundles/005-modifier-removing/blocks/todo/todo.bemhtml">todo.bemhtml</a>
+│   │   │       ├── <a href="https://github.com/toivonen/bem-js-tutorial/blob/master/desktop.bundles/005-modifier-removing/blocks/todo/todo.css">todo.css</a>
+│   │   │       └── <a href="https://github.com/toivonen/bem-js-tutorial/blob/master/desktop.bundles/005-modifier-removing/blocks/todo/todo.js">todo.js</a>
+│   │   └── <a href="https://github.com/toivonen/bem-js-tutorial/blob/master/desktop.bundles/005-modifier-removing/005-modifier-removing.bemjson.js">005-modifier-removing.bemjson.js</a>
+
+>> <a href="http://varya.me/bem-js-tutorial/desktop.bundles/005-modifier-removing/005-modifier-removing.html">005-modifier-removing.html</a></pre>
 
 Removing a modifier from an element (or a block) explained with
 [005-modifier-removing](http://varya.me/bem-js-tutorial/desktop.bundles/005-modifier-removing/005-modifier-removing.html)
