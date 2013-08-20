@@ -5,14 +5,12 @@ DOM.decl('call-button', {
         'js' : {
             'inited' : function() {
                 this.bindTo('click', function() {
-                    this.setMod('status', 'calling');
+                    this.setMod('calling');
                 });
             }
         },
-        'status' : {
-            'calling' : function() {
-                this.elem('link').text('Calling...');
-            }
+        'calling' : function() {
+            this.elem('link').text('Calling...');
         }
     }
 });
