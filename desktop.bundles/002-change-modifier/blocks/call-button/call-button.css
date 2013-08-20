@@ -130,7 +130,7 @@
     transform:rotate(-30deg);
 }
 
-.call-button_status_calling
+.call-button_calling
 {
 	color:#0f4b6d !important;
 	
@@ -152,7 +152,7 @@
 						-webkit-gradient(linear, 0% 0%, 0% 100%, from(#4fbbf7), to(#3faeeb));
 }
 
-.call-button_status_calling:hover
+.call-button_calling:hover
 {
 	background-color:#63c7fe;
 	
@@ -167,7 +167,7 @@
 						-webkit-gradient(linear, 0% 0%, 0% 100%, from(#63c7fe), to(#58bef7));
 }
 
-.call-button_status_calling .call-button__link:after
+.call-button_calling .call-button__link:after
 {
     left:38px;
     width: 9px;

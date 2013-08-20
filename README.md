@@ -124,6 +124,7 @@ DOM.decl('my-block', {
     onSetMod: {
         'foo' : function() {
             // Runs when a block gets any value of `foo` modifier
+            // This also works for 'boolean' modifiers
         },
         'bar' : {
             'qux' : function() {
@@ -180,7 +181,7 @@ The callback associated with `js_inited` modifier runs when a block is
 initialized by the core. In this example it starts with binding to a `click`
 event on the DOM node corresponding to the block. This is done with the `bindTo`
 helper.<br/>
-In the callback it is said to set a modifier `status` with its `calling` value
+In the callback it is said to set a `calling` modifier
 to the block and the `setMod` method serves for it.
 
 ```js
@@ -191,13 +192,24 @@ DOM.decl('call-button', {
         'js' : {
             'inited' : function() {
                 this.bindTo('click', function() {
-                    this.setMod('status', 'calling');
+                    this.setMod('calling');
                 });
             }
         }
 
 ...
 
+```
+
+Take into account that here we use a `boolean modifier`, which has no value. But
+as you will see below, modifiers are very often used as key-value pairs. In that
+case, both modifier's name and its value have to be passed to the `setMod`
+helper:
+
+```js
+this.setMod('status', 'on');
+...
+this.setMod('status', 'off');
 ```
 
 The `setMod` method applies a modifier's CSS class to the blocks which makes the
@@ -210,10 +222,8 @@ modules.define('i-bem__dom', function(provide, DOM) {
 DOM.decl('call-button', {
     onSetMod: {
         'js' : { ... },
-        'status' : {
-            'calling' : function() {
-                this.elem('link').text('Calling...');
-            }
+        'calling' : function() {
+            this.elem('link').text('Calling...');
         }
     }
 });
