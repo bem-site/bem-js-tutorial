@@ -1,3 +1,7 @@
 block('button')(
-    tag()('span')
+    tag()('a'),
+
+    attrs()({
+        role: 'button'
+    })
 );
