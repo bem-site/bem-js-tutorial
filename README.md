@@ -160,7 +160,7 @@ function(modName, modVal, curModVal) {
     // Current value of the modifier
 
 }
-``
+```
 
 The fisrt modifier any block gets is a `js` modifier with its `inited` value.
 The framework core reads all the `i-bem` marked blocks on a page and then initializes
