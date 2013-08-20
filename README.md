@@ -132,11 +132,36 @@ DOM.decl('my-block', {
             },
             '' : function() {
                 // Runs when `bar` modifier is removed from a block
+            },
+            '*' : function() {
+                // Runs for any value of 'bar' modifier
             }
+        },
+        '*' : function() {
+            // Runs for any modifier of the block
         }
     }
 });
 ```
+
+These callbacks get following parameters:
+
+```js
+function(modName, modVal, curModVal) {
+
+    // modName
+    // Modifier's name is operated
+
+    // modVal
+    // Modifier's value to be set. It is a `String` for modifiers with values
+    // or `true`/`false` for boolean modifiers
+
+    // curModVal
+    // Current value of the modifier
+
+}
+``
+
 The fisrt modifier any block gets is a `js` modifier with its `inited` value.
 The framework core reads all the `i-bem` marked blocks on a page and then initializes
 them and sets the `js_inited` modifier on each block. Thus, you can
