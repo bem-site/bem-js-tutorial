@@ -4,7 +4,7 @@ DOM.decl('button', {
     onSetMod: {
         'js' : {
             'inited' : function() {
-                // Something can be here, but there is not
+                console.log('Here an object of ' + this.domElem[0].innerHTML + ' comes. Just once.');
             }
         }
     },
