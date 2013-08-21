@@ -4,14 +4,17 @@ DOM.decl('button', {
     onSetMod: {
         'js' : {
             'inited' : function() {
-                console.log('Initialization');
+                // Something can be here, but there is not
             }
         }
+    },
+    onClick: function() {
+        console.log('Here I can track clicks');
     }
 },{
     live: function() {
-        this.liveInitOnEvent('click', function(e) {
-            console.log('Event callback');
+        this.liveBindTo('click', function(e) {
+            this.onClick();
         });
     }
 });
