@@ -1,0 +1,11 @@
+block('text')(
+
+    elem('h2')(
+        tag()('h2')
+    ),
+
+    elem('p')(
+        tag()('p')
+    )
+
+);
