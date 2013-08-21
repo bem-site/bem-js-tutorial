@@ -19,8 +19,8 @@
         title: 'Live (lazy) initialization on DOM event',
         favicon: '/favicon.ico',
         head: [
-            { elem: 'css', url: '_010-live-init-on-dom-event.css', ie: false },
-            { elem: 'css', url: '_010-live-init-on-dom-event', ie: true },
+            { elem: 'css', url: '_011-live-bind-to.css', ie: false },
+            { elem: 'css', url: '_011-live-bind-to', ie: true },
             { elem: 'meta', attrs: { name: 'description', content: '' }},
         ],
         content:[
@@ -29,7 +29,7 @@
                 content: 'Famous BonBon CSS3 buttons by Simurai (http://archive.simurai.com/lab/buttons/) illustrate lazy initialization in BEM'
             },
             buttons,
-            { elem: 'js', url: '_010-live-init-on-dom-event.js' }
+            { elem: 'js', url: '_011-live-bind-to.js' }
         ]
     }
 }())
