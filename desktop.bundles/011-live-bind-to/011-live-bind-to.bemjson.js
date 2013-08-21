@@ -24,10 +24,11 @@
             { elem: 'meta', attrs: { name: 'description', content: '' }},
         ],
         content:[
-            {
-                block: 'description',
-                content: 'Famous BonBon CSS3 buttons by Simurai (http://archive.simurai.com/lab/buttons/) illustrate lazy initialization in BEM'
-            },
+            [
+                'Famous BonBon CSS3 buttons by Simurai ',
+                '(<a href="http://archive.simurai.com/lab/buttons/">http://archive.simurai.com/lab/buttons/</a>) ',
+                'illustrate lazy initialization in BEM<br/>'
+            ],
             buttons,
             { elem: 'js', url: '_011-live-bind-to.js' }
         ]
