@@ -12,6 +12,22 @@
             block: 'text',
             content: [
                 {
+                    elem: 'h1',
+                    content: 'Dutch jokes'
+                },
+                {
+                    elem: 'p',
+                    content: [
+                        'This example shows a BEM-component initialized after "click". ',
+                        'The text is based on a book preview ',
+                        '<a href="http://frankbooks.ru/uploads/attachments/moppen-m-817.pdf">',
+                        'Нидерландский шутя',
+                        '</a>, ',
+                        'which is an adopted version of some Dutch jokes for Russian-speaking ',
+                        'learners.'
+                    ]
+                },
+                {
                     elem: 'h2',
                     mix: {
                         block: 'translate',
