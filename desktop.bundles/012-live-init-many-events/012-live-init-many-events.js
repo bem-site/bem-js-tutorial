@@ -18,4 +18,4 @@
 /*borschik:include:../../libs/bem-core/common.blocks/i-bem/__internal/i-bem__internal.vanilla.js*/;
 /*borschik:include:../../libs/bem-core/common.blocks/ecma/__string/ecma__string.js*/;
 /*borschik:include:../../libs/bem-core/common.blocks/i-bem/__dom/_init/i-bem__dom_init_auto.js*/;
-/*borschik:include:blocks/todo/todo.js*/;
+/*borschik:include:blocks/checkbox/checkbox.js*/;

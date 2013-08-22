@@ -3698,21 +3698,42 @@ $(function() {
 });
 /* ../../libs/bem-core/common.blocks/i-bem/__dom/_init/i-bem__dom_init_auto.js end */
 ;
-/* blocks/call-button/call-button.js begin */
+/* blocks/checkbox/checkbox.js begin */
 modules.define('i-bem__dom', function(provide, DOM) {
 
-DOM.decl('call-button', {
+DOM.decl('checkbox', {
     onSetMod: {
-        'js' : {
-            'inited' : function() {
-                this.bindTo('click', function() {
-                    this.setMod('calling');
-                });
+        'focused' : {
+            'true' : function() {
+                this.elem('control').focus();
+            },
+            '' : function() {
+                this.elem('control').blur();
             }
         },
-        'calling' : function() {
-            this.elem('link').text('Calling...');
+        'checked' : function(modName, modVal) {
+            this.elem('control').attr('checked', modVal ? 'checked' : false);
         }
+    },
+    _onClick : function() {
+        this.setMod('focused', true);
+    },
+    _onChange : function(e) {
+        this.setMod('checked', e.target.checked ? true : false);
+    }
+},{
+    live: function() {
+        this.liveBindTo('label', 'click', function() {
+            this._onClick();
+        });
+
+        this.liveBindTo('control', 'change', function(e){
+            this._onChange(e);
+        });
+
+        this.liveBindTo('control', 'focusin focusout', function(e){
+            this.setMod('focused', e.type == 'focusin'? true : false);
+        })
     }
 });
 
@@ -3720,5 +3741,5 @@ provide(DOM);
 
 });
 
-/* blocks/call-button/call-button.js end */
+/* blocks/checkbox/checkbox.js end */
 ;

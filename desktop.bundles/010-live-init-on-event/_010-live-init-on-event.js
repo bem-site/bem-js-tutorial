@@ -3698,21 +3698,27 @@ $(function() {
 });
 /* ../../libs/bem-core/common.blocks/i-bem/__dom/_init/i-bem__dom_init_auto.js end */
 ;
-/* blocks/call-button/call-button.js begin */
+/* blocks/translate/translate.js begin */
 modules.define('i-bem__dom', function(provide, DOM) {
 
-DOM.decl('call-button', {
+DOM.decl('translate', {
     onSetMod: {
         'js' : {
             'inited' : function() {
-                this.bindTo('click', function() {
-                    this.setMod('calling');
-                });
+                this.setMod(this.elem('prompt'), 'visible', true);
             }
-        },
-        'calling' : function() {
-            this.elem('link').text('Calling...');
         }
+    },
+    onElemSetMod: {
+        'prompt': {
+            'visible': function(elem) {
+                elem.text(this.params['prompt']);
+            }
+        }
+    }
+},{
+    live: function() {
+        this.liveInitOnEvent('click');
     }
 });
 
@@ -3720,5 +3726,5 @@ provide(DOM);
 
 });
 
-/* blocks/call-button/call-button.js end */
+/* blocks/translate/translate.js end */
 ;

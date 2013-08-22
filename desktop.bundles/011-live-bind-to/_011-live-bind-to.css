@@ -1,0 +1,204 @@
+/* blocks/page/page.css begin */
+.page
+{
+    font: 20px/1 "Lucida Sans Unicode","Lucida Grande",Verdana,Arial,Helvetica,sans-serif;
+    text-align: center;
+    background-color: #dedede;
+}
+
+/* blocks/page/page.css end */
+
+/* blocks/button/button.css begin */
+.button
+{
+    /* text */
+        text-decoration:        none;
+        font:                   24px/1em 'Droid Sans', sans-serif;
+        font-weight:            bold;
+        text-shadow:            rgba(255,255,255,.5) 0 1px 0;
+        -webkit-user-select:    none;
+        -moz-user-select:       none;
+        user-select:            none;
+        
+        
+    /* layout */
+        padding:                .5em .6em .4em .6em;
+        margin:                 .5em;
+        display:                inline-block;
+        position:               relative;
+        
+        -webkit-border-radius:  8px;
+        -moz-border-radius:     8px;
+        border-radius:  8px;
+        
+    /* effects */
+        border-top:         1px solid rgba(255,255,255,0.8);
+        border-bottom:      1px solid rgba(0,0,0,0.1);
+        
+        background-image:   -webkit-gradient(radial, 50% 0, 100, 50% 0, 0, from( rgba(255,255,255,0) ), to( rgba(255,255,255,0.7) )), url("blocks/button/__bg/button__bg.png");
+        background-image:   -moz-radial-gradient(top, ellipse cover, rgba(255,255,255,0.7) 0%, rgba(255,255,255,0) 100%), url("blocks/button/__bg/button__bg.png");
+        background-image:   gradient(radial, 50% 0, 100, 50% 0, 0, from( rgba(255,255,255,0) ), to( rgba(255,255,255,0.7) )), url("blocks/button/__bg/button__bg.png");
+
+        -webkit-transition: background .2s ease-in-out;
+        -moz-transition:    background .2s ease-in-out;
+        transition:         background .2s ease-in-out;
+}
+
+.button_color_grey
+{
+        color:              hsl(0, 0%, 40%) !important;
+        background-color:   hsl(0, 0%, 75%);
+
+        -webkit-box-shadow: inset rgba(255,254,255,0.6) 0 0.3em .3em, inset rgba(0,0,0,0.15) 0 -0.1em .3em, /* inner shadow */ 
+                            hsl(0, 0%, 60%) 0 .1em 3px, hsl(0, 0%, 45%) 0 .3em 1px, /* color border */
+                            rgba(0,0,0,0.2) 0 .5em 5px; /* drop shadow */
+        -moz-box-shadow:    inset rgba(255,254,255,0.6) 0 0.3em .3em, inset rgba(0,0,0,0.15) 0 -0.1em .3em, /* inner shadow */ 
+                            hsl(0, 0%, 60%) 0 .1em 3px, hsl(0, 0%, 45%) 0 .3em 1px, /* color border */
+                            rgba(0,0,0,0.2) 0 .5em 5px; /* drop shadow */
+        box-shadow:         inset rgba(255,254,255,0.6) 0 0.3em .3em, inset rgba(0,0,0,0.15) 0 -0.1em .3em, /* inner shadow */ 
+                            hsl(0, 0%, 60%) 0 .1em 3px, hsl(0, 0%, 45%) 0 .3em 1px, /* color border */
+                            rgba(0,0,0,0.2) 0 .5em 5px; /* drop shadow */
+}
+
+.button_color_orange
+{
+    color:              hsl(39, 100%, 30%) !important;
+    background-color:   hsl(39, 100%, 50%);
+
+    -webkit-box-shadow: inset rgba(255,254,255,0.6) 0 0.3em .3em, inset rgba(0,0,0,0.15) 0 -0.1em .3em, /* inner shadow */ 
+                            hsl(39, 100%, 40%) 0 .1em 3px, hsl(39, 100%, 30%) 0 .3em 1px, /* color border */
+                            rgba(0,0,0,0.2) 0 .5em 5px; /* drop shadow */
+    -moz-box-shadow:    inset rgba(255,254,255,0.6) 0 0.3em .3em, inset rgba(0,0,0,0.15) 0 -0.1em .3em, /* inner shadow */ 
+                            hsl(39, 100%, 40%) 0 .1em 3px, hsl(39, 100%, 30%) 0 .3em 1px, /* color border */
+                            rgba(0,0,0,0.2) 0 .5em 5px; /* drop shadow */
+    box-shadow:         inset rgba(255,254,255,0.6) 0 0.3em .3em, inset rgba(0,0,0,0.15) 0 -0.1em .3em, /* inner shadow */ 
+                            hsl(39, 100%, 40%) 0 .1em 3px, hsl(39, 100%, 30%) 0 .3em 1px, /* color border */
+                            rgba(0,0,0,0.2) 0 .5em 5px; /* drop shadow */
+}
+
+.button_color_blue
+{
+    color:              hsl(208, 50%, 40%) !important;
+    background-color:   hsl(208, 100%, 75%);
+    
+    -webkit-box-shadow: inset rgba(255,254,255,0.6) 0 0.3em .3em, inset rgba(0,0,0,0.15) 0 -0.1em .3em, /* inner shadow */ 
+                            hsl(208, 50%, 55%) 0 .1em 3px, hsl(208, 50%, 40%) 0 .3em 1px, /* color border */
+                            rgba(0,0,0,0.2) 0 .5em 5px; /* drop shadow */
+    -moz-box-shadow:    inset rgba(255,254,255,0.6) 0 0.3em .3em, inset rgba(0,0,0,0.15) 0 -0.1em .3em, /* inner shadow */ 
+                            hsl(208, 50%, 55%) 0 .1em 3px, hsl(208, 50%, 40%) 0 .3em 1px, /* color border */
+                            rgba(0,0,0,0.2) 0 .5em 5px; /* drop shadow */
+    box-shadow:         inset rgba(255,254,255,0.6) 0 0.3em .3em, inset rgba(0,0,0,0.15) 0 -0.1em .3em, /* inner shadow */ 
+                            hsl(208, 50%, 55%) 0 .1em 3px, hsl(208, 50%, 40%) 0 .3em 1px, /* color border */
+                            rgba(0,0,0,0.2) 0 .5em 5px; /* drop shadow */
+}
+
+.button_color_green
+{
+    color:              hsl(88, 70%, 30%) !important;
+    background-color:   hsl(88, 70%, 60%);
+    -webkit-box-shadow: inset rgba(255,254,255,0.6) 0 0.3em .3em, inset rgba(0,0,0,0.15) 0 -0.1em .3em, /* inner shadow */ 
+                            hsl(88, 70%, 40%) 0 .1em 3px, hsl(88, 70%, 30%) 0 .3em 1px, /* color border */
+                            rgba(0,0,0,0.2) 0 .5em 5px; /* drop shadow */
+    -moz-box-shadow:    inset rgba(255,254,255,0.6) 0 0.3em .3em, inset rgba(0,0,0,0.15) 0 -0.1em .3em, /* inner shadow */ 
+                            hsl(88, 70%, 40%) 0 .1em 3px, hsl(88, 70%, 30%) 0 .3em 1px, /* color border */
+                            rgba(0,0,0,0.2) 0 .5em 5px; /* drop shadow */
+    box-shadow:         inset rgba(255,254,255,0.6) 0 0.3em .3em, inset rgba(0,0,0,0.15) 0 -0.1em .3em, /* inner shadow */ 
+                            hsl(88, 70%, 40%) 0 .1em 3px, hsl(88, 70%, 30%) 0 .3em 1px, /* color border */
+                            rgba(0,0,0,0.2) 0 .5em 5px; /* drop shadow */
+}
+
+.button_color_pink
+{
+    color:              hsl(340, 100%, 30%) !important;
+    background-color:   hsl(340, 100%, 75%);
+    -webkit-box-shadow: inset rgba(255,254,255,0.6) 0 0.3em .3em, inset rgba(0,0,0,0.15) 0 -0.1em .3em, /* inner shadow */ 
+                            hsl(340, 70%, 50%) 0 .1em 3px, hsl(340, 80%, 40%) 0 .3em 1px, /* color border */
+                            rgba(0,0,0,0.2) 0 .5em 5px; /* drop shadow */
+    -moz-box-shadow:    inset rgba(255,254,255,0.6) 0 0.3em .3em, inset rgba(0,0,0,0.15) 0 -0.1em .3em, /* inner shadow */ 
+                            hsl(340, 70%, 50%) 0 .1em 3px, hsl(340, 80%, 40%) 0 .3em 1px, /* color border */
+                            rgba(0,0,0,0.2) 0 .5em 5px; /* drop shadow */
+    box-shadow:         inset rgba(255,254,255,0.6) 0 0.3em .3em, inset rgba(0,0,0,0.15) 0 -0.1em .3em, /* inner shadow */ 
+                            hsl(340, 70%, 50%) 0 .1em 3px, hsl(340, 80%, 40%) 0 .3em 1px, /* color border */
+                            rgba(0,0,0,0.2) 0 .5em 5px; /* drop shadow */
+}
+
+.button_shape_round
+{
+    border-top: none; 
+    -webkit-border-radius:  1em; 
+    -moz-border-radius:     1em; 
+    border-radius:          1em; 
+}
+
+.button_shape_oval
+{
+    border-top:             none; 
+    padding-left:           .8em;
+    padding-right:          .8em;
+    -webkit-border-radius:  5em / 2em; 
+    -moz-border-radius:     5em / 2em; 
+    border-radius:          5em / 2em; 
+}
+
+.button_shape_brackets
+{
+    border-top:             none; 
+    -webkit-border-radius:  .5em / 1em;
+    -moz-border-radius:     .5em / 1em;
+    border-radius:          .5em / 1em;
+}
+
+.button_shape_skew
+{
+    border-top:             none; 
+    padding-right:          1.2em;
+    padding-left:           0.8em;  
+    -webkit-border-radius:  5em 1em / 5em 1em;  
+    -moz-border-radius:     5em 1em / 5em 1em;  
+    border-radius:          5em 1em / 5em 1em;  
+}
+
+.button_shape_back
+{
+    border-top-color:       rgba(255,255,255,0.5);
+    -webkit-border-radius:  1.6em 1.6em 1em 1em / 4em 4em 1em 1em; 
+    -moz-border-radius:     1.6em 1.6em 1em 1em / 4em 4em 1em 1em; 
+    border-radius:          1.6em 1.6em 1em 1em / 4em 4em 1em 1em; 
+}
+
+.button_shape_knife
+{
+    padding-left: 1.5em;
+    -webkit-border-radius:  .2em .5em .5em 8em / .2em .5em .5em 5em; 
+    -moz-border-radius:     .2em .5em .5em 8em / .2em .5em .5em 5em; 
+    border-radius:          .2em .5em .5em 8em / .2em .5em .5em 5em; 
+}
+
+.button_shape_shield
+{
+    -webkit-border-radius:  .4em .4em 2em 2em / .4em .4em 3em 3em; 
+    -moz-border-radius:     .4em .4em 2em 2em / .4em .4em 3em 3em;
+    border-radius:          .4em .4em 2em 2em / .4em .4em 3em 3em;
+}
+
+.button_shape_drop
+{
+    border-top: none;
+    -webkit-border-radius:  2em 5em  2em .6em / 2em 4em 2em .6em; 
+    -moz-border-radius:     2em 5em  2em .6em / 2em 4em 2em .6em; 
+    border-radius:          2em 5em  2em .6em / 2em 4em 2em .6em; 
+}
+
+.button_shape_morph
+{
+    border-top: none;
+    -webkit-border-radius:  5em / 2em;
+    -moz-border-radius:     5em / 2em;
+    border-radius:          5em / 2em;
+    -webkit-transition:     -webkit-border-radius .3s ease-in-out;
+    -moz-transition:        -moz-border-radius .3s ease-in-out;
+    transition:             -moz-border-radius .3s ease-in-out;
+}
+
+/* blocks/button/button.css end */
+

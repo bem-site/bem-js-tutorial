@@ -12,8 +12,9 @@
 /*borschik:include:../../libs/bem-core/common.blocks/ecma/__function/ecma__function.js*/;
 /*borschik:include:../../libs/bem-core/common.blocks/i-bem/__dom/i-bem__dom.js*/;
 /*borschik:include:../../libs/bem-core/common.blocks/jquery/jquery.js*/;
-/*borschik:include:../../libs/bem-core/common.blocks/loader/loader.js*/;
+/*borschik:include:../../libs/bem-core/common.blocks/loader/_type/loader_type_js.js*/;
 /*borschik:include:../../libs/bem-core/common.blocks/jquery/__config/jquery__config.js*/;
+/*borschik:include:../../libs/bem-core/common.blocks/dom/dom.js*/;
 /*borschik:include:../../libs/bem-core/common.blocks/i-bem/__internal/i-bem__internal.vanilla.js*/;
 /*borschik:include:../../libs/bem-core/common.blocks/ecma/__string/ecma__string.js*/;
 /*borschik:include:../../libs/bem-core/common.blocks/i-bem/__dom/_init/i-bem__dom_init_auto.js*/;

@@ -7,7 +7,7 @@
  * http://www.opensource.org/licenses/mit-license.php
  * http://www.gnu.org/licenses/gpl.html
  *
- * @version 0.0.6
+ * @version 0.0.8
  */
 
 (function(global) {
@@ -74,6 +74,15 @@ var DECL_STATES = {
         });
     },
 
+    /**
+     * Returns whether the module is defined
+     * @param {String} name
+     * @returns {Boolean}
+     */
+    isDefined = function(name) {
+        return !!modulesStorage[name];
+    },
+
     onNextTick = function() {
         waitForNextTick = false;
         calcDeclDeps();
@@ -86,7 +95,10 @@ var DECL_STATES = {
             j = 0;
             dependOnDecls = decl.dependOnDecls;
             while(dep = decl.deps[j++]) {
-                modulesStorage[dep] || throwModuleNotFound(dep, decl);
+                if(!isDefined(dep)) {
+                    throwModuleNotFound(dep, decl);
+                    break;
+                }
                 dependOnDecls.push(modulesStorage[dep].decl);
             }
 
@@ -100,17 +112,24 @@ var DECL_STATES = {
     },
 
     applyRequires = function() {
-        var pendingRequire, i = 0, j, dep, dependOnDecls;
-        while(pendingRequire = pendingRequires[i++]) {
-            j = 0; dependOnDecls = [];
-            while(dep = pendingRequire.modules[j++]) {
-                modulesStorage[dep] || throwModuleNotFound(dep);
-                dependOnDecls.push(modulesStorage[dep].decl);
-            }
-            applyRequire(dependOnDecls, pendingRequire.cb);
-        }
+        var requiresToProcess = pendingRequires,
+            require, i = 0, j, dep, dependOnDecls, applyCb;
 
         pendingRequires = [];
+
+        while(require = requiresToProcess[i++]) {
+            j = 0; dependOnDecls = []; applyCb = true;
+            while(dep = require.modules[j++]) {
+                if(!isDefined(dep)) {
+                    throwModuleNotFound(dep);
+                    applyCb = false;
+                    break;
+                }
+
+                dependOnDecls.push(modulesStorage[dep].decl);
+            }
+            applyCb && applyRequire(dependOnDecls, require.cb);
+        }
     },
 
     applyRequire = function(dependOnDecls, cb) {
@@ -222,11 +241,17 @@ var DECL_STATES = {
         }
     },
 
+    throwException = function(e) {
+        nextTick(function() {
+            throw e;
+        });
+    },
+
     throwModuleNotFound = function(name, decl) {
-        throw Error(
+        throwException(Error(
             decl?
                 'Module "' + decl.name + '": can\'t resolve dependence "' + name + '"' :
-                'Can\'t resolve required module "' + name + '"');
+                'Can\'t resolve required module "' + name + '"'));
     },
 
     throwCircularDependenceDetected = function(decl, path) {
@@ -237,11 +262,11 @@ var DECL_STATES = {
         }
         strPath.push(decl.name);
 
-        throw Error('Circular dependence detected "' + strPath.join(' -> ') + '"');
+        throwException(Error('Circular dependence detected "' + strPath.join(' -> ') + '"'));
     },
 
     throwDeclAlreadyProvided = function(decl) {
-        throw Error('Declaration of module "' + decl.name + '" already provided');
+        throwException(Error('Declaration of module "' + decl.name + '" already provided'));
     },
 
     nextTick = (function() {
@@ -281,7 +306,7 @@ var DECL_STATES = {
             }
 
             if(isPostMessageAsync) {
-                var msg = '__modules' + +new Date,
+                var msg = '__modules' + (+new Date()),
                     onMessage = function(e) {
                         if(e.data === msg) {
                             e.stopPropagation && e.stopPropagation();
@@ -322,9 +347,10 @@ var DECL_STATES = {
     })(),
 
     api = {
-        define  : define,
-        require : require,
-        options : options
+        define    : define,
+        require   : require,
+        isDefined : isDefined,
+        options   : options
     };
 
 if(typeof exports === 'object') {
@@ -339,12 +365,16 @@ else {
 /* ../../libs/bem-core/node_modules/ym/modules.js end */
 ;
 /* ../../libs/bem-core/common.blocks/i-bem/i-bem.vanilla.js begin */
+/**
+ * @module i-bem
+ */
+
 modules.define(
     'i-bem',
     ['inherit', 'identify', 'next-tick', 'objects', 'functions', 'events', 'events__channels'],
     function(provide, inherit, identify, nextTick, objects, functions, events, channels) {
 
-var undefined,
+var undef,
 /**
  * Storage for block init functions
  * @private
@@ -361,15 +391,16 @@ var undefined,
 
 /**
  * Builds the name of the handler method for setting a modifier
- * @static
  * @private
- * @param {String} elemName Element name
+ * @param {String} prefix
  * @param {String} modName Modifier name
  * @param {String} modVal Modifier value
+ * @param {String} [elemName] Element name
  * @returns {String}
  */
-function buildModFnName(elemName, modName, modVal) {
-    return (elemName? '__elem_' + elemName : '') +
+function buildModFnName(prefix, modName, modVal, elemName) {
+    return '__' + prefix +
+        (elemName? '__elem_' + elemName : '') +
        '__mod' +
        (modName? '_' + modName : '') +
        (modVal? '_' + modVal : '');
@@ -379,32 +410,31 @@ function buildModFnName(elemName, modName, modVal) {
  * Transforms a hash of modifier handlers to methods
  * @static
  * @private
+ * @param {String} prefix
  * @param {Object} modFns
  * @param {Object} props
  * @param {String} [elemName]
  */
-function modFnsToProps(modFns, props, elemName) {
+function modFnsToProps(prefix, modFns, props, elemName) {
     if(functions.isFunction(modFns)) {
-        props[buildModFnName(elemName, '*', '*')] = modFns;
-    }
-    else {
+        props[buildModFnName(prefix, '*', '*', elemName)] = modFns;
+    } else {
         var modName, modVal, modFn;
         for(modName in modFns) {
             if(modFns.hasOwnProperty(modName)) {
                 modFn = modFns[modName];
                 if(functions.isFunction(modFn)) {
-                    props[buildModFnName(elemName, modName, modName === 'js'? 'inited' : '*')] = modFn;
+                    props[buildModFnName(prefix, modName, modName === 'js'? 'inited' : '*', elemName)] = modFn;
                     /** @deprecated: above code has fallback, replace
-                     *  modName === 'js'? 'inited' : '*'
+                     *  modName === 'js'? 'inited': '*'
                      *  with
                      *  '*'
                      *  in next version
                      */
-                }
-                else {
+                } else {
                     for(modVal in modFn) {
                         if(modFn.hasOwnProperty(modVal)) {
-                            props[buildModFnName(elemName, modName, modVal)] = modFn[modVal];
+                            props[buildModFnName(prefix, modName, modVal, elemName)] = modFn[modVal];
                         }
                     }
                 }
@@ -432,15 +462,30 @@ function buildCheckMod(modName, modVal) {
 }
 
 function convertModHandlersToMethods(props) {
+    if(props.beforeSetMod) {
+        modFnsToProps('before', props.beforeSetMod, props);
+        delete props.beforeSetMod;
+    }
+
     if(props.onSetMod) {
-        modFnsToProps(props.onSetMod, props);
+        modFnsToProps('after', props.onSetMod, props);
         delete props.onSetMod;
     }
 
+    var elemName;
+    if(props.onBeforeElemSetMod) {
+        for(elemName in props.onBeforeElemSetMod) {
+            if(props.onBeforeElemSetMod.hasOwnProperty(elemName)) {
+                modFnsToProps('before', props.onBeforeElemSetMod[elemName], props, elemName);
+            }
+        }
+        delete props.onBeforeElemSetMod;
+    }
+
     if(props.onElemSetMod) {
-        for(var elemName in props.onElemSetMod) {
+        for(elemName in props.onElemSetMod) {
             if(props.onElemSetMod.hasOwnProperty(elemName)) {
-                modFnsToProps(props.onElemSetMod[elemName], props, elemName);
+                modFnsToProps('after', props.onElemSetMod[elemName], props, elemName);
             }
         }
         delete props.onElemSetMod;
@@ -481,7 +526,7 @@ var BEM = inherit(events.Emitter, /** @lends BEM.prototype */ {
 
         initImmediately !== false?
             this._init() :
-            initFns.push(this._init.bind(this));
+            initFns.push(this._init, this);
     },
 
     /**
@@ -526,7 +571,11 @@ var BEM = inherit(events.Emitter, /** @lends BEM.prototype */ {
     },
 
     _buildEvent : function(e) {
-        return typeof e === 'string'? new events.Event(e) : e;
+        typeof e === 'string'?
+            e = new events.Event(e, this) :
+            e.target || (e.target = this);
+
+        return e;
     },
 
     /**
@@ -544,16 +593,14 @@ var BEM = inherit(events.Emitter, /** @lends BEM.prototype */ {
         if(len === 1) {
             modVal = '';
             modName = elem;
-            elem = undefined;
+            elem = undef;
             invert = true;
-        }
-        else if(len === 2) {
+        } else if(len === 2) {
             if(typeof elem === 'string') {
                 modVal = modName;
                 modName = elem;
-                elem = undefined;
-            }
-            else {
+                elem = undef;
+            } else {
                 modVal = '';
                 invert = true;
             }
@@ -576,7 +623,7 @@ var BEM = inherit(events.Emitter, /** @lends BEM.prototype */ {
             modName = elem || modName;
             var modCache = this._modCache;
             return modName in modCache?
-                modCache[modName] :
+                modCache[modName] || '' :
                 modCache[modName] = this._extractModVal(modName);
         }
 
@@ -605,13 +652,13 @@ var BEM = inherit(events.Emitter, /** @lends BEM.prototype */ {
     getMods : function(elem) {
         var hasElem = elem && typeof elem !== 'string',
             modNames = [].slice.call(arguments, hasElem? 1 : 0),
-            res = this._extractMods(modNames, hasElem? elem : undefined);
+            res = this._extractMods(modNames, hasElem? elem : undef);
 
         if(!hasElem) { // caching
             modNames.length?
                 modNames.forEach(function(name) {
                     this._modCache[name] = res[name];
-                }, this):
+                }, this) :
                 this._modCache = res;
         }
 
@@ -628,12 +675,14 @@ var BEM = inherit(events.Emitter, /** @lends BEM.prototype */ {
      */
     setMod : function(elem, modName, modVal) {
         if(typeof modVal === 'undefined') {
-            modVal = modName;
+            modVal = typeof modName === 'undefined'? true : modName;
             modName = elem;
-            elem = undefined;
+            elem = undef;
         }
 
         if(!elem || elem[0]) {
+            modVal === false && (modVal = '');
+
             var modId = (elem && elem[0]? identify(elem[0]) : '') + '_' + modName;
 
             if(this._processingMods[modId])
@@ -654,15 +703,28 @@ var BEM = inherit(events.Emitter, /** @lends BEM.prototype */ {
 
             elem && modFnParams.unshift(elem);
 
-            [['*', '*'], [modName, '*'], [modName, modVal]].forEach(function(mod) {
-                needSetMod = this._callModFn(elemName, mod[0], mod[1], modFnParams) !== false && needSetMod;
-            }, this);
+            var modVars = [['*', '*'], [modName, '*'], [modName, modVal]],
+                prefixes = ['before', 'after'],
+                i = 0, prefix, j, modVar;
 
-            !elem && needSetMod && (this._modCache[modName] = modVal);
+            while(prefix = prefixes[i++]) {
+                j = 0;
+                while(modVar = modVars[j++]) {
+                    if(this._callModFn(prefix, elemName, modVar[0], modVar[1], modFnParams) === false) {
+                        needSetMod = false;
+                        break;
+                    }
+                }
 
-            needSetMod && this._afterSetMod(modName, modVal, curModVal, elem, elemName);
+                if(!needSetMod) break;
 
-            delete this._processingMods[modId];
+                if(prefix === 'before') {
+                    this._onSetMod(modName, modVal, curModVal, elem, elemName);
+                    elem || (this._modCache[modName] = modVal); // cache only block mods
+                }
+            }
+
+            this._processingMods[modId] = null;
         }
 
         return this;
@@ -677,7 +739,7 @@ var BEM = inherit(events.Emitter, /** @lends BEM.prototype */ {
      * @param {Object} [elem] Nested element
      * @param {String} [elemName] Element name
      */
-    _afterSetMod : function(modName, modVal, oldModVal, elem, elemName) {},
+    _onSetMod : function(modName, modVal, oldModVal, elem, elemName) {},
 
     /**
      * Sets a modifier for a block/nested element, depending on conditions.
@@ -697,7 +759,7 @@ var BEM = inherit(events.Emitter, /** @lends BEM.prototype */ {
             modVal2 = modVal1;
             modVal1 = modName;
             modName = elem;
-            elem = undefined;
+            elem = undef;
         }
         if(typeof modVal2 === 'undefined') {
             modVal2 = '';
@@ -728,7 +790,7 @@ var BEM = inherit(events.Emitter, /** @lends BEM.prototype */ {
     delMod : function(elem, modName) {
         if(!modName) {
             modName = elem;
-            elem = undefined;
+            elem = undef;
         }
 
         return this.setMod(elem, modName, '');
@@ -737,16 +799,17 @@ var BEM = inherit(events.Emitter, /** @lends BEM.prototype */ {
     /**
      * Executes handlers for setting modifiers
      * @private
+     * @param {String} prefix
      * @param {String} elemName Element name
      * @param {String} modName Modifier name
      * @param {String} modVal Modifier value
      * @param {Array} modFnParams Handler parameters
      */
-    _callModFn : function(elemName, modName, modVal, modFnParams) {
-        var modFnName = buildModFnName(elemName, modName, modVal);
+    _callModFn : function(prefix, elemName, modName, modVal, modFnParams) {
+        var modFnName = buildModFnName(prefix, modName, modVal, elemName);
         return this[modFnName]?
            this[modFnName].apply(this, modFnParams) :
-           undefined;
+           undef;
     },
 
     /**
@@ -793,9 +856,10 @@ var BEM = inherit(events.Emitter, /** @lends BEM.prototype */ {
      * @returns {this}
      */
     nextTick : function(fn) {
+        var _this = this;
         nextTick(function() {
-            this.hasMod('js', 'inited') && fn.call(this);
-        }.bind(this));
+            _this.hasMod('js', 'inited') && fn.call(_this);
+        });
         return this;
     },
 
@@ -866,7 +930,7 @@ var BEM = inherit(events.Emitter, /** @lends BEM.prototype */ {
                         }
                         return method?
                             method.apply(this, arguments) :
-                            undefined;
+                            undef;
                     });
             });
         }
@@ -940,7 +1004,7 @@ var BEM = inherit(events.Emitter, /** @lends BEM.prototype */ {
      * @static
      * @private
      * @param {Object} elem Nested element
-     * @returns {String|undefined}
+     * @returns {String|undef}
      */
     _extractElemNameFrom : function(elem) {},
 
@@ -949,14 +1013,14 @@ var BEM = inherit(events.Emitter, /** @lends BEM.prototype */ {
      * @private
      */
     _runInitFns : function() {
-        var fnsLen = initFns.length;
-        if(fnsLen) {
-            var fnsCopy = initFns.slice(),
+        if(initFns.length) {
+            var fns = initFns,
                 fn, i = 0;
 
             initFns = [];
-            while(fn = fnsCopy[i++]) {
-                fn();
+            while(fn = fns[i]) {
+                fn.call(fns[i + 1]);
+                i += 2;
             }
         }
     },
@@ -984,14 +1048,9 @@ provide(BEM);
 ;
 /* ../../libs/bem-core/common.blocks/inherit/inherit.vanilla.js begin */
 /**
- * Inheritance module
- *
- * Copyright (c) 2010-2013 Filatov Dmitry (dfilatov@yandex-team.ru)
- * Dual licensed under the MIT and GPL licenses:
- * http://www.opensource.org/licenses/mit-license.php
- * http://www.gnu.org/licenses/gpl.html
- *
+ * @module inherit
  * @version 2.1.0
+ * @author Filatov Dmitry <dfilatov@yandex-team.ru>
  */
 
 modules.define('inherit', function(provide) {
@@ -1067,8 +1126,7 @@ function override(base, res, add) {
                     return res;
                 };
             })(name, prop);
-        }
-        else {
+        } else {
             res[name] = prop;
         }
     }
@@ -1125,9 +1183,9 @@ inherit.self = function() {
         withMixins = isArray(args[0]),
         base = withMixins? applyMixins(args[0], args[0][0]) : args[0],
         props = args[1],
-        staticProps = args[2];
+        staticProps = args[2],
+        basePtp = base.prototype;
 
-    var basePtp = base.prototype;
     props && override(basePtp, basePtp, props);
     staticProps && override(base, base, staticProps);
     
@@ -1141,14 +1199,9 @@ provide(inherit);
 ;
 /* ../../libs/bem-core/common.blocks/identify/identify.vanilla.js begin */
 /**
- * Identify module
- *
- * Copyright (c) 2010-2013 Filatov Dmitry (dfilatov@yandex-team.ru)
- * Dual licensed under the MIT and GPL licenses:
- * http://www.opensource.org/licenses/mit-license.php
- * http://www.gnu.org/licenses/gpl.html
- *
+ * @module identify
  * @version 1.0.0
+ * @author Filatov Dmitry <dfilatov@yandex-team.ru>
  */
 
 modules.define('identify', function(provide) {
@@ -1182,14 +1235,9 @@ provide(function(obj, onlyGet) {
 ;
 /* ../../libs/bem-core/common.blocks/next-tick/next-tick.vanilla.js begin */
 /**
- * next-tick module
- *
- * Copyright (c) 2013 Filatov Dmitry (dfilatov@yandex-team.ru)
- * Dual licensed under the MIT and GPL licenses:
- * http://www.opensource.org/licenses/mit-license.php
- * http://www.gnu.org/licenses/gpl.html
- *
+ * @module next-tick
  * @version 1.0.1
+ * @author Filatov Dmitry <dfilatov@yandex-team.ru>
  */
 
 modules.define('next-tick', function(provide) {
@@ -1207,6 +1255,7 @@ var global = this.global,
         }
     };
 
+    /* global process */
     if(typeof process === 'object' && process.nextTick) { // nodejs
         return provide(function(fn) {
             enqueueFn(fn) && process.nextTick(callFns);
@@ -1231,7 +1280,7 @@ var global = this.global,
         }
 
         if(isPostMessageAsync) {
-            var msg = '__nextTick' + +new Date,
+            var msg = '__nextTick' + (+new Date),
                 onMessage = function(e) {
                     if(e.data === msg) {
                         e.stopPropagation && e.stopPropagation();
@@ -1267,29 +1316,36 @@ var global = this.global,
     }
 
     provide(function(fn) { // old browsers
-        enqueueFn(fn) && setTimeout(callFns, 0);
+        enqueueFn(fn) && global.setTimeout(callFns, 0);
     });
 });
 
 /* ../../libs/bem-core/common.blocks/next-tick/next-tick.vanilla.js end */
 ;
 /* ../../libs/bem-core/common.blocks/objects/objects.vanilla.js begin */
+/**
+ * @module objects
+ */
+
 modules.define('objects', function(provide) {
 
-var bindCall = function(fn) {
-        return fn.call.bind(fn);
-    },
-    hasOwnProp = bindCall(Object.prototype.hasOwnProperty);
+var hasOwnProp = Object.prototype.hasOwnProperty;
 
 provide({
-    extend : function(target) {
+    /**
+     * Extends a given target by
+     * @param {Object} target object to extend
+     * @param {...Object} source
+     * @returns {Object}
+     */
+    extend : function(target, source) {
         typeof target !== 'object' && (target = {});
 
         for(var i = 1, len = arguments.length; i < len; i++) {
             var obj = arguments[i];
             if(obj) {
                 for(var key in obj) {
-                    hasOwnProp(obj, key) && (target[key] = obj[key]);
+                    hasOwnProp.call(obj, key) && (target[key] = obj[key]);
                 }
             }
         }
@@ -1297,9 +1353,14 @@ provide({
         return target;
     },
 
+    /**
+     * Check whether a given object is empty (contains no enumerable properties)
+     * @param {Object} obj
+     * @returns {Boolean}
+     */
     isEmpty : function(obj) {
         for(var key in obj) {
-            if(hasOwnProp(obj, key)) {
+            if(hasOwnProp.call(obj, key)) {
                 return false;
             }
         }
@@ -1307,9 +1368,15 @@ provide({
         return true;
     },
 
+    /**
+     * Generic iterator function over object
+     * @param {Object} obj object to iterate
+     * @param {Function} fn callback
+     * @param {Object} [ctx] callbacks's context
+     */
     each : function(obj, fn, ctx) {
         for(var key in obj) {
-            if(hasOwnProp(obj, key)) {
+            if(hasOwnProp.call(obj, key)) {
                 ctx? fn.call(ctx, obj[key], key) : fn(obj[key], key);
             }
         }
@@ -1317,22 +1384,30 @@ provide({
 });
 
 });
-
 /* ../../libs/bem-core/common.blocks/objects/objects.vanilla.js end */
 ;
 /* ../../libs/bem-core/common.blocks/functions/functions.vanilla.js begin */
+/**
+ * @module functions
+ */
+
 modules.define('functions', function(provide) {
 
-var bindCall = function(fn) {
-        return fn.call.bind(fn);
-    },
-    toStr = bindCall(Object.prototype.toString);
+var toStr = Object.prototype.toString;
 
 provide({
+    /**
+     * Checks whether a given object is function
+     * @param {*} obj
+     * @returns {Boolean}
+     */
     isFunction : function(obj) {
-        return toStr(obj) === '[object Function]';
+        return toStr.call(obj) === '[object Function]';
     },
-    
+
+    /**
+     * @type {Function}
+     */
     noop : function() {}
 });
 
@@ -1341,17 +1416,15 @@ provide({
 ;
 /* ../../libs/bem-core/common.blocks/events/events.vanilla.js begin */
 /**
- * Events module
- *
- * Copyright (c) 2010-2013 Filatov Dmitry (alpha@zforms.ru)
- * Dual licensed under the MIT and GPL licenses:
- * http://www.opensource.org/licenses/mit-license.php
- * http://www.gnu.org/licenses/gpl.html
- *
- * @version 1.0.3
+ * @module events
+ * @version 1.0.4
+ * @author Filatov Dmitry <dfilatov@yandex-team.ru>
  */
 
-modules.define('events', ['identify', 'inherit'], function(provide, identify, inherit) {
+modules.define(
+    'events',
+    ['identify', 'inherit', 'functions'],
+    function(provide, identify, inherit, functions) {
 
 var undef,
     storageExpando = '__' + (+new Date) + 'storage',
@@ -1359,7 +1432,11 @@ var undef,
         return identify(fn) + (ctx? identify(ctx) : '');
     },
 
-    Event = /** @lends Event.prototype */ inherit({
+    /**
+     * @class Event
+     * @alias events:Event
+     */
+    Event = inherit(/** @lends Event.prototype */{
         __constructor : function(type, target) {
             this.type = type;
             this.target = target;
@@ -1387,9 +1464,9 @@ var undef,
         }
     }),
 
-    Emitter = /** @lends Emitter.prototype */{
+    EmitterProps = {
         /**
-         * Adding event handler
+         * Adds an event handler
          * @param {String} e Event type
          * @param {Object} [data] Additional data that the handler gets as e.data
          * @param {Function} fn Handler
@@ -1398,7 +1475,7 @@ var undef,
          */
         on : function(e, data, fn, ctx, _special) {
             if(typeof e === 'string') {
-                if(typeof data === 'function') {
+                if(functions.isFunction(data)) {
                     ctx = fn;
                     fn = data;
                     data = undef;
@@ -1411,7 +1488,7 @@ var undef,
                     eventStorage;
 
                 while(eventType = eventTypes[i++]) {
-                    eventStorage = storage[eventType] || (storage[eventType] = { ids : {}, list : {}});
+                    eventStorage = storage[eventType] || (storage[eventType] = { ids : {}, list : {} });
                     if(!(id in eventStorage.ids)) {
                         list = eventStorage.list;
                         item = { fn : fn, data : data, ctx : ctx, special : _special };
@@ -1433,12 +1510,21 @@ var undef,
             return this;
         },
 
+        /**
+         * Adds a one time handler for the event.
+         * Handler is executed only the next time the event is fired, after which it is removed.
+         * @param {String} e Event type
+         * @param {Object} [data] Additional data that the handler gets as e.data
+         * @param {Function} fn Handler
+         * @param {Object} [ctx] Handler context
+         * @returns {this}
+         */
         once : function(e, data, fn, ctx) {
             return this.on(e, data, fn, ctx, { once : true });
         },
 
         /**
-         * Removing event handler(s)
+         * Removes event handler or handlers
          * @param {String} [e] Event type
          * @param {Function} [fn] Handler
          * @param {Object} [ctx] Handler context
@@ -1464,15 +1550,13 @@ var undef,
 
                                         if(prev) {
                                             prev.next = next;
-                                        }
-                                        else if(item === list.first) {
+                                        } else if(item === list.first) {
                                             list.first = next;
                                         }
 
                                         if(next) {
                                             next.prev = prev;
-                                        }
-                                        else if(item === list.last) {
+                                        } else if(item === list.last) {
                                             list.last = prev;
                                         }
 
@@ -1503,14 +1587,11 @@ var undef,
          * @returns {this}
          */
         emit : function(e, data) {
-            var storage = this[storageExpando];
+            var storage = this[storageExpando],
+                eventInstantiated = false;
 
             if(storage) {
-                typeof e === 'string' && (e = new Event(e));
-
-                e.target || (e.target = this);
-
-                var eventTypes = [e.type, '*'],
+                var eventTypes = [typeof e === 'string'? e : e.type, '*'],
                     i = 0, eventType, eventStorage;
                 while(eventType = eventTypes[i++]) {
                     if(eventStorage = storage[eventType]) {
@@ -1518,6 +1599,12 @@ var undef,
                             lastItem = eventStorage.list.last,
                             res;
                         while(item) {
+                            if(!eventInstantiated) { // instantiate Event only on demand
+                                eventInstantiated = true;
+                                typeof e === 'string' && (e = new Event(e));
+                                e.target || (e.target = this);
+                            }
+
                             e.data = item.data;
                             res = item.fn.apply(item.ctx || this, arguments);
                             if(typeof res !== 'undefined') {
@@ -1546,20 +1633,34 @@ var undef,
     };
 
 /** @deprecated use emit */
-Emitter.trigger = Emitter.emit;
+EmitterProps.trigger = EmitterProps.emit;
 
 /** @deprecated use once */
-Emitter.onFirst = Emitter.once;
+EmitterProps.onFirst = EmitterProps.once;
+
+/**
+ * @class Emitter
+ * @alias events:Emitter
+ */
+var Emitter = inherit(
+        /** @lends Emitter.prototype */
+        EmitterProps,
+        /** @lends Emitter */
+        EmitterProps);
 
 provide({
-    Emitter : inherit(Emitter, Emitter),
-    Event   : Event
+    Emitter : Emitter,
+    Event : Event
 });
 
 });
 /* ../../libs/bem-core/common.blocks/events/events.vanilla.js end */
 ;
 /* ../../libs/bem-core/common.blocks/events/__channels/events__channels.vanilla.js begin */
+/**
+ * @module events__channels
+ */
+
 modules.define('events__channels', ['events'], function(provide, events) {
 
 var undef,
@@ -1706,8 +1807,7 @@ var ptp = Array.prototype,
                         break;
                     }
                 }
-            }
-            else {
+            } else {
                 res = initialVal;
             }
 
@@ -1727,7 +1827,7 @@ var ptp = Array.prototype,
             var i = -1, t = this, len = t.length;
 
             while(++i < len)
-                if(i in t && (ctx ? callback.call(ctx, t[i], i, t) : callback(t[i], i, t)))
+                if(i in t && (ctx? callback.call(ctx, t[i], i, t) : callback(t[i], i, t)))
                     return true;
 
             return false;
@@ -1743,7 +1843,7 @@ var ptp = Array.prototype,
             var i = -1, t = this, len = t.length;
 
             while(++i < len)
-                if(i in t && !(ctx ? callback.call(ctx, t[i], i, t) : callback(t[i], i, t)))
+                if(i in t && !(ctx? callback.call(ctx, t[i], i, t) : callback(t[i], i, t)))
                     return false;
 
             return true;
@@ -1778,15 +1878,18 @@ Function.prototype.bind || (Function.prototype.bind = function(ctx) {
 /* ../../libs/bem-core/common.blocks/ecma/__function/ecma__function.js end */
 ;
 /* ../../libs/bem-core/common.blocks/i-bem/__dom/i-bem__dom.js begin */
+/**
+ * @module i-bem__dom
+ */
+
 modules.define(
     'i-bem__dom',
-    ['i-bem', 'i-bem__internal', 'identify', 'objects', 'functions', 'jquery'],
-    function(provide, BEM, INTERNAL, identify, objects, functions, $) {
+    ['i-bem', 'i-bem__internal', 'identify', 'objects', 'functions', 'jquery', 'dom'],
+    function(provide, BEM, INTERNAL, identify, objects, functions, $, dom) {
 
-var undefined,
+var undef,
     win = $(window),
     doc = $(document),
-    scope = $('body'),
 
 /**
  * Storage for DOM elements by unique key
@@ -1834,6 +1937,10 @@ var undefined,
     MOD_DELIM = INTERNAL.MOD_DELIM,
     ELEM_DELIM = INTERNAL.ELEM_DELIM,
 
+    EXTRACT_MODS_RE = RegExp(
+        '[^' + MOD_DELIM + ']' + MOD_DELIM + '(' + NAME_PATTERN + ')' +
+        '(?:' + MOD_DELIM + '(' + NAME_PATTERN + '))?$'),
+
     buildModPostfix = INTERNAL.buildModPostfix,
     buildClass = INTERNAL.buildClass;
 
@@ -1878,7 +1985,7 @@ function initBlock(blockName, domElem, params, forceLive, callback) {
     if(typeof params === 'boolean') {
         callback = forceLive;
         forceLive = params;
-        params = undefined;
+        params = undef;
     }
 
     var domNode = domElem[0];
@@ -1967,6 +2074,7 @@ function extractParams(domNode) {
     if(!fn && domNode.tagName.toLowerCase() === 'body') { // LEGO-2027 in FF onclick doesn't work on body
         var elem = $(domNode),
             attr = elem.attr('onclick') || elem.attr('ondblclick');
+        /*jshint -W061 */
         attr && (fn = Function(attr));
     }
     return fn? fn() : {};
@@ -1982,9 +2090,9 @@ function cleanupDomNode(domNode) {
 }
 
 /**
- * Uncople DOM node from the block. If this is the last node, then destroys the block.
+ * Uncouple DOM node from the block. If this is the last node, then destroys the block.
  * @private
- * @param {BEM.DOM} block block
+ * @param {DOM} block block
  * @param {HTMLElement} domNode DOM node
  */
 function removeDomNodeFromBlock(block, domNode) {
@@ -1993,11 +2101,7 @@ function removeDomNodeFromBlock(block, domNode) {
         block.domElem = block.domElem.not(domNode);
 }
 
-/**
- * @namespace
- * @name BEM.DOM
- */
-var DOM = BEM.DOM = BEM.decl('i-bem__dom',/** @lends BEM.DOM.prototype */{
+var DOM = BEM.decl('i-bem__dom',/** @lends DOM.prototype */{
     /**
      * @class Base block for creating BEM blocks that have DOM representation
      * @constructs
@@ -2114,7 +2218,7 @@ var DOM = BEM.DOM = BEM.decl('i-bem__dom',/** @lends BEM.DOM.prototype */{
     _findBlocks : function(select, elem, block, onlyFirst) {
         if(!block) {
             block = elem;
-            elem = undefined;
+            elem = undef;
         }
 
         var ctxElem = elem?
@@ -2158,21 +2262,15 @@ var DOM = BEM.DOM = BEM.decl('i-bem__dom',/** @lends BEM.DOM.prototype */{
      * @returns {BEM}
      */
     bindToDomElem : function(domElem, event, fn) {
-        var _this = this;
-
         fn?
             domElem.bind(
-                _this._buildEventName(event),
-                function(e) {
-                    e.domElem = $(this);
-                    return fn.apply(_this, arguments);
-                }
-            ) :
+                this._buildEventName(event),
+                $.proxy(fn, this)) :
             objects.each(event, function(fn, event) {
-                _this.bindToDomElem(domElem, event, fn);
-            });
+                this.bindToDomElem(domElem, event, fn);
+            }, this);
 
-        return _this;
+        return this;
     },
 
     /**
@@ -2195,23 +2293,6 @@ var DOM = BEM.DOM = BEM.decl('i-bem__dom',/** @lends BEM.DOM.prototype */{
      * @returns {BEM}
      */
     bindToWin : function(event, fn) {
-        var _fn = fn,
-            currentHeight,
-            currentWidth;
-
-        if(event === 'resize') {
-            fn = function() {
-                var height = win.height(),
-                    width = win.width();
-
-                if(currentHeight !== height || currentWidth !== width) {
-                    currentHeight = height;
-                    currentWidth = width;
-                    _fn.apply(this, arguments);
-                }
-            }
-        }
-        
         this._needSpecialUnbind = true;
         return this.bindToDomElem(win, event, fn);
     },
@@ -2241,10 +2322,15 @@ var DOM = BEM.DOM = BEM.decl('i-bem__dom',/** @lends BEM.DOM.prototype */{
      * @protected
      * @param {jQuery} domElem DOM element where the event was being listened for
      * @param {String} event Event name
+     * @param {Function} [fn] Handler function
      * @returns {BEM}
      */
-    unbindFromDomElem : function(domElem, event) {
-        domElem.unbind(this._buildEventName(event));
+    unbindFromDomElem : function(domElem, event, fn) {
+        event = this._buildEventName(event);
+
+        fn?
+            domElem.unbind(event, fn) :
+            domElem.unbind(event);
         return this;
     },
 
@@ -2252,20 +2338,22 @@ var DOM = BEM.DOM = BEM.decl('i-bem__dom',/** @lends BEM.DOM.prototype */{
      * Removes event handler from document
      * @protected
      * @param {String} event Event name
+     * @param {Function} [fn] Handler function
      * @returns {BEM}
      */
-    unbindFromDoc : function(event) {
-        return this.unbindFromDomElem(doc, event);
+    unbindFromDoc : function(event, fn) {
+        return this.unbindFromDomElem(doc, event, fn);
     },
 
     /**
      * Removes event handler from window
      * @protected
      * @param {String} event Event name
+     * @param {Function} [fn] Handler function
      * @returns {BEM}
      */
-    unbindFromWin : function(event) {
-        return this.unbindFromDomElem(win, event);
+    unbindFromWin : function(event, fn) {
+        return this.unbindFromDomElem(win, event, fn);
     },
 
     /**
@@ -2273,17 +2361,23 @@ var DOM = BEM.DOM = BEM.decl('i-bem__dom',/** @lends BEM.DOM.prototype */{
      * @protected
      * @param {jQuery|String} [elem] Nested element
      * @param {String} event Event name
+     * @param {Function} [fn] Handler function
      * @returns {BEM}
      */
-    unbindFrom : function(elem, event) {
-        if(!event) {
+    unbindFrom : function(elem, event, fn) {
+        var argLen = arguments.length;
+        if(argLen === 1) {
+            event = elem;
+            elem = this.domElem;
+        } else if(argLen === 2 && functions.isFunction(event)) {
+            fn = event;
             event = elem;
             elem = this.domElem;
         } else if(typeof elem === 'string') {
             elem = this.elem(elem);
         }
 
-        return this.unbindFromDomElem(elem, event);
+        return this.unbindFromDomElem(elem, event, fn);
     },
 
     /**
@@ -2403,7 +2497,7 @@ var DOM = BEM.DOM = BEM.decl('i-bem__dom',/** @lends BEM.DOM.prototype */{
             (matches = domNode.className
                 .match(this.__self._buildModValRE(modName, elemName || elem)));
 
-        return matches? matches[2] : '';
+        return matches? matches[2] || true : '';
     },
 
     /**
@@ -2423,9 +2517,8 @@ var DOM = BEM.DOM = BEM.decl('i-bem__dom',/** @lends BEM.DOM.prototype */{
                 '(' + (extractAll? NAME_PATTERN : modNames.join('|')) + ')',
                 elem,
                 'g')) || []).forEach(function(className) {
-                    var iModVal = (className = className.trim()).lastIndexOf(MOD_DELIM),
-                        iModName = className.substr(0, iModVal - 1).lastIndexOf(MOD_DELIM);
-                    res[className.substr(iModName + 1, iModVal - iModName - 1)] = className.substr(iModVal + 1);
+                    var matches = className.match(EXTRACT_MODS_RE);
+                    res[matches[1]] = matches[2] || true;
                     ++countMatched;
                 });
 
@@ -2446,7 +2539,7 @@ var DOM = BEM.DOM = BEM.decl('i-bem__dom',/** @lends BEM.DOM.prototype */{
      * @param {jQuery} [elem] Element
      * @param {String} [elemName] Element name
      */
-    _afterSetMod : function(modName, modVal, oldModVal, elem, elemName) {
+    _onSetMod : function(modName, modVal, oldModVal, elem, elemName) {
         if(!elem && modName === 'js' && modVal === '') {
             return;
         }
@@ -2454,15 +2547,21 @@ var DOM = BEM.DOM = BEM.decl('i-bem__dom',/** @lends BEM.DOM.prototype */{
         var _self = this.__self,
             classPrefix = _self._buildModClassPrefix(modName, elemName),
             classRE = _self._buildModValRE(modName, elemName),
-            needDel = modVal === '';
+            needDel = modVal === '' || modVal === false;
 
         (elem || this.domElem).each(function() {
-            var className = this.className;
-            className.indexOf(classPrefix) > -1?
-                this.className = className.replace(
-                    classRE,
-                    (needDel? '' : '$1' + classPrefix + modVal)) :
-                needDel || $(this).addClass(classPrefix + modVal);
+            var className = this.className,
+                modClassName = classPrefix;
+
+            modVal !== true && (modClassName += MOD_DELIM + modVal);
+
+            (oldModVal === true?
+                classRE.test(className) :
+                className.indexOf(classPrefix + MOD_DELIM) > -1)?
+                    this.className = className.replace(
+                        classRE,
+                        (needDel? '' : '$1' + modClassName)) :
+                    needDel || $(this).addClass(modClassName);
         });
 
         elemName && this
@@ -2491,7 +2590,7 @@ var DOM = BEM.DOM = BEM.decl('i-bem__dom',/** @lends BEM.DOM.prototype */{
 
         if(typeof modName === 'boolean') {
             strictMode = modName;
-            modName = undefined;
+            modName = undef;
         }
 
         var _self = this.__self,
@@ -2609,17 +2708,17 @@ var DOM = BEM.DOM = BEM.decl('i-bem__dom',/** @lends BEM.DOM.prototype */{
     /**
      * Checks whether a DOM element is in a block
      * @protected
+     * @param {jQuery} [ctx=this.domElem] Element where check is being performed
      * @param {jQuery} domElem DOM element
      * @returns {Boolean}
      */
-    containsDomElem : function(domElem) {
-        var res = false;
+    containsDomElem : function(ctx, domElem) {
+        if(arguments.length === 1) {
+            domElem = ctx;
+            ctx = this.domElem;
+        }
 
-        this.domElem.each(function() {
-            return !(res = domElem.parents().andSelf().index(this) > -1);
-        });
-
-        return res;
+        return dom.contains(ctx, domElem);
     },
 
     /**
@@ -2655,8 +2754,7 @@ var DOM = BEM.DOM = BEM.decl('i-bem__dom',/** @lends BEM.DOM.prototype */{
                         removeDomNodeFromBlock(block, domNode);
                         delete params[blockName];
                     }
-                }
-                else {
+                } else {
                     delete uniqIdToDomElems[blockParams.uniqId];
                 }
             });
@@ -2672,14 +2770,14 @@ var DOM = BEM.DOM = BEM.decl('i-bem__dom',/** @lends BEM.DOM.prototype */{
         delete _this._elemCache;
     }
 
-}, /** @lends BEM.DOM */{
+}, /** @lends DOM */{
 
     /**
      * Scope
      * @protected
      * @type jQuery
      */
-    scope : scope,
+    scope : $('body'),
 
     /**
      * Document shortcut
@@ -2750,8 +2848,7 @@ var DOM = BEM.DOM = BEM.decl('i-bem__dom',/** @lends BEM.DOM.prototype */{
                     if(block) {
                         removeDomNodeFromBlock(block, domNode);
                         delete params[blockName];
-                    }
-                    else {
+                    } else {
                         delete uniqIdToDomElems[blockParams.uniqId];
                     }
                 }
@@ -2767,12 +2864,10 @@ var DOM = BEM.DOM = BEM.decl('i-bem__dom',/** @lends BEM.DOM.prototype */{
      * @static
      * @param {jQuery} ctx Root DOM node
      * @param {jQuery|String} content New content
-     * @param {Function} [callback] Handler to be called after initialization
-     * @param {Object} [callbackCtx] Handler's context
      */
-    update : function(ctx, content, callback, callbackCtx) {
+    update : function(ctx, content) {
         this.destruct(ctx, true);
-        this.init(ctx.html(content), callback, callbackCtx);
+        this.init(ctx.html(content));
     },
 
     /**
@@ -2782,8 +2877,14 @@ var DOM = BEM.DOM = BEM.decl('i-bem__dom',/** @lends BEM.DOM.prototype */{
      * @param {jQuery|String} content Content to be added
      */
     replace : function(ctx, content) {
-        this.destruct(true, ctx);
-        this.init($(content).replaceAll(ctx));
+        var prev = ctx.prev(),
+            parent = ctx.parent();
+
+        this.destruct(ctx);
+
+        this.init(prev.length?
+            $(content).insertAfter(prev) :
+            $(content).prependTo(parent));
     },
 
     /**
@@ -2842,8 +2943,7 @@ var DOM = BEM.DOM = BEM.decl('i-bem__dom',/** @lends BEM.DOM.prototype */{
             e.split(' ').forEach(function(e) {
                 this._liveClassBind(className, e, callback, invokeOnInit);
             }, this);
-        }
-        else {
+        } else {
             var storage = liveClassEventStorage[e],
                 uniqId = identify(callback);
 
@@ -2915,8 +3015,9 @@ var DOM = BEM.DOM = BEM.decl('i-bem__dom',/** @lends BEM.DOM.prototype */{
         return function(e) {
             var args = [
                     _this._name,
-                    (e.domElem = $(this)).closest(_this.buildSelector()),
-                    true ],
+                    $(this).closest(_this.buildSelector()),
+                    true
+                ],
                 block = initBlock.apply(null, invokeOnInit? args.concat([callback, e]) : args);
 
             if(block && !invokeOnInit && callback)
@@ -2948,14 +3049,12 @@ var DOM = BEM.DOM = BEM.decl('i-bem__dom',/** @lends BEM.DOM.prototype */{
         if(!event || functions.isFunction(event)) {
             callback = event;
             event = to;
-            to = undefined;
+            to = undef;
         }
 
         if(!to || typeof to === 'string') {
             to = { elem : to };
         }
-
-        to.elemName && (to.elem = to.elemName);
 
         if(to.elem && to.elem.indexOf(' ') > 0) {
             to.elem.split(' ').forEach(function(elem) {
@@ -3013,7 +3112,7 @@ var DOM = BEM.DOM = BEM.decl('i-bem__dom',/** @lends BEM.DOM.prototype */{
         var name = this._name;
         blocks[blockName].on(event, function(e) {
             var args = arguments,
-                blocks = e.block[findFnName](name);
+                blocks = e.target[findFnName](name);
 
             callback && blocks.forEach(function(block) {
                 callback.apply(block, args);
@@ -3092,7 +3191,7 @@ var DOM = BEM.DOM = BEM.decl('i-bem__dom',/** @lends BEM.DOM.prototype */{
             if(functions.isFunction(data)) {
                 fnCtx = fn;
                 fn = data;
-                data = undefined;
+                data = undef;
             }
 
             if(e.indexOf(' ') > -1) {
@@ -3112,9 +3211,9 @@ var DOM = BEM.DOM = BEM.decl('i-bem__dom',/** @lends BEM.DOM.prototype */{
                         ++storage.counter;
                     }
                     ctxStorage[identify(fn) + (fnCtx? identify(fnCtx) : '')] = {
-                        fn   : fn,
+                        fn : fn,
                         data : data,
-                        ctx  : fnCtx
+                        ctx : fnCtx
                     };
                 });
             }
@@ -3162,13 +3261,13 @@ var DOM = BEM.DOM = BEM.decl('i-bem__dom',/** @lends BEM.DOM.prototype */{
      * @static
      * @private
      * @param {jQuery} elem Nested element
-     * @returns {String|undefined}
+     * @returns {String|undef}
      */
     _extractElemNameFrom : function(elem) {
         if(elem.__bemElemName) return elem.__bemElemName;
 
         var matches = elem[0].className.match(this._buildElemNameRE());
-        return matches? matches[1] : undefined;
+        return matches? matches[1] : undef;
     },
 
     /**
@@ -3189,7 +3288,7 @@ var DOM = BEM.DOM = BEM.decl('i-bem__dom',/** @lends BEM.DOM.prototype */{
                (elem?
                    ELEM_DELIM + (typeof elem === 'string'? elem : this._extractElemNameFrom(elem)) :
                    '') +
-               MOD_DELIM + modName + MOD_DELIM;
+               MOD_DELIM + modName;
     },
 
     /**
@@ -3202,7 +3301,11 @@ var DOM = BEM.DOM = BEM.decl('i-bem__dom',/** @lends BEM.DOM.prototype */{
      * @returns {RegExp}
      */
     _buildModValRE : function(modName, elem, quantifiers) {
-        return new RegExp('(\\s|^)' + this._buildModClassPrefix(modName, elem) + '(' + NAME_PATTERN + ')(?=\\s|$)', quantifiers);
+        return new RegExp(
+            '(\\s|^)' +
+            this._buildModClassPrefix(modName, elem) +
+            '(?:' + MOD_DELIM + '(' + NAME_PATTERN + '))?(?=\\s|$)',
+            quantifiers);
     },
 
     /**
@@ -3237,17 +3340,23 @@ $.fn.bem = function(blockName, params) {
     return initBlock(blockName, this, params, true);
 };
 
-provide(blocks['i-bem__dom']);
+provide(DOM);
 
 });
 
 /* ../../libs/bem-core/common.blocks/i-bem/__dom/i-bem__dom.js end */
 ;
 /* ../../libs/bem-core/common.blocks/jquery/jquery.js begin */
+/**
+ * @module jquery
+ */
+
 modules.define(
     'jquery',
-    ['loader', 'jquery__config'],
+    ['loader_type_js', 'jquery__config'],
     function(provide, loader, cfg) {
+
+/* global jQuery */
 
 function doProvide() {
     provide(jQuery.noConflict(true));
@@ -3260,19 +3369,14 @@ typeof jQuery !== 'undefined'?
 });
 /* ../../libs/bem-core/common.blocks/jquery/jquery.js end */
 ;
-/* ../../libs/bem-core/common.blocks/loader/loader.js begin */
+/* ../../libs/bem-core/common.blocks/loader/_type/loader_type_js.js begin */
 /**
- * Loader module
- *
- * Copyright (c) 2013 Filatov Dmitry (dfilatov@yandex-team.ru)
- * Dual licensed under the MIT and GPL licenses:
- * http://www.opensource.org/licenses/mit-license.php
- * http://www.gnu.org/licenses/gpl.html
- *
+ * @module loader_type_js
  * @version 1.0.0
+ * @author Filatov Dmitry <dfilatov@yandex-team.ru>
  */
 
-modules.define('loader', function(provide) {
+modules.define('loader_type_js', function(provide) {
 
 var loading = {},
     loaded = {},
@@ -3321,30 +3425,137 @@ provide(function(path, cb) {
 
 });
 
-/* ../../libs/bem-core/common.blocks/loader/loader.js end */
+/* ../../libs/bem-core/common.blocks/loader/_type/loader_type_js.js end */
 ;
 /* ../../libs/bem-core/common.blocks/jquery/__config/jquery__config.js begin */
+/**
+ * @module jquery__config
+ */
+
 modules.define('jquery__config', function(provide) {
 
 provide({
-    url : '//yandex.st/jquery/1.10.1/jquery.min.js'
+    url : '//yandex.st/jquery/1.10.2/jquery.min.js'
 });
 
 });
 /* ../../libs/bem-core/common.blocks/jquery/__config/jquery__config.js end */
 ;
+/* ../../libs/bem-core/common.blocks/dom/dom.js begin */
+/**
+ * @module dom
+ */
+
+modules.define('dom', ['jquery'], function(provide, $) {
+
+provide({
+    /**
+     * Checks whether a DOM elem is in a context
+     * @param {jQuery} ctx DOM elem where check is being performed
+     * @param {jQuery} domElem DOM elem to check
+     * @returns {Boolean}
+     */
+    contains : function(ctx, domElem) {
+        var res = false;
+
+        domElem.each(function() {
+            var domNode = this;
+            do {
+                if(~ctx.index(domNode)) return !(res = true);
+            } while(domNode = domNode.parentNode);
+
+            return res;
+        });
+
+        return res;
+    },
+
+    /**
+     * Returns current focused DOM elem in document
+     * @returns {jQuery}
+     */
+    getFocused : function() {
+        // "Error: Unspecified error." in iframe in IE9
+        try { return $(document.activeElement); } catch(e) {}
+    },
+
+    /**
+     * Checks whether a DOM element contains focus
+     * @param domElem
+     * @returns {Boolean}
+     */
+    containsFocus : function(domElem) {
+        return this.contains(domElem, this.getFocused());
+    },
+
+    /**
+    * Checks whether a browser currently can set focus on DOM elem
+    * @param {jQuery} domElem
+    * @returns {Boolean}
+    */
+    isFocusable : function(domElem) {
+        var domNode = domElem[0];
+
+        if(!domNode) return false;
+
+        switch(domNode.tagName.toLowerCase()) {
+            case 'iframe':
+                return true;
+
+            case 'input':
+            case 'button':
+            case 'textarea':
+            case 'select':
+                return !domNode.disabled;
+
+            case 'a':
+                return !!domNode.href;
+
+            default:
+                return domNode.hasAttribute('tabindex');
+        }
+    },
+
+    /**
+    * Checks whether a domElem is intended to edit text
+    * @param {jQuery} domElem
+    * @returns {Boolean}
+    */
+    isEditable : function(domElem) {
+        var domNode = domElem[0];
+
+        if(!domNode) return false;
+
+        switch(domNode.tagName.toLowerCase()) {
+            case 'input':
+                var type = domNode.type;
+                return (type === 'text' || type === 'password') && !domNode.disabled && !domNode.readOnly;
+
+            case 'textarea':
+                return !domNode.disabled && !domNode.readOnly;
+
+            default:
+                return domNode.contentEditable === 'true';
+        }
+    }
+});
+
+});
+/* ../../libs/bem-core/common.blocks/dom/dom.js end */
+;
 /* ../../libs/bem-core/common.blocks/i-bem/__internal/i-bem__internal.vanilla.js begin */
-/** @fileOverview Module for internal BEM helpers */
-/** @requires BEM */
+/**
+ * @module i-bem__internal
+ */
 
 modules.define('i-bem__internal', function(provide) {
 
+var undef,
 /**
  * Separator for modifiers and their values
  * @const
  * @type String
  */
-var undefined,
     MOD_DELIM = '_',
 
 /**
@@ -3361,19 +3572,29 @@ var undefined,
  */
     NAME_PATTERN = '[a-zA-Z0-9-]+';
 
-function buildModPostfix(modName, modVal, buffer) {
-    buffer.push(MOD_DELIM, modName, MOD_DELIM, modVal);
+function isSimple(obj) {
+    var typeOf = typeof obj;
+    return typeOf === 'string' || typeOf === 'number' || typeOf === 'boolean';
 }
 
-function buildBlockClass(name, modName, modVal, buffer) {
-    buffer.push(name);
-    modVal && buildModPostfix(modName, modVal, buffer);
+function buildModPostfix(modName, modVal) {
+    var res = '';
+    /* jshint eqnull: true */
+    if(modVal != null && modVal !== false) {
+        res += MOD_DELIM + modName;
+        modVal !== true && (res += MOD_DELIM + modVal);
+    }
+    return res;
 }
 
-function buildElemClass(block, name, modName, modVal, buffer) {
-    buildBlockClass(block, undefined, undefined, buffer);
-    buffer.push(ELEM_DELIM, name);
-    modVal && buildModPostfix(modName, modVal, buffer);
+function buildBlockClass(name, modName, modVal) {
+    return name + buildModPostfix(modName, modVal);
+}
+
+function buildElemClass(block, name, modName, modVal) {
+    return buildBlockClass(block, undef, undef) +
+        ELEM_DELIM + name +
+        buildModPostfix(modName, modVal);
 }
 
 provide({
@@ -3382,11 +3603,7 @@ provide({
     MOD_DELIM : MOD_DELIM,
     ELEM_DELIM : ELEM_DELIM,
 
-    buildModPostfix : function(modName, modVal, buffer) {
-        var res = buffer || [];
-        buildModPostfix(modName, modVal, res);
-        return buffer? res : res.join('');
-    },
+    buildModPostfix : buildModPostfix,
 
     /**
      * Builds the class of a block or element with a modifier
@@ -3394,38 +3611,29 @@ provide({
      * @param {String} block Block name
      * @param {String} [elem] Element name
      * @param {String} [modName] Modifier name
-     * @param {String} [modVal] Modifier value
-     * @param {Array} [buffer] Buffer
-     * @returns {String|Array} Class or buffer string (depending on whether the buffer parameter is present)
+     * @param {String|Number} [modVal] Modifier value
+     * @returns {String} Class
      */
-    buildClass : function(block, elem, modName, modVal, buffer) {
-        var typeOf = typeof modName;
-        if(typeOf == 'string') {
-            if(typeof modVal != 'string') {
-                buffer = modVal;
+    buildClass : function(block, elem, modName, modVal) {
+        if(isSimple(modName)) {
+            if(!isSimple(modVal)) {
                 modVal = modName;
                 modName = elem;
-                elem = undefined;
+                elem = undef;
             }
-        } else if(typeOf != 'undefined') {
-            buffer = modName;
-            modName = undefined;
-        } else if(elem && typeof elem != 'string') {
-            buffer = elem;
-            elem = undefined;
+        } else if(typeof modName !== 'undefined') {
+            modName = undef;
+        } else if(elem && typeof elem !== 'string') {
+            elem = undef;
         }
 
-        if(!(elem || modName || buffer)) { // оптимизация для самого простого случая
+        if(!(elem || modName)) { // optimization for simple case
             return block;
         }
 
-        var res = buffer || [];
-
-        elem?
-            buildElemClass(block, elem, modName, modVal, res) :
-            buildBlockClass(block, modName, modVal, res);
-
-        return buffer? res : res.join('');
+        return elem?
+            buildElemClass(block, elem, modName, modVal) :
+            buildBlockClass(block, modName, modVal);
     },
 
     /**
@@ -3434,34 +3642,29 @@ provide({
      * @param {String} block Block name
      * @param {String} [elem] Element name
      * @param {Object} [mods] Modifiers
-     * @param {Array} [buffer] Buffer
-     * @returns {String|Array} Class or buffer string (depending on whether the buffer parameter is present)
+     * @returns {String} Class
      */
-    buildClasses : function(block, elem, mods, buffer) {
-        if(elem && typeof elem != 'string') {
-            buffer = mods;
+    buildClasses : function(block, elem, mods) {
+        if(elem && typeof elem !== 'string') {
             mods = elem;
-            elem = undefined;
+            elem = undef;
         }
 
-        var res = buffer || [];
-
-        elem?
-            buildElemClass(block, elem, undefined, undefined, res) :
-            buildBlockClass(block, undefined, undefined, res);
+        var res = elem?
+            buildElemClass(block, elem, undef, undef) :
+            buildBlockClass(block, undef, undef);
 
         if(mods) {
             for(var modName in mods) {
                 if(mods.hasOwnProperty(modName) && mods[modName]) {
-                    res.push(' ');
-                    elem?
-                        buildElemClass(block, elem, modName, mods[modName], res) :
-                        buildBlockClass(block, modName, mods[modName], res);
+                    res += ' ' + (elem?
+                        buildElemClass(block, elem, modName, mods[modName]) :
+                        buildBlockClass(block, modName, mods[modName]));
                 }
             }
         }
 
-        return buffer? res : res.join('');
+        return res;
     }
 });
 

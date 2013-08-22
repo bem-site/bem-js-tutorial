@@ -1,0 +1,33 @@
+/* 010-live-init-on-event.ie.css begin */
+/* 010-live-init-on-event.css begin */
+/* ../../desktop.blocks/text/text.css begin */
+.text
+{
+    font-family: "Lucida Grande",Helvetica,Arial,sans-serif;
+    color: #333;
+    font-size: 16px;
+}
+
+/* ../../desktop.blocks/text/text.css end */
+
+/* blocks/translate/translate.css begin */
+.translate__prompt
+{
+    display: none;
+}
+
+.translate__prompt_visible
+{
+    display: inline;
+    color: green;
+    margin: 0 0.5em;
+}
+
+/* blocks/translate/translate.css end */
+
+
+/* 010-live-init-on-event.css end */
+
+
+/* 010-live-init-on-event.ie.css end */
+

@@ -3698,21 +3698,25 @@ $(function() {
 });
 /* ../../libs/bem-core/common.blocks/i-bem/__dom/_init/i-bem__dom_init_auto.js end */
 ;
-/* blocks/call-button/call-button.js begin */
+/* blocks/button/button.js begin */
 modules.define('i-bem__dom', function(provide, DOM) {
 
-DOM.decl('call-button', {
+DOM.decl('button', {
     onSetMod: {
         'js' : {
             'inited' : function() {
-                this.bindTo('click', function() {
-                    this.setMod('calling');
-                });
+                console.log('Here an object of ' + this.domElem[0].innerHTML + ' comes. Just once.');
             }
-        },
-        'calling' : function() {
-            this.elem('link').text('Calling...');
         }
+    },
+    onClick: function() {
+        console.log('Here I can track clicks');
+    }
+},{
+    live: function() {
+        this.liveBindTo('click', function(e) {
+            this.onClick();
+        });
     }
 });
 
@@ -3720,5 +3724,5 @@ provide(DOM);
 
 });
 
-/* blocks/call-button/call-button.js end */
+/* blocks/button/button.js end */
 ;
