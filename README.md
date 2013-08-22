@@ -24,9 +24,9 @@ Any BEM block can be equiped with JavaScript. To do this, you just need to place
 a JavaScript file into your block directory.
 
 ```
-desktop.blocks/
-    my-block/
-        my-block.js
+├── desktop.blocks/
+│   ├── my-block/
+│       └── my-block.js
 ```
 
 Then, just mark a block with a `js` flag when declaring it in the BEM tree.
@@ -56,6 +56,17 @@ the article: [JavaScript components low
 basics](http://varya.me/en/issues/javascript-component-solutions/).
 
 ## The console.log example
+
+<pre>├── desktop.bundles/
+│   ├── 001-simple-block/
+│   │   ├── blocks/
+│   │   │   ├── .bem/
+│   │   │   └── my-block/
+│   │   │       └── <a href="https://github.com/toivonen/bem-js-tutorial/blob/master/desktop.bundles/001-simple-block/blocks/my-block/my-block.js">my-block.js</a>
+│   │   └── <a href="https://github.com/toivonen/bem-js-tutorial/blob/master/desktop.bundles/001-simple-block/001-simple-block.bemjson.js">001-simple-block.bemjson.js</a>
+
+>> <a href="http://varya.me/bem-js-tutorial/desktop.bundles/001-simple-block/001-simple-block.html">001-simple-block.html</a></pre>
+
 The first example is the most simple. It demostrates the block structure and
 shows how the JavaScript starts working.<br/>
 Load the example page
@@ -113,6 +124,7 @@ DOM.decl('my-block', {
     onSetMod: {
         'foo' : function() {
             // Runs when a block gets any value of `foo` modifier
+            // This also works for 'boolean' modifiers
         },
         'bar' : {
             'qux' : function() {
@@ -120,11 +132,36 @@ DOM.decl('my-block', {
             },
             '' : function() {
                 // Runs when `bar` modifier is removed from a block
+            },
+            '*' : function() {
+                // Runs for any value of 'bar' modifier
             }
+        },
+        '*' : function() {
+            // Runs for any modifier of the block
         }
     }
 });
 ```
+
+These callbacks get following parameters:
+
+```js
+function(modName, modVal, curModVal) {
+
+    // modName
+    // Modifier's name is operated
+
+    // modVal
+    // Modifier's value to be set. It is a `String` for modifiers with values
+    // or `true`/`false` for boolean modifiers
+
+    // curModVal
+    // Current value of the modifier
+
+}
+```
+
 The fisrt modifier any block gets is a `js` modifier with its `inited` value.
 The framework core reads all the `i-bem` marked blocks on a page and then initializes
 them and sets the `js_inited` modifier on each block. Thus, you can
@@ -139,6 +176,19 @@ set a modifier on it. Then a block runs a callback associated with
 this modifier.
 
 ### Setting a modifier on a block and reacting to it
+
+<pre>├── desktop.bundles/
+│   ├── 002-change-modifier/
+│   │   ├── blocks/
+│   │   │   ├── .bem/
+│   │   │   └── call-button/
+│   │   │       ├── <a href="https://github.com/toivonen/bem-js-tutorial/blob/master/desktop.bundles/002-change-modifier/blocks/call-button/call-button.bemhtml">call-button.bemhtml</a>
+│   │   │       ├── <a href="https://github.com/toivonen/bem-js-tutorial/blob/master/desktop.bundles/002-change-modifier/blocks/call-button/call-button.css">call-button.css</a>
+│   │   │       ├── <a href="https://github.com/toivonen/bem-js-tutorial/blob/master/desktop.bundles/002-change-modifier/blocks/call-button/call-button.js">call-button.js</a>
+│   │   │       └── call-button.png
+│   │   └── <a href="https://github.com/toivonen/bem-js-tutorial/blob/master/desktop.bundles/002-change-modifier/002-change-modifier.bemjson.js">002-change-modifier.bemjson.js</a>
+
+>> <a href="http://varya.me/bem-js-tutorial/desktop.bundles/002-change-modifier/002-change-modifier.html">002-change-modifier.html</a></pre>
 
 In the
 [002-change-modifier](http://varya.me/bem-js-tutorial/desktop.bundles/002-change-modifier/002-change-modifier.html)
@@ -156,7 +206,7 @@ The callback associated with `js_inited` modifier runs when a block is
 initialized by the core. In this example it starts with binding to a `click`
 event on the DOM node corresponding to the block. This is done with the `bindTo`
 helper.<br/>
-In the callback it is said to set a modifier `status` with its `calling` value
+In the callback it is said to set a `calling` modifier
 to the block and the `setMod` method serves for it.
 
 ```js
@@ -167,13 +217,24 @@ DOM.decl('call-button', {
         'js' : {
             'inited' : function() {
                 this.bindTo('click', function() {
-                    this.setMod('status', 'calling');
+                    this.setMod('calling');
                 });
             }
         }
 
 ...
 
+```
+
+Take into account that here we use a `boolean modifier`, which has no value. But
+as you will see below, modifiers are very often used as key-value pairs. In that
+case, both modifier's name and its value have to be passed to the `setMod`
+helper:
+
+```js
+this.setMod('status', 'on');
+...
+this.setMod('status', 'off');
 ```
 
 The `setMod` method applies a modifier's CSS class to the blocks which makes the
@@ -186,10 +247,8 @@ modules.define('i-bem__dom', function(provide, DOM) {
 DOM.decl('call-button', {
     onSetMod: {
         'js' : { ... },
-        'status' : {
-            'calling' : function() {
-                this.elem('link').text('Calling...');
-            }
+        'calling' : function() {
+            this.elem('link').text('Calling...');
         }
     }
 });
@@ -212,6 +271,23 @@ the code with further implementations or to redefine it completely, as is shown
 in the tutorial below.
 
 ### Setting a modifier on an element
+
+<pre>├── desktop.bundles/
+│   ├── 003-element-modifier/
+│   │   ├── blocks
+│   │   │   ├── .bem/
+│   │   │   ├── page/
+│   │   │   ├── sign/
+│   │   │   ├── text/
+│   │   │   └── traffic-light/
+│   │   │       ├── __go/
+│   │   │       │   └── traffic-light__go.mp3
+│   │   │       ├── <a href="https://github.com/toivonen/bem-js-tutorial/blob/master/desktop.bundles/003-element-modifier/blocks/traffic-light/traffic-light.bemhtml">traffic-light.bemhtml</a>
+│   │   │       ├── <a href="https://github.com/toivonen/bem-js-tutorial/blob/master/desktop.bundles/003-element-modifier/blocks/traffic-light/traffic-light.css">traffic-light.css</a>
+│   │   │       └── <a href="https://github.com/toivonen/bem-js-tutorial/blob/master/desktop.bundles/003-element-modifier/blocks/traffic-light/traffic-light.js">traffic-light.js</a>
+│   │   └── <a href="https://github.com/toivonen/bem-js-tutorial/blob/master/desktop.bundles/003-element-modifier/003-element-modifier.bemjson.js">003-element-modifier.bemjson.js</a>
+
+>> <a href="http://varya.me/bem-js-tutorial/desktop.bundles/003-element-modifier/003-element-modifier.html">003-element-modifier.html</a></pre>
 
 According to BEM, elements can be modified in the same way as blocks. JavaScript methods
 are similar in both. The next
@@ -365,6 +441,19 @@ This makes a browser play a traffic light sound when an element is switched into
 
 ### Toggling a modifier
 
+<pre>├── desktop.bundles/
+│   ├── 004-toggle-mod/
+│   │   ├── blocks/
+│   │   │   ├── .bem/
+│   │   │   ├── page/
+│   │   │   └── switch/
+│   │   │       ├── <a href="https://github.com/toivonen/bem-js-tutorial/blob/master/desktop.bundles/004-toggle-mod/blocks/switch/switch.bemhtml">switch.bemhtml</a>
+│   │   │       ├── <a href="https://github.com/toivonen/bem-js-tutorial/blob/master/desktop.bundles/004-toggle-mod/blocks/switch/switch.css">switch.css</a>
+│   │   │       └── <a href="https://github.com/toivonen/bem-js-tutorial/blob/master/desktop.bundles/004-toggle-mod/blocks/switch/switch.js">switch.js</a>
+│   │   └── <a href="https://github.com/toivonen/bem-js-tutorial/blob/master/desktop.bundles/004-toggle-mod/004-toggle-mod.bemjson.js">004-toggle-mod.bemjson.js</a>
+
+>> <a href="http://varya.me/bem-js-tutorial/desktop.bundles/004-toggle-mod/004-toggle-mod.html">004-toggle-mod.html</a></pre>
+
 It is useful to toggle a modifier if there are 2 values of it to be changed one
 by one. This is what the
 [004-toggle-mod](http://varya.me/bem-js-tutorial/desktop.bundles/004-toggle-mod/004-toggle-mod.html)
@@ -401,6 +490,19 @@ Indeed, the same goes for elements which an additional first parameter for the
 helper method.
 
 ### Deleting a modifier
+
+<pre>├── desktop.bundles/
+│   ├── 005-modifier-removing/
+│   │   ├── blocks/
+│   │   │   ├── .bem/
+│   │   │   ├── page/
+│   │   │   └── todo/
+│   │   │       ├── <a href="https://github.com/toivonen/bem-js-tutorial/blob/master/desktop.bundles/005-modifier-removing/blocks/todo/todo.bemhtml">todo.bemhtml</a>
+│   │   │       ├── <a href="https://github.com/toivonen/bem-js-tutorial/blob/master/desktop.bundles/005-modifier-removing/blocks/todo/todo.css">todo.css</a>
+│   │   │       └── <a href="https://github.com/toivonen/bem-js-tutorial/blob/master/desktop.bundles/005-modifier-removing/blocks/todo/todo.js">todo.js</a>
+│   │   └── <a href="https://github.com/toivonen/bem-js-tutorial/blob/master/desktop.bundles/005-modifier-removing/005-modifier-removing.bemjson.js">005-modifier-removing.bemjson.js</a>
+
+>> <a href="http://varya.me/bem-js-tutorial/desktop.bundles/005-modifier-removing/005-modifier-removing.html">005-modifier-removing.html</a></pre>
 
 Removing a modifier from an element (or a block) explained with
 [005-modifier-removing](http://varya.me/bem-js-tutorial/desktop.bundles/005-modifier-removing/005-modifier-removing.html)
