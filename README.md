@@ -554,3 +554,44 @@ element object) is optional.
 
 Notice that the `bindTo` helper works not with a block but with its elements
 here.
+
+## Live initialization
+Before a block starts to function the core initializes it. At the end of this
+process the block gets `js_inited` modifier, which you are already familiar
+with.
+
+While a block is initialized, there appears a JavaScript object corresponding to
+the block instance. Then a callback for `js_inited` modifier runs, and there can
+be coded all the primary actions.
+
+In the previous examples all the blocks on a page were initialized after
+`domReady`. Although on a page full of block it is not needed to initialize all
+the components at once. Sometimes a user loads a page just to press one button
+on it. So, a better way is to save calculation time and browser memory
+initializing block intratces only when a user starts operating on them.
+
+This is the so-called `live initialization` (or `lazy`).
+
+### `live` static method
+The instructions to initialize a block lazy can be given in a predefined `live`
+static method.
+
+```js
+modules.define('i-bem__dom', function(provide, DOM) {
+
+DOM.decl('my-block', {
+    onSetMod: {
+        ...
+    },
+    ...
+},{
+    live: function() {
+        // Here you can code when to initialize
+        // this block instances
+    }
+});
+
+provide(DOM);
+
+});
+```
