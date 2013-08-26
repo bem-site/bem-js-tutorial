@@ -701,6 +701,11 @@ be taken, its was placed into the `onclick`.
 
 Coming back to the live initialization, you can see that on a page with many
 blocks of the kind the core initializes only those on which the event runs. This
-approach saves the browser memory and makes the page functioning faster.
+approach saves the browser memory and makes the page function faster.
 
-// TODO: event delegation in the core
+There is an [event delegation](http://davidwalsh.name/event-delegate) idea
+behind live initialization. Thus, there is only one listener for the `click`
+event on the `document` object, not a lot of them for every block on a
+page.<br/>
+Besides saving browser forces, this way provides some flexibility for
+dynamically changed pages. This you can see with the following example.
