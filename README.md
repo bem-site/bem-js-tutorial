@@ -595,3 +595,112 @@ provide(DOM);
 
 });
 ```
+
+In the previous examples, there was not static methods at all and this is equal
+to setting the `live` property as `false`.<br/>
+Here, as it is a function, the core understands that the instances of this block
+should not be initialized before something special happens. This can be that a
+DOM event fires of the block DOM node or on an element.
+
+### Initializing a block on DOM event
+
+<pre>├── desktop.bundles/
+│   ├── 010-live-init-on-event/
+│   │   ├── blocks/
+│   │   │   ├── .bem/
+│   │   │   ├── text/
+│   │   │   └── translate/
+│   │   │       ├── <a href="https://github.com/toivonen/bem-js-tutorial/blob/master/desktop.bundles/010-live-init-on-event/blocks/translate/translate.bemhtml">translate.bemhtml</a>
+│   │   │       ├── <a href="https://github.com/toivonen/bem-js-tutorial/blob/master/desktop.bundles/010-live-init-on-event/blocks/translate/translate.css">translate.css</a>
+│   │   │       └── <a href="https://github.com/toivonen/bem-js-tutorial/blob/master/desktop.bundles/010-live-init-on-event/blocks/translate/translate.js">translate.js</a>
+│   │   └── <a href="https://github.com/toivonen/bem-js-tutorial/blob/master/desktop.bundles/010-live-init-on-event/010-live-init-on-event.bemjson.js">010-live-init-on-event.bemjson.js</a>
+
+>> <a href="http://varya.me/bem-js-tutorial/desktop.bundles/010-live-init-on-event/010-live-init-on-event.html">010-live-init-on-event.html</a></pre>
+
+On the
+[010-live-init-on-event.html](http://varya.me/bem-js-tutorial/desktop.bundles/010-live-init-on-event/010-live-init-on-event.html)
+page you can see the text in Dutch. Actually, this text is divided into a lot of
+pieces phrase by phrase. Then, they are framed with a `translate` block.
+
+If a user readign the text does not understand its meaning he/she can see a
+translation for an unclear phrase by clicking on the text.
+
+```html
+<span
+    class="translate i-bem"
+    onclick="return {'translate':{'prompt':'один мужчина заходит на почту;'}}">
+    Een man gaat een postkantor binnen
+    <i class="translate__prompt"></i>
+</span>
+```
+
+As you can see from its HTML structure, the `translate` block holds a piece of
+text in Dutch inside and its Russian translation in the block parameters (inside
+the `onclick` attribute). Also, there is a `prompt` element not displayed by
+default, which is used to place the translation into it when needed.
+
+Note that there is no `translate_js_inited` class on a block DOM node even after
+the page is completely loaded. This means that there is no JavaScript object
+related to the block yet.<br/>
+In the
+[translate.js](https://github.com/toivonen/bem-js-tutorial/blob/master/desktop.bundles/010-live-init-on-event/blocks/translate/translate.js)
+file of the block it is said to initialize it only after a `click` launches on
+the block DOM node.
+
+```js
+modules.define('i-bem__dom', function(provide, DOM) {
+
+DOM.decl('translate', {
+    ...
+},{
+    live: function() {
+        this.liveInitOnEvent('click');
+    }
+});
+
+provide(DOM);
+
+});
+```
+
+When clicked, the core applies `js_inited` modifier to the block instance and
+runs block 'constructor', the function set to this modifier.
+
+```js
+modules.define('i-bem__dom', function(provide, DOM) {
+
+DOM.decl('translate', {
+    onSetMod: {
+        'js' : {
+            'inited' : function() {
+                this.setMod(this.elem('prompt'), 'visible', true);
+            }
+        }
+    },
+    onElemSetMod: {
+        'prompt': {
+            'visible': function(elem) {
+                elem.text(this.params['prompt']);
+            }
+        }
+    }
+},{
+    ...
+});
+
+provide(DOM);
+
+});
+```
+It makes the contained `prompt` element visible by setting on it the `visible`
+modifier into `true`. And this means to take the corresponding translation from
+the block parameters by getting the `this.params['paramName']` value.<br/>
+In face, the translation could be placed into the `prompt` at the beginning since
+it was invisible for a user anyway. But just to illustrate how the parameters can
+be taken, its was placed into the `onclick`.
+
+Coming back to the live initialization, you can see that on a page with many
+blocks of the kind the core initializes only those on which the event runs. This
+approach saves the browser memory and makes the page functioning faster.
+
+// TODO: event delegation in the core
