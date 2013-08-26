@@ -1,0 +1,11 @@
+.custom-button
+{
+    display: inline-block;
+    position: relative;
+    color: white;
+    padding: 0.4em;
+    background-color: #f3067c;
+    text-decoration: none;
+    border-radius: 0.6em;
+}
+

@@ -1,0 +1,18 @@
+block('translate')(
+
+    tag()('span'),
+
+    js()({ prompt: this.ctx.prompt }),
+
+    content()([
+        this.ctx.content,
+        { elem: 'prompt' }
+    ]),
+
+    elem('prompt')(
+
+        tag()('i')
+
+    )
+
+);
