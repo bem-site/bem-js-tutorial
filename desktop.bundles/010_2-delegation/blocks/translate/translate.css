@@ -1,0 +1,11 @@
+.translate__prompt
+{
+    display: none;
+}
+
+.translate__prompt_visible
+{
+    display: inline;
+    color: green;
+    margin: 0 0.5em;
+}
