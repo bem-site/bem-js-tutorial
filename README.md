@@ -725,3 +725,78 @@ page at the beginning.
 The core of `i-bem` framework listens to the events on the `document` object. So,
 when a user clicks any `trabslate` block, this click bubbles up to the `document`
 and core initializes the block as it was instructed it its `live` section.
+
+### Binding to live events
+<pre>├── desktop.bundles/
+│   ├── 011-live-bind-to/
+│   │   ├── blocks/
+│   │   │   ├── .bem/
+│   │   │   ├── button/
+│   │   │   |   ├── <a href="https://github.com/toivonen/bem-js-tutorial/blob/master/desktop.bundles/011-live-bind-to/blocks/button/button.bemhtml">button.bemhtml</a>
+│   │   │   |   ├── <a href="https://github.com/toivonen/bem-js-tutorial/blob/master/desktop.bundles/011-live-bind-to/blocks/button/button.css">button.css</a>
+│   │   │   |   └── <a href="https://github.com/toivonen/bem-js-tutorial/blob/master/desktop.bundles/011-live-bind-to/blocks/button/button.js">button.js</a>
+│   │   │   └── page/
+│   │   └── <a href="https://github.com/toivonen/bem-js-tutorial/blob/master/desktop.bundles/011-live-bind-to/011-live-bind-to.bemjson.js">011-live-bind-to.bemjson.js</a>
+
+>> <a href="http://varya.me/bem-js-tutorial/desktop.bundles/011-live-bind-to/011-live-bind-to.html">011-live-bind-to.html</a></pre>
+
+The next [example with 100 BonBon
+buttons](http://varya.me/bem-js-tutorial/desktop.bundles/011-live-bind-to/011-live-bind-to.html)
+shows that live events can be reacted not once when initializing a block but
+every time.
+
+This `button` block is again equipted with live inialization instructions since
+it would be madness to initialize all the 100 buttons at once and then listen to
+the clicks on each of them.
+
+```js
+modules.define('i-bem__dom', function(provide, DOM) {
+
+DOM.decl('button', {
+    onSetMod: {
+        'js' : {
+            'inited' : function() {
+                console.log('Here an object of ' + this.domElem[0].innerHTML + ' comes. Just once.');
+            }
+        }
+    },
+    ...
+},{
+    live: function() {
+        this.liveBindTo('click');
+    }
+});
+
+provide(DOM);
+
+});
+```
+
+Similar to the examples with `liveInitOnEvent` this code initializes a block
+instance and runs the `js_inited` modifier callback.
+
+Unlike the `liveInitOnEvent` the `liveBindTo` method runs its callback not
+just once but every time a user clicks the button.
+
+```js
+modules.define('i-bem__dom', function(provide, DOM) {
+
+DOM.decl('button', {
+    onSetMod: {
+        ...
+    },
+    onClick: function() {
+        console.log('Here I can track clicks');
+    }
+},{
+    live: function() {
+        this.liveBindTo('click', function(e) {
+            this.onClick();
+        });
+    }
+});
+
+provide(DOM);
+
+});
+```
