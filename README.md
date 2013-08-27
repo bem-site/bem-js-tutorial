@@ -963,3 +963,59 @@ the embedded input control. Having the control focused, it would set `focused`
 modifier to itself providing the proper view. When changed either manually or
 automatically the block would get `checked` modifier and a `checked` attribute
 for the control or loose them.
+
+#### Why not :checked?
+As you might notice, in this example an internal 'control' element (the input)
+is indicated to be checked with the `checked` modifier on its parent block.
+
+```html
+<span
+    class="checkbox i-bem checkbox_js_inited checkbox_checked"
+    onclick="return {'checkbox':{}}">
+    <input
+        class="checkbox__control"
+        id="remember2"
+        type="checkbox"
+        value="on"
+        checked="checked">
+   <label class="checkbox__label" for="remember2"></label>
+</span>
+```
+
+```css
+.checkbox_checked .checkbox__label {
+    left: 54px;
+}
+
+.checkbox_checked .checkbox__label:after {
+    background: #00bf00;
+}
+```
+
+Indeed, it would be possible to use `:checked` pseudo selector as it was done in
+the [control prototype](http://codepen.io/bbodine1/pen/novBm).
+
+```css
+.checkbox input[type=checkbox]:checked + label {
+  left: 54px;
+}
+
+.checkbox input[type=checkbox]:checked + label:after {
+  background: #00bf00;
+}
+```
+
+However the modifier approach supplies more flexibility making the whole block
+be able to change if checked
+
+```css
+.checkbox_checked
+{
+    background-image: -webkit-linear-gradient(0deg, #333, #333 4px, #555 4px, #555 6px);
+    background-image: linear-gradient(0deg, #333, #333 4px, #555 4px, #555 6px);
+    background-size: 6px 6px;
+}
+```
+
+as well as saves time for parsing selectors and bringing architectural
+consistency to the code.
