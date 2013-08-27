@@ -800,3 +800,166 @@ provide(DOM);
 
 });
 ```
+
+### Live initialization on many events
+<pre>├── desktop.bundles/
+│   ├── 012-live-init-many-events/
+│   │   ├── blocks/
+│   │   │   ├── .bem/
+│   │   │   ├── checkbox/
+│   │   │   |   ├── <a href="https://github.com/toivonen/bem-js-tutorial/blob/master/desktop.bundles/012-live-init-many-events/blocks/checkbox/checkbox.bemhtml">checkbox.bemhtml</a>
+│   │   │   |   ├── <a href="https://github.com/toivonen/bem-js-tutorial/blob/master/desktop.bundles/012-live-init-many-events/blocks/checkbox/checkbox.css">checkbox.css</a>
+│   │   │   |   └── <a href="https://github.com/toivonen/bem-js-tutorial/blob/master/desktop.bundles/012-live-init-many-events/blocks/checkbox/checkbox.js">checkbox.js</a>
+│   │   │   └── page/
+│   │   └── <a href="https://github.com/toivonen/bem-js-tutorial/blob/master/desktop.bundles/012-live-init-many-events/012-live-init-many-events.bemjson.js">012-live-init-many-events.bemjson.js</a>
+
+>> <a href="http://varya.me/bem-js-tutorial/desktop.bundles/012-live-init-many-events/012-live-init-many-events.html">012-live-init-many-events.html</a></pre>
+
+In the previous examples the core watched only one `click` event to decide if a
+block should start working or not. But sometimes reacting just one event is not
+enough. This is illustrated with the
+[012-live-init-many-events](http://varya.me/bem-js-tutorial/desktop.bundles/012-live-init-many-events/012-live-init-many-events.html)
+example, where you can see customized checkboxes.
+
+```html
+<span
+    class="checkbox i-bem"
+    onclick="return {'checkbox':{}}">
+    <input class="checkbox__control" id="remember1" type="checkbox" value="on">
+    <label class="checkbox__label" for="remember1"></label>
+</span>
+```
+
+It is obvious an instance of this block has to be initialized when a user clicks
+its `label` element.
+
+```js
+modules.define('i-bem__dom', function(provide, DOM) {
+
+DOM.decl('checkbox', {
+    ...
+    _onClick : function() {
+        this.setMod('focused', true);
+    },
+    ...
+},{
+    live: function() {
+        this.liveBindTo('label', 'click', function() {
+            this._onClick();
+        });
+    }
+});
+
+provide(DOM);
+
+});
+```
+
+The same `liveBindTo` method is used here to initialized the block and listen to
+its next clicks. Notice that here it is provided with an additional parameter
+(the first one) with the name of a block element whose clicks we are interested
+in.
+
+But more than that, the control can be changed with a keyboard (or from another
+JavaScript piece) and this must also be taken into account.<br/>
+You can put in the `live` method as many instructions about how to initialize as
+you need. Here it happens after a `click` event on the `label` element and also
+after a `change` event on the embedded `control` element, which is native `input`.
+
+```js
+modules.define('i-bem__dom', function(provide, DOM) {
+
+DOM.decl('checkbox', {
+    ...
+    _onClick : function() {
+        this.setMod('focused', true);
+    },
+    _onChange : function(e) {
+        this.setMod('checked', e.target.checked ? true : false);
+    }
+},{
+    live: function() {
+        this.liveBindTo('label', 'click', function() {
+            this._onClick();
+        });
+
+        this.liveBindTo('control', 'change', function(e){
+            this._onChange(e);
+        });
+    }
+});
+
+provide(DOM);
+
+});
+```
+
+The block should also be inited when focused in or focused out.
+
+```js
+modules.define('i-bem__dom', function(provide, DOM) {
+
+DOM.decl('checkbox', {
+    ...
+},{
+    live: function() {
+        this.liveBindTo('label', 'click', function() {
+            this._onClick();
+        });
+
+        this.liveBindTo('control', 'change', function(e){
+            this._onChange(e);
+        });
+
+        this.liveBindTo('control', 'focusin focusout', function(e){
+            this.setMod('focused', e.type == 'focusin'? true : false);
+        });
+    }
+});
+
+provide(DOM);
+
+});
+```
+
+As you can see, it is possible to bind to more than one event with the same
+callback if list their names separated with a space.
+
+Then, with adding modifiers' functionality to the components, it can be finished.
+
+```js
+modules.define('i-bem__dom', function(provide, DOM) {
+
+DOM.decl('checkbox', {
+    onSetMod: {
+        'focused' : {
+            'true' : function() {
+                this.elem('control').focus();
+            },
+            '' : function() {
+                this.elem('control').blur();
+            }
+        },
+        'checked' : function(modName, modVal) {
+            this.elem('control').attr('checked', modVal ? 'checked' : false);
+        }
+    },
+    ...
+},{
+    live: function() {
+        ...
+    }
+});
+
+provide(DOM);
+
+});
+```
+
+This approach makes the control behaviour consistent. No matter how a user or
+another piece of JavaScript or a browser start to interact with the component,
+it will work fine. Getting the `focused` modifier from something, it would focuse
+the embedded input control. Having the control focused, it would set `focused`
+modifier to itself providing the proper view. When changed either manually or
+automatically the block would get `checked` modifier and a `checked` attribute
+for the control or loose them.
