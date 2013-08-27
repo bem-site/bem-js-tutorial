@@ -39,11 +39,11 @@ Then, just mark a block with a `js` flag when declaring it in the BEM tree.
 ```
 
 This gives (after running BEMHTML templates on the JSON) a corresponding DOM
-node marked with an `i-bem` class and having `onclick` attributes with block
+node marked with an `i-bem` class and having `data-bem` attribute with the block
 parameters.
 
 ```html
-<div class="my-block i-bem" onclick="return {"my-block":{}}">
+<div class="my-block i-bem" data-bem="{'my-block':{}}">
     ...
 </div>
 ```
@@ -51,9 +51,15 @@ parameters.
 If you are not using BEMHTML templates, instruct your templates to produce the same
 output or write this HTML manually. Then you can use BEM JavaScript with this HTML.
 
-BTW, if you are interested as to why the onclick attribute was chosen to store parameters, check
-the article: [JavaScript components low
-basics](http://varya.me/en/issues/javascript-component-solutions/).
+The `data-bem` attribute stores block parameters in JSON, which structure is:
+
+```js
+{
+    "my-block" : {
+        "paramName": "paramValue"
+    }
+}
+```
 
 ## The console.log example
 
@@ -514,7 +520,7 @@ block. As all the tasks are visible by default, it is emphasized by a
 `visible_yes` modifier.
 
 ```html
-<ul class="todo ..." onclick="return { 'todo': {} }">
+<ul class="todo ..." data-bem="{ 'todo': {} }">
   <li class="todo__task todo__task_visible_yes" title="Click to remove">
     <a class="todo__task-inner">
       <h2>Lean more about BEM</h2>
@@ -628,7 +634,7 @@ translation for an unclear phrase by clicking on the text.
 ```html
 <span
     class="translate i-bem"
-    onclick="return {'translate':{'prompt':'один мужчина заходит на почту;'}}">
+    data-bem="{'translate':{'prompt':'один мужчина заходит на почту;'}}">
     Een man gaat een postkantor binnen
     <i class="translate__prompt"></i>
 </span>
@@ -636,7 +642,7 @@ translation for an unclear phrase by clicking on the text.
 
 As you can see from its HTML structure, the `translate` block holds a piece of
 text in Dutch inside and its Russian translation in the block parameters (inside
-the `onclick` attribute). Also, there is a `prompt` element not displayed by
+the `data-bem` attribute). Also, there is a `prompt` element not displayed by
 default, which is used to place the translation into it when needed.
 
 Note that there is no `translate_js_inited` class on a block DOM node even after
@@ -697,7 +703,7 @@ modifier into `true`. And this means to take the corresponding translation from
 the block parameters by getting the `this.params['paramName']` value.<br/>
 In face, the translation could be placed into the `prompt` at the beginning since
 it was invisible for a user anyway. But just to illustrate how the parameters can
-be taken, its was placed into the `onclick`.
+be taken, its was placed into the `data-bem`.
 
 Coming back to the live initialization, you can see that on a page with many
 blocks of the kind the core initializes only those on which the event runs. This
@@ -824,7 +830,7 @@ example, where you can see customized checkboxes.
 ```html
 <span
     class="checkbox i-bem"
-    onclick="return {'checkbox':{}}">
+    data-bem="{'checkbox':{}}">
     <input class="checkbox__control" id="remember1" type="checkbox" value="on">
     <label class="checkbox__label" for="remember1"></label>
 </span>
@@ -971,7 +977,7 @@ is indicated to be checked with the `checked` modifier on its parent block.
 ```html
 <span
     class="checkbox i-bem checkbox_js_inited checkbox_checked"
-    onclick="return {'checkbox':{}}">
+    data-bem="{'checkbox':{}}">
     <input
         class="checkbox__control"
         id="remember2"
