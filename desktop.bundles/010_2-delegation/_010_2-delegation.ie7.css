@@ -1,5 +1,20 @@
 /* 010_2-delegation.ie.css begin */
 /* 010_2-delegation.css begin */
+/* blocks/page/page.css begin */
+.custom-button
+{
+    display: inline-block;
+    position: relative;
+    color: white;
+    padding: 0.4em;
+    background-color: #f3067c;
+    text-decoration: none;
+    border-radius: 0.6em;
+}
+
+
+/* blocks/page/page.css end */
+
 /* ../../desktop.blocks/text/text.css begin */
 .text
 {

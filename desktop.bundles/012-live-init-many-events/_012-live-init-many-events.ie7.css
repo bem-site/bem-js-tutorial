@@ -9,6 +9,9 @@
 /* blocks/page/page.css end */
 
 /* blocks/checkbox/checkbox.css begin */
+/*
+ * CSS is taken from http://codepen.io/bbodine1/pen/novBm
+ */
 .checkbox
 {
     display: inline-block;
@@ -129,11 +132,11 @@
     background-size: 6px 6px;
 }
 
-.checkbox_checked label {
+.checkbox_checked .checkbox__label {
     left: 54px;
 }
 
-.checkbox_checked label:after {
+.checkbox_checked .checkbox__label:after {
     background: #00bf00;
 }
 
