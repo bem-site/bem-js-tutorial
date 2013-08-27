@@ -709,3 +709,19 @@ event on the `document` object, not a lot of them for every block on a
 page.<br/>
 Besides saving browser forces, this way provides some flexibility for
 dynamically changed pages. This you can see with the following example.
+
+### Delegated initialization
+<pre>
+
+>> <a href="http://varya.me/bem-js-tutorial/desktop.bundles/010_2-delegation/010_2-delegation.html">010_2-delegation.html</a></pre>
+
+This page provides absolutely the same `translate` block as the previous one.
+But there is also a piece of crazy inline JavaScript on a page which works when a
+user clicks the pink button and dynamically append a few of new `trasnlate`
+blocks to the page. Then, with clicking on the phrases of this fresh joke you can
+see that it work absolutely the same as the other `translate` blocks being on the
+page at the beginning.
+
+The core of `i-bem` framework listens to the events on the `document` object. So,
+when a user clicks any `trabslate` block, this click bubbles up to the `document`
+and core initializes the block as it was instructed it its `live` section.
