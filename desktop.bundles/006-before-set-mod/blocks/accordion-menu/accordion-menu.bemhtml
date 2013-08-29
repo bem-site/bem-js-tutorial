@@ -1,4 +1,4 @@
-block('accordeon-menu')(
+block('accordion-menu')(
 
     tag()('ul'),
 

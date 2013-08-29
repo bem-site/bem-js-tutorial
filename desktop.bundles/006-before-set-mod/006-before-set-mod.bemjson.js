@@ -10,7 +10,7 @@
     ],
     content:[
         {
-            block: 'accordeon-menu',
+            block: 'accordion-menu',
             items: [
                 {
                     title: 'My files',
