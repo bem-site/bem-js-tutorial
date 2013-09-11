@@ -69,6 +69,25 @@
     background: linear-gradient(top,  #a5cd4e 0%,#6b8f1a 100%);
 }
 
+.accordion-menu__item_disabled .accordion-menu__link
+{
+    cursor: auto;
+    color: #bebebe;
+    text-shadow: 1px 1px 1px rgba(255,255,255, .2);
+    background: #848484;
+    background: -moz-linear-gradient(top,  #848484 0%, #959595 100%);
+    background: -webkit-gradient(linear, left top, left bottom, color-stop(0%,#848484), color-stop(100%,#959595));
+    background: -webkit-linear-gradient(top,  #848484 0%,#959595 100%);
+    background: -o-linear-gradient(top,  #848484 0%,#959595 100%);
+    background: -ms-linear-gradient(top,  #848484 0%,#959595 100%);
+    background: linear-gradient(top,  #848484 0%,#959595 100%);
+}
+
+.accordion-menu__item_disabled .accordion-menu__num
+{
+    background-color: #6f6f6f;
+}
+
 .accordion-menu__num
 {
     display: block;
