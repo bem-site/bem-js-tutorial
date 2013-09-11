@@ -1,0 +1,30 @@
+block('button')(
+
+    tag()('button'),
+
+    js()(true),
+
+    mod('disabled', true).attrs()({
+        'disabled' : 'disabled'
+    }),
+
+    content()([
+        {
+            elem: 'text',
+            content: this.ctx.text
+        },
+        {
+            elem: 'price',
+            content: this.ctx.price
+        }
+    ]),
+
+    elem('text')(
+        tag()('span')
+    ),
+
+    elem('price')(
+        tag()('span')
+    )
+
+);
