@@ -215,6 +215,11 @@ helper.<br/>
 In the callback it is said to set a `calling` modifier
 to the block and the `setMod` method serves for it.
 
+> NOTE: In many cases using bindTo for events listening is not the best solution
+> as it needs to watch every block of the kind. It becames even worse with
+> elements of the blocks since they are many. You will see below much better way
+> in the `live` section.
+
 ```js
 modules.define('i-bem__dom', function(provide, DOM) {
 
@@ -561,6 +566,13 @@ element object) is optional.
 Notice that the `bindTo` helper works not with a block but with its elements
 here.
 
+> As it was mentioned above, `bindTo` helper listens for every element of the
+> kind. If this block had 100 task elements, that would mean 100 event watchers.
+> Moreover, a dynamically added new task should have been provided with an event
+> listener as well. There is another way to work with the events fully explained
+> in the `live` section. Make sure you have learnt it before starting with a
+> real powerful application.
+
 ### Before a modifier is set
 
 <pre>├── desktop.bundles/
@@ -583,8 +595,8 @@ setting a modifier.
 The
 [006-before-set-mod](http://varya.me/bem-js-tutorial/desktop.bundles/006-before-set-mod/006-before-set-mod.html)
 example illustrates such a case with an
-`[accordion-menu](https://github.com/toivonen/bem-js-tutorial/tree/master/desktop.bundles/006-before-set-mod/blocks/accordion-menu)
-block`. You can see a menu with a few items on a page. Each of them can reveal
+[accordion-menu](https://github.com/toivonen/bem-js-tutorial/tree/master/desktop.bundles/006-before-set-mod/blocks/accordion-menu)
+block. You can see a menu with a few items on a page. Each of them can reveal
 its subitems when being clicked. To do that you need bind to a 'click' event on
 the menu items, set `current` modifier into `true` for the related item and
 ensure that previously selected item is closed (which means its `current`
