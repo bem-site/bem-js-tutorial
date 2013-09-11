@@ -35,7 +35,7 @@ block('accordion-menu')(
 
             content.push({
                 elem: 'item',
-                mods: { current: item.current },
+                mods: { current: item.current, disabled: item.disabled },
                 content: [
                         {
                         elem: 'link',

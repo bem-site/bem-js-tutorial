@@ -561,6 +561,104 @@ element object) is optional.
 Notice that the `bindTo` helper works not with a block but with its elements
 here.
 
+### Before a modifier is set
+
+<pre>├── desktop.bundles/
+│   ├── 006-before-set-mod/
+│   │   ├── blocks/
+│   │   │   ├── .bem/
+│   │   │   ├── page/
+│   │   │   └── accordion-menu/
+│   │   │       ├── <a href="https://github.com/toivonen/bem-js-tutorial/blob/master/desktop.bundles/006-before-set-mod/blocks/accordion-menu/accordion-menu.bemhtml">accordion-menu.bemhtml</a>
+│   │   │       ├── <a href="https://github.com/toivonen/bem-js-tutorial/blob/master/desktop.bundles/006-before-set-mod/blocks/accordion-menu/accordion-menu.css">accordion-menu.css</a>
+│   │   │       └── <a href="https://github.com/toivonen/bem-js-tutorial/blob/master/desktop.bundles/006-before-set-mod/blocks/accordion-menu/accordion-menu.js">accordion-menu.js</a>
+│   │   └── <a href="https://github.com/toivonen/bem-js-tutorial/blob/master/desktop.bundles/006-before-set-mod/006-before-set-mod.bemjson.js">006-before-set-mod.bemjson.js</a>
+
+>> <a href="http://varya.me/bem-js-tutorial/desktop.bundles/006-before-set-mod/006-before-set-mod.html">006-before-set-mod.html</a></pre>
+
+Besides the possibility to react on a modifier setting, you can do something
+before that happens. It is widely adopted for teh cases when you need to prevent
+setting a modifier.
+
+The
+[006-before-set-mod](http://varya.me/bem-js-tutorial/desktop.bundles/006-before-set-mod/006-before-set-mod.html)
+example illustrates such a case with an
+`[accordion-menu](https://github.com/toivonen/bem-js-tutorial/tree/master/desktop.bundles/006-before-set-mod/blocks/accordion-menu)
+block`. You can see a menu with a few items on a page. Each of them can reveal
+its subitems when being clicked. To do that you need bind to a 'click' event on
+the menu items, set `current` modifier into `true` for the related item and
+ensure that previously selected item is closed (which means its `current`
+modifier is set into `false`).
+
+```js
+modules.define('i-bem__dom', ['jquery'], function(provide, $, DOM) {
+
+DOM.decl('accordion-menu', {
+
+    onSetMod: {
+        'js' : {
+            'inited' : function() {
+                this._current = this.findElem('item', 'current', true);
+                this.bindTo('item', 'click', function(e) {
+                    this.setMod($(e.currentTarget), 'current', true);
+                });
+            }
+        }
+    },
+
+    onElemSetMod: {
+        'item' : {
+            'current' : {
+                'true' : function(elem) {
+                    this.delMod(this._current, 'current');
+                    this._current = elem;
+                }
+            }
+        }
+    }
+
+});
+
+provide(DOM);
+
+});
+```
+> You may also take notice that jQuery is used here to wrap the elements and this
+> provides some changes into the code. The bem-core library is based on a
+> [ymaps/modules](https://github.com/ymaps/modules) module system explained below.
+> With it each module should be declared before using.
+
+The example becomes more interesting when a disabled item appears. Such an item
+has to prevent its being in the `current` state. That is always possible to put
+an additional condition in the modifier callback but the core provides more
+elegant solution. Similar to `onSetMod` and `onElemSetMod` properties you can
+use `beforeSetMod` and `beforeElemSetMod` to instruct the block component what
+to do previously. It is also prevents setting a modifier when a callback related
+to the 'before' part returns `false`.
+
+```modules.define('i-bem__dom', ['jquery'], function(provide, $, DOM) {
+
+DOM.decl('accordion-menu', {
+    beforeElemSetMod: {
+        'item' : {
+            'current' : {
+                'true' : function(elem) {
+                    return !this.hasMod(elem, 'disabled');
+                }
+            }
+        }
+    },
+    ...
+});
+
+provide(DOM);
+
+});js
+```
+
+Here it checks if the clicked item is disabled and prevents such an item to be
+`current`.
+
 ## Live initialization
 Before a block starts to function the core initializes it. At the end of this
 process the block gets `js_inited` modifier, which you are already familiar
