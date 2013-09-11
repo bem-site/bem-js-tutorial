@@ -473,13 +473,13 @@ function convertModHandlersToMethods(props) {
     }
 
     var elemName;
-    if(props.onBeforeElemSetMod) {
-        for(elemName in props.onBeforeElemSetMod) {
-            if(props.onBeforeElemSetMod.hasOwnProperty(elemName)) {
-                modFnsToProps('before', props.onBeforeElemSetMod[elemName], props, elemName);
+    if(props.beforeElemSetMod) {
+        for(elemName in props.beforeElemSetMod) {
+            if(props.beforeElemSetMod.hasOwnProperty(elemName)) {
+                modFnsToProps('before', props.beforeElemSetMod[elemName], props, elemName);
             }
         }
-        delete props.onBeforeElemSetMod;
+        delete props.beforeElemSetMod;
     }
 
     if(props.onElemSetMod) {
@@ -3798,8 +3798,11 @@ modules.define('i-bem__dom', ['jquery'], function(provide, $, DOM) {
 DOM.decl('accordion-menu', {
     beforeElemSetMod: {
         'item' : {
-            'current' : function() {
-                console.log(333);
+            'current' : {
+                'true' : function(elem) {
+                    this.delMod(this._current, 'current');
+                    this._current = elem;
+                }
             }
         }
     },

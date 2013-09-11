@@ -17,5 +17,6 @@
 /*borschik:include:../../libs/bem-core/common.blocks/dom/dom.js*/;
 /*borschik:include:../../libs/bem-core/common.blocks/i-bem/__internal/i-bem__internal.vanilla.js*/;
 /*borschik:include:../../libs/bem-core/common.blocks/ecma/__string/ecma__string.js*/;
+/*borschik:include:../../libs/bem-core/common.blocks/ecma/__json/ecma__json.js*/;
 /*borschik:include:../../libs/bem-core/common.blocks/i-bem/__dom/_init/i-bem__dom_init_auto.js*/;
 /*borschik:include:blocks/traffic-light/traffic-light.js*/;

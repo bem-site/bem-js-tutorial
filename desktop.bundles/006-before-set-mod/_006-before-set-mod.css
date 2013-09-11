@@ -22,6 +22,10 @@
 .accordion-menu__item
 {
     list-style: none;
+    margin: 0;
+    padding: 0;
+    border: none;
+    outline: none;
 }
 
 .accordion-menu__link
@@ -31,6 +35,8 @@
     min-width: 110px;
     padding: 0 10px 0 40px;
     height: 32px;
+
+    cursor: pointer;
 
     color: #fdfdfd;
     font: bold 12px/32px Arial, sans-serif;
@@ -50,7 +56,7 @@
     box-shadow: inset 0px 1px 0px 0px rgba(255,255,255, .1), 0px 1px 0px 0px rgba(0,0,0, .1);
 }
 
-.accordion-menu__item_current .accordion__link
+.accordion-menu__item_current .accordion-menu__link
 {
     color: #3e5706;
     text-shadow: 1px 1px 1px rgba(255,255,255, .2);
@@ -84,6 +90,13 @@
     box-shadow: inset 1px 1px 1px rgba(0,0,0, .2), 1px 1px 1px rgba(255,255,255, .1);
 }
 
+.accordion-menu__item_current .accordion-menu__num
+{
+    color: #fdfdfd;
+    text-shadow: 0px 1px 0px rgba(0,0,0, .35);
+    background: #3e5706;
+}
+
 .accordion-menu__item_current .accordion-menu__sub-menu
 {
     height: 98px;
@@ -93,6 +106,10 @@
 {
     height: 0;
     overflow: hidden;
+    margin: 0;
+    padding: 0;
+    border: none;
+    outline: none;
 
     -webkit-transition: height .2s ease-in-out;
     -moz-transition: height .2s ease-in-out;

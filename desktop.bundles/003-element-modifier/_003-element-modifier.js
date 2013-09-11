@@ -473,13 +473,13 @@ function convertModHandlersToMethods(props) {
     }
 
     var elemName;
-    if(props.onBeforeElemSetMod) {
-        for(elemName in props.onBeforeElemSetMod) {
-            if(props.onBeforeElemSetMod.hasOwnProperty(elemName)) {
-                modFnsToProps('before', props.onBeforeElemSetMod[elemName], props, elemName);
+    if(props.beforeElemSetMod) {
+        for(elemName in props.beforeElemSetMod) {
+            if(props.beforeElemSetMod.hasOwnProperty(elemName)) {
+                modFnsToProps('before', props.beforeElemSetMod[elemName], props, elemName);
             }
         }
-        delete props.onBeforeElemSetMod;
+        delete props.beforeElemSetMod;
     }
 
     if(props.onElemSetMod) {
@@ -675,9 +675,15 @@ var BEM = inherit(events.Emitter, /** @lends BEM.prototype */ {
      */
     setMod : function(elem, modName, modVal) {
         if(typeof modVal === 'undefined') {
-            modVal = typeof modName === 'undefined'? true : modName;
-            modName = elem;
-            elem = undef;
+            if(typeof elem === 'string') { // if no elem
+                modVal = typeof modName === 'undefined'?
+                    true :  // e.g. setMod('focused')
+                    modName; // e.g. setMod('js', 'inited')
+                modName = elem;
+                elem = undef;
+            } else { // if elem
+                modVal = true; // e.g. setMod(elem, 'focused')
+            }
         }
 
         if(!elem || elem[0]) {
@@ -761,6 +767,11 @@ var BEM = inherit(events.Emitter, /** @lends BEM.prototype */ {
             modName = elem;
             elem = undef;
         }
+
+        if(typeof modVal1 === 'undefined') { // boolean mod
+            modVal1 = true;
+        }
+
         if(typeof modVal2 === 'undefined') {
             modVal2 = '';
         } else if(typeof modVal2 === 'boolean') {
@@ -1931,6 +1942,7 @@ var undef,
 
     BEM_CLASS = 'i-bem',
     BEM_SELECTOR = '.' + BEM_CLASS,
+    BEM_PARAMS_ATTR = 'data-bem',
 
     NAME_PATTERN = INTERNAL.NAME_PATTERN,
 
@@ -2070,14 +2082,8 @@ function getParams(domNode) {
  * @returns {Object}
  */
 function extractParams(domNode) {
-    var fn = domNode.onclick || domNode.ondblclick;
-    if(!fn && domNode.tagName.toLowerCase() === 'body') { // LEGO-2027 in FF onclick doesn't work on body
-        var elem = $(domNode),
-            attr = elem.attr('onclick') || elem.attr('ondblclick');
-        /*jshint -W061 */
-        attr && (fn = Function(attr));
-    }
-    return fn? fn() : {};
+    var attrVal = domNode.getAttribute(BEM_PARAMS_ATTR);
+    return attrVal? JSON.parse(attrVal) : {};
 }
 
 /**
@@ -2774,10 +2780,11 @@ var DOM = BEM.decl('i-bem__dom',/** @lends DOM.prototype */{
 
     /**
      * Scope
+     * Will be set on onDomReady to `<body>`
      * @protected
      * @type jQuery
      */
-    scope : $('body'),
+    scope : null,
 
     /**
      * Document shortcut
@@ -2821,7 +2828,7 @@ var DOM = BEM.decl('i-bem__dom',/** @lends DOM.prototype */{
      * @returns {jQuery} ctx Initialization context
      */
     init : function(ctx) {
-        ctx || (ctx = this.scope);
+        ctx || (ctx = DOM.scope);
 
         var uniqInitId = identify();
         findDomElem(ctx, BEM_SELECTOR).each(function() {
@@ -2949,7 +2956,7 @@ var DOM = BEM.decl('i-bem__dom',/** @lends DOM.prototype */{
 
             if(!storage) {
                 storage = liveClassEventStorage[e] = {};
-                this.scope.bind(e, this._liveClassTrigger.bind(this));
+                DOM.scope.bind(e, this._liveClassTrigger.bind(this));
             }
 
             storage = storage[className] || (storage[className] = { uniqIds : {}, fns : [] });
@@ -3013,6 +3020,7 @@ var DOM = BEM.decl('i-bem__dom',/** @lends DOM.prototype */{
     _buildLiveEventFn : function(callback, invokeOnInit) {
         var _this = this;
         return function(e) {
+            e.currentTarget = this;
             var args = [
                     _this._name,
                     $(this).closest(_this.buildSelector()),
@@ -3339,6 +3347,13 @@ var DOM = BEM.decl('i-bem__dom',/** @lends DOM.prototype */{
 $.fn.bem = function(blockName, params) {
     return initBlock(blockName, this, params, true);
 };
+
+/**
+ * Set default scope after DOM ready
+ */
+$(function() {
+    DOM.scope = $('body');
+});
 
 provide(DOM);
 
@@ -3686,6 +3701,84 @@ String.prototype.trim || (String.prototype.trim = function() {
 
 })();
 /* ../../libs/bem-core/common.blocks/ecma/__string/ecma__string.js end */
+;
+/* ../../libs/bem-core/common.blocks/ecma/__json/ecma__json.js begin */
+(function(undefined) {
+
+if(window.JSON) return;
+
+var _toString = Object.prototype.toString,
+    escapable = /[\\\"\x00-\x1f\x7f-\x9f\u00ad\u0600-\u0604\u070f\u17b4\u17b5\u200c-\u200f\u2028-\u202f\u2060-\u206f\ufeff\ufff0-\uffff]/g,
+    meta = {
+        '\b' : '\\b',
+        '\t' : '\\t',
+        '\n' : '\\n',
+        '\f' : '\\f',
+        '\r' : '\\r',
+        '"' : '\\"',
+        '\\' : '\\\\'
+    },
+    stringify;
+
+window.JSON = {
+    stringify : stringify = function(val) {
+        if(val === null) {
+            return 'null';
+        }
+        if(typeof val === 'undefined') {
+            return undefined;
+        }
+        var res, i, strVal;
+        switch(_toString.call(val)) {
+            case '[object String]':
+                escapable.lastIndex = 0;
+                return '"' +
+                    (escapable.test(val)?
+                        val.replace(escapable, function(a) {
+                            var c = meta[a];
+                            return typeof c === 'string'? c : '\\u' + ('0000' + a.charCodeAt(0).toString(16)).slice(-4);
+                        }) :
+                        val) +
+                    '"';
+
+            case '[object Number]':
+            case '[object Boolean]':
+                return '' + val;
+
+            case '[object Array]':
+                res = '['; i = 0;
+                var len = val.length;
+                while(i < len) {
+                    strVal = stringify(val[i]);
+                    res += (i++? ',' : '') + (typeof strVal === 'undefined'? 'null' : strVal);
+                }
+                return res + ']';
+
+            case '[object Object]':
+                if(_toString.call(val.toJSON) === '[object Function]') {
+                    return stringify(val.toJSON());
+                }
+                res = '{'; i = 0;
+                for(var key in val) {
+                    if(val.hasOwnProperty(key)) {
+                        strVal = stringify(val[key]);
+                        typeof strVal !== 'undefined' && (res += (i++? ',' : '') + '"' + key + '":' + strVal);
+                    }
+                }
+                return res + '}';
+
+            default:
+                return undefined;
+        }
+    },
+
+    parse : function(str) {
+        /*jshint -W061 */
+        return Function('return ' + str)();
+    }
+};
+})();
+/* ../../libs/bem-core/common.blocks/ecma/__json/ecma__json.js end */
 ;
 /* ../../libs/bem-core/common.blocks/i-bem/__dom/_init/i-bem__dom_init_auto.js begin */
 /* дефолтная инициализация */
