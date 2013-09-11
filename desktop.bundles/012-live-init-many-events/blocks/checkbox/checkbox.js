@@ -31,7 +31,7 @@ DOM.decl('checkbox', {
         });
 
         this.liveBindTo('control', 'focusin focusout', function(e){
-            this.setMod('focused', e.type == 'focusin'? true : false);
+            this.setMod('focused', e.type == 'focusin');
         })
     }
 });
