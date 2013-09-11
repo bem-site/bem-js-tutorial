@@ -4,8 +4,11 @@ modules.define('i-bem__dom', ['jquery'], function(provide, $, DOM) {
 DOM.decl('accordion-menu', {
     beforeElemSetMod: {
         'item' : {
-            'current' : function() {
-                console.log(333);
+            'current' : {
+                'true' : function(elem) {
+                    this.delMod(this._current, 'current');
+                    this._current = elem;
+                }
             }
         }
     },

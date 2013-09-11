@@ -80,7 +80,9 @@ block('accordion-menu')(
 
     elem('num')(
 
-        tag()('span')
+        tag()(function(){
+            return this.ctx.content ? 'span' : '';
+        })
 
     ),
 
