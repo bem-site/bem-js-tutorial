@@ -14,6 +14,7 @@
             items: [
                 {
                     title: 'My files',
+                    current: true,
                     items: [
                         {
                             title: 'Dropbox',

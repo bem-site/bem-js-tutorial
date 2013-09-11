@@ -2,6 +2,8 @@ block('accordion-menu')(
 
     tag()('ul'),
 
+    js()(true),
+
     content()(function(){
         var content = [];
         this.ctx.items.forEach(function(item){
@@ -12,7 +14,7 @@ block('accordion-menu')(
             item.items.forEach(function(subItem, i){
                 num += subItem.number;
                 sub.push({
-                    elem: 'item',
+                    elem: 'sub-item',
                     content: {
                         elem: 'link',
                         url: subItem.url,
@@ -33,6 +35,7 @@ block('accordion-menu')(
 
             content.push({
                 elem: 'item',
+                mods: { current: item.current },
                 content: [
                         {
                         elem: 'link',
