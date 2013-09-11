@@ -2,10 +2,10 @@ modules.define('i-bem__dom', ['jquery'], function(provide, $, DOM) {
 
 
 DOM.decl('accordion-menu', {
-    onBeforeElemSetMod: { // TODO: remove 'on' when ready
+    beforeElemSetMod: {
         'item' : {
             'current' : {
-                true : function(elem) {
+                'true' : function(elem) {
                     this.delMod(this._current, 'current');
                     this._current = elem;
                 }
