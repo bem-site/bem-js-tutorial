@@ -14,7 +14,6 @@
             items: [
                 {
                     title: 'My files',
-                    current: true,
                     items: [
                         {
                             title: 'Dropbox',
@@ -35,6 +34,7 @@
                 },
                 {
                     title: 'Mail',
+                    current: true,
                     items: [
                         {
                             title: 'Hotmail',
