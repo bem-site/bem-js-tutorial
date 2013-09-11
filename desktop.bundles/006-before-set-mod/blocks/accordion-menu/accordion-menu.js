@@ -1,13 +1,11 @@
 modules.define('i-bem__dom', ['jquery'], function(provide, $, DOM) {
 
-
 DOM.decl('accordion-menu', {
     beforeElemSetMod: {
         'item' : {
             'current' : {
                 'true' : function(elem) {
-                    this.delMod(this._current, 'current');
-                    this._current = elem;
+                    return !this.hasMod(elem, 'disabled');
                 }
             }
         }
@@ -19,6 +17,16 @@ DOM.decl('accordion-menu', {
                 this.bindTo('item', 'click', function(e) {
                     this.setMod($(e.currentTarget), 'current', true);
                 });
+            }
+        }
+    },
+    onElemSetMod: {
+        'item' : {
+            'current' : {
+                'true' : function(elem) {
+                    this.delMod(this._current, 'current');
+                    this._current = elem;
+                }
             }
         }
     }

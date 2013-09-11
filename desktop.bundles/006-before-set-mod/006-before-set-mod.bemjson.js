@@ -55,6 +55,7 @@
                 },
                 {
                     title: 'Cloud',
+                    disabled: true,
                     items: [
                         {
                             title: 'Connect',
