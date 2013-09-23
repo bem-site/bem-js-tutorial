@@ -3812,7 +3812,7 @@ DOM.decl('checkbox', {
         this.setMod('focused', true);
     },
     _onChange : function(e) {
-        this.setMod('checked', e.target.checked ? true : false);
+        this.setMod('checked', e.target.checked);
     }
 },{
     live: function() {
