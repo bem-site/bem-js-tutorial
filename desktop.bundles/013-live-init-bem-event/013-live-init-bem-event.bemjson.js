@@ -8,6 +8,10 @@
         { elem: 'meta', attrs: { name: 'description', content: '' }},
     ],
     content:[
+        {
+            block: 'input',
+            name: 'username'
+        },
         { elem: 'js', url: '_013-live-init-bem-event.js' }
     ]
 })
