@@ -25,7 +25,8 @@ module.exports = {
     },
     'bem-components' : {
         type     : 'git',
-        url      : 'git://github.com/bem/bem-components.git'
+        url      : 'git://github.com/bem/bem-components.git',
+        branch   : 'v2'
     },
     'bem-core' : {
         type     : 'git',
