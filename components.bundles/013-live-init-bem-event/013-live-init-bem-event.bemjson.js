@@ -10,7 +10,7 @@
     content:[
         {
             block: 'input',
-            name: 'username',
+            name: 'password',
             mods: { size: 's' },
             content: { elem: 'control' }
         },
