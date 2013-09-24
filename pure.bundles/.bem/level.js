@@ -8,9 +8,7 @@ exports.getConfig = function() {
 
     return BEM.util.extend(this.__base() || {}, {
         bundleBuildLevels: this.resolvePaths([
-                'bem-core/common.blocks',
-                'bem-components/common.blocks',
-                'bem-components/desktop.blocks'
+                'bem-core/common.blocks'
             ]
             .map(function(path) { return PATH.resolve(environ.LIB_ROOT, path); })
             .concat([
