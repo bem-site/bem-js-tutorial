@@ -10,7 +10,9 @@
     content:[
         {
             block: 'input',
-            name: 'username'
+            name: 'username',
+            mods: { size: 's' },
+            content: { elem: 'control' }
         },
         { elem: 'js', url: '_013-live-init-bem-event.js' }
     ]
