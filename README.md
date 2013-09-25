@@ -648,7 +648,8 @@ use `beforeSetMod` and `beforeElemSetMod` to instruct the block component what
 to do previously. It is also prevents setting a modifier when a callback related
 to the 'before' part returns `false`.
 
-```modules.define('i-bem__dom', ['jquery'], function(provide, $, DOM) {
+```js
+modules.define('i-bem__dom', ['jquery'], function(provide, $, DOM) {
 
 DOM.decl('accordion-menu', {
     beforeElemSetMod: {
@@ -665,7 +666,7 @@ DOM.decl('accordion-menu', {
 
 provide(DOM);
 
-});js
+});
 ```
 
 Here it checks if the clicked item is disabled and prevents such an item to be
