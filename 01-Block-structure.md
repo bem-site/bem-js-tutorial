@@ -1,6 +1,6 @@
 # Tutorial on JavaScript in BEM terms
 
-## Links
+### Links
  * [Core document](README.md)
 
 ----------------------------------
@@ -170,6 +170,6 @@ defining a callback to the `js_inited` modifier.
 In the example presented above, this code is a `console.log` call with the block's `outerHTML`.
 
 ---------------------------------------
-## Links
+### Links
  * [Core document](README.md)
  * [Next chapter. Modifiers](02-Modifiers.md)
