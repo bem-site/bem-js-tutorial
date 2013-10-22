@@ -1,6 +1,10 @@
 # Tutorial on JavaScript in BEM terms
 
-> The core document is here: [**README.md**](README.md)
+### Links
+ * [Core document](README.md)
+ * [Previous chapter. Modifiers](02-Modifiers.md)
+
+----------------------------------
 
 ## Live initialization
 Before a block starts to function the core initializes it. At the end of this
@@ -466,3 +470,8 @@ be able to change if checked
 
 as well as saves time for parsing selectors and bringing architectural
 consistency to the code.
+
+---------------------------------------
+### Links
+ * [Core document](README.md)
+ * [Previous chapter. Modifiers](02-Modifiers.md)

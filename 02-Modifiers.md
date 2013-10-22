@@ -1,6 +1,10 @@
 # Tutorial on JavaScript in BEM terms
 
-> The core document is here: [**README.md**](README.md)
+### Links
+ * [Core document](README.md)
+ * [Previous chapter. Block structure](01-Block-structure.md)
+
+----------------------------------
 
 ## Modifiers
 In BEM, modifiers express block states. To put a block into a special state we
@@ -497,3 +501,9 @@ provide(DOM);
 
 Here it checks if the clicked item is disabled and prevents such an item to be
 `current`.
+
+---------------------------------------
+### Links
+ * [Core document](README.md)
+ * [Previous chapter. Block structure](01-Block-structure.md)
+ * [Next chapter. Live initialization](03-Live-initialization.md)
