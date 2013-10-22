@@ -16,4 +16,4 @@ components.
  * structure. The very first example.
  * [**Modifiers**](02-Modifiers.md): Setting, toggling and removing modifiers.
 Reacting on a block being assigned a modifier and further tricks.
- * [**Live initialization**]: Initialization features and good practices.
+ * [**Live initialization**](03-Live-initialization.md): Initialization features and good practices.
