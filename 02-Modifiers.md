@@ -1,3 +1,7 @@
+# Tutorial on JavaScript in BEM terms
+
+> The core document is here: [**README.md**](README.md)
+
 ## Modifiers
 In BEM, modifiers express block states. To put a block into a special state we
 set a modifier on it. Then a block runs a callback associated with
