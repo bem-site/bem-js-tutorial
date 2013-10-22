@@ -1,6 +1,9 @@
 # Tutorial on JavaScript in BEM terms
 
-> The core document is here: [**README.md**](README.md)
+## Links
+ * [Core document](README.md)
+
+----------------------------------
 
 ## JavaScript-enriched block
 ### Prerequisites
@@ -166,4 +169,7 @@ defining a callback to the `js_inited` modifier.
 
 In the example presented above, this code is a `console.log` call with the block's `outerHTML`.
 
-
+---------------------------------------
+## Links
+ * [Core document](README.md)
+ * [Next chapter. Modifiers](02-Modifiers.md)
