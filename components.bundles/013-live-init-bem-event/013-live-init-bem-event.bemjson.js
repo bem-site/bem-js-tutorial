@@ -21,7 +21,7 @@
                     }
                 },
                 {
-                    block: 'vinyl',
+                    block: 'player',
                     mods: { theme: 'red' },
                     mix: [{
                         block: 'dj',
@@ -29,7 +29,7 @@
                     }]
                 },
                 {
-                    block: 'vinyl',
+                    block: 'player',
                     mods: { theme: 'yellow' },
                     mix: [{
                         block: 'dj',
