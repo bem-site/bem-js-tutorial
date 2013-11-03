@@ -11,16 +11,11 @@
         {
             block : 'checkbox',
             name : 'r1',
-            mods : { checked : true },
             val : 2,
-            text : 'label2'
+            icon: {
+                elem: 'icon'
+            }
         },
-        /*{
-            block: 'input',
-            name: 'password',
-            mods: { size: 's' },
-            content: { elem: 'control' }
-        },*/
         { elem: 'js', url: '_013-live-init-bem-event.js' }
     ]
 })
