@@ -1,9 +1,12 @@
-block('vinyl')(
+block('player')(
 
     content()(function(){
         return [
             {
                 elem: 'needle'
+            },
+            {
+                elem: 'vinyl'
             }
         ]
     })

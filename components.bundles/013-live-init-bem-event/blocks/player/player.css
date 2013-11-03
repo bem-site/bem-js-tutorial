@@ -1,28 +1,28 @@
 /*
  * Idea and images are taken from http://demo.marcofolio.net/jquery_dj/
  * */
-.vinyl
+.player .player__vinyl
 {
     width: 370px;
     height: 370px;
     position: relative;
 }
 
-.vinyl_theme_red
+.player_theme_red .player__vinyl
 {
-    background-image:url("vinyl_theme_red.png");
+    background-image:url("player_theme_red.png");
 }
 
-.vinyl_theme_yellow
+.player_theme_yellow .player__vinyl
 {
-    background-image:url("vinyl_theme_yellow.png");
+    background-image:url("player_theme_yellow.png");
 }
 
-.vinyl__needle
+.player__needle
 {
     position: absolute;
     right: 27px;
     width: 50px;
     height: 76px;
-    background-image:url("vinyl__needle.png");
+    background-image:url("player__needle.png");
 }
