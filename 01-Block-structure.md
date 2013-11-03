@@ -56,31 +56,31 @@ The `data-bem` attribute stores block parameters in JSON, which structure is:
 
 ## The console.log example
 
-<pre>├── desktop.bundles/
+<pre>├── pure.bundles/
 │   ├── 001-simple-block/
 │   │   ├── blocks/
 │   │   │   ├── .bem/
 │   │   │   └── my-block/
-│   │   │       └── <a href="https://github.com/toivonen/bem-js-tutorial/blob/master/desktop.bundles/001-simple-block/blocks/my-block/my-block.js">my-block.js</a>
-│   │   └── <a href="https://github.com/toivonen/bem-js-tutorial/blob/master/desktop.bundles/001-simple-block/001-simple-block.bemjson.js">001-simple-block.bemjson.js</a>
+│   │   │       └── <a href="https://github.com/toivonen/bem-js-tutorial/blob/master/pure.bundles/001-simple-block/blocks/my-block/my-block.js">my-block.js</a>
+│   │   └── <a href="https://github.com/toivonen/bem-js-tutorial/blob/master/pure.bundles/001-simple-block/001-simple-block.bemjson.js">001-simple-block.bemjson.js</a>
 
->> <a href="http://varya.me/bem-js-tutorial/desktop.bundles/001-simple-block/001-simple-block.html">001-simple-block.html</a></pre>
+>> <a href="http://varya.me/bem-js-tutorial/pure.bundles/001-simple-block/001-simple-block.html">001-simple-block.html</a></pre>
 
 The first example is the most simple. It demonstrates the block's structure and
 shows how the JavaScript starts working.<br/>
 Load the example page
-[001-simple-block](http://varya.me/bem-js-tutorial/desktop.bundles/001-simple-block/001-simple-block.html)
+[001-simple-block](http://varya.me/bem-js-tutorial/pure.bundles/001-simple-block/001-simple-block.html)
 with your console tool open, and you can see the `outerHTML` of the `my-block` on
 the page.
 
 The BEMJSON declaration of the example
-[001-simple-block.bemjson.js](https://github.com/toivonen/bem-js-tutorial/blob/master/desktop.bundles/001-simple-block/001-simple-block.bemjson.js)
+[001-simple-block.bemjson.js](https://github.com/toivonen/bem-js-tutorial/blob/master/pure.bundles/001-simple-block/001-simple-block.bemjson.js)
 describes a simple page with only one `my-block` component.
 
 The `my-block` component is represented on the
-[001-simple-block/blocks](https://github.com/toivonen/bem-js-tutorial/tree/master/desktop.bundles/001-simple-block/blocks/my-block)
+[001-simple-block/blocks](https://github.com/toivonen/bem-js-tutorial/tree/master/pure.bundles/001-simple-block/blocks/my-block)
 level with a JavaScript file. The
-[my-block.js](https://github.com/toivonen/bem-js-tutorial/blob/master/desktop.bundles/001-simple-block/blocks/my-block/my-block.js)
+[my-block.js](https://github.com/toivonen/bem-js-tutorial/blob/master/pure.bundles/001-simple-block/blocks/my-block/my-block.js)
 file is filled with a simple piece of code.
 
 ```js
