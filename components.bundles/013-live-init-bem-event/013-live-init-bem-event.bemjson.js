@@ -10,6 +10,7 @@
     content:[
         {
             block: 'dj',
+            js: true,
             content: [
                 {
                     block : 'checkbox',
