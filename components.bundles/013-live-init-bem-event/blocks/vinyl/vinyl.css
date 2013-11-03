@@ -1,0 +1,15 @@
+.vinyl
+{
+    width: 370px;
+    height: 370px;
+}
+
+.vinyl_theme_red
+{
+    background-image:url("vinyl_theme_red.png");
+}
+
+.vinyl_theme_yellow
+{
+    background-image:url("vinyl_theme_yellow.png");
+}
