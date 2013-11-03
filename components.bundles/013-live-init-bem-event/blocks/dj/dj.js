@@ -9,6 +9,9 @@ DOM.decl('dj', {
         }
     }
 },{
+    live: function() {
+        this.liveInitOnBlockInsideEvent('init', 'checkbox');
+    }
 });
 
 provide(DOM);
