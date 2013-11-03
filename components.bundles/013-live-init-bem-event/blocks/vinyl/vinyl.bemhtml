@@ -1,0 +1,11 @@
+block('vinyl')(
+
+    content()(function(){
+        return [
+            {
+                elem: 'needle'
+            }
+        ]
+    })
+
+)
