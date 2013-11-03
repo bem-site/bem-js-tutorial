@@ -9,12 +9,33 @@
     ],
     content:[
         {
-            block : 'checkbox',
-            name : 'r1',
-            val : 2,
-            icon: {
-                elem: 'icon'
-            }
+            block: 'dj',
+            content: [
+                {
+                    block : 'checkbox',
+                    name : 'r1',
+                    val : 2,
+                    icon: {
+                        elem: 'icon'
+                    }
+                },
+                {
+                    block: 'vinyl',
+                    mods: { theme: 'red' },
+                    mix: [{
+                        block: 'dj',
+                        elem: 'disk'
+                    }]
+                },
+                {
+                    block: 'vinyl',
+                    mods: { theme: 'yellow' },
+                    mix: [{
+                        block: 'dj',
+                        elem: 'disk'
+                    }]
+                }
+            ]
         },
         { elem: 'js', url: '_013-live-init-bem-event.js' }
     ]
