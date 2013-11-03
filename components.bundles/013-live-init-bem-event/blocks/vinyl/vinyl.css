@@ -5,6 +5,7 @@
 {
     width: 370px;
     height: 370px;
+    position: relative;
 }
 
 .vinyl_theme_red
@@ -15,4 +16,13 @@
 .vinyl_theme_yellow
 {
     background-image:url("vinyl_theme_yellow.png");
+}
+
+.vinyl__needle
+{
+    position: absolute;
+    right: 27px;
+    width: 50px;
+    height: 76px;
+    background-image:url("vinyl__needle.png");
 }
