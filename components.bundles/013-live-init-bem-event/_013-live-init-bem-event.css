@@ -1,0 +1,132 @@
+/* blocks/page/page.css begin */
+.page
+{
+    background-image:url("blocks/page/__bg/page__bg.jpg");
+
+    color: #FFF;
+
+    font: 20px/2 Verdana;
+    padding: 0 25px;
+}
+
+a
+{
+    color: #FFFFCC;
+}
+
+/* blocks/page/page.css end */
+
+/* blocks/dj/dj.css begin */
+.dj
+{
+    margin-top: 50px;
+    text-align: center;
+}
+
+/* blocks/dj/dj.css end */
+
+/* blocks/checkbox/checkbox.css begin */
+.checkbox
+{
+    margin: 0 auto;
+    position: relative;
+    display: block;
+    outline: 0;
+    cursor: default;
+    background: orange;
+    border-radius: 50%;
+    width: 100px;
+    height: 100px;
+    border: 1px solid rgba(0,0,0,0.4) ;
+    box-shadow: inset 0 1px 0 0 rgba(255,255,255,0.25),
+                0 0 5px 5px rgba(255,255,255,0.8),
+                0 0 0 12px rgba(0,0,0,0.06),
+                0 0 0 7px rgba(0,0,0,0.1);
+}
+
+.ua_js_yes .checkbox__control
+{
+    position: absolute;
+    z-index: 1;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    margin: 0;
+    padding: 0;
+    opacity: 0;
+    outline: 0;
+    border: 0;
+    background: 0;
+}
+
+.checkbox__control
+{
+    cursor: pointer;
+}
+
+.checkbox__icon
+{
+    display: block;
+    position: absolute;
+    top: 25px;
+    left: 33px;;
+    margin: 0 auto;
+    border-style: solid;
+    border-width: 25px 0 25px 45px;
+    border-color: transparent transparent transparent rgba(255, 255, 255, 1);
+}
+
+.checkbox_checked .checkbox__icon
+{
+    border-width: 0;
+    width: 13px;
+    height: 50px;
+    border-width: 0 12px;
+    border-color: transparent rgba(255, 255, 255, 1);
+}
+
+/* blocks/checkbox/checkbox.css end */
+
+/* blocks/player/player.css begin */
+/*
+ * Idea and images are taken from http://demo.marcofolio.net/jquery_dj/
+ * */
+.player
+{
+    width: 370px;
+    height: 370px;
+    position: relative;
+    display: inline-block;
+    margin: 0 30px;
+}
+.player .player__vinyl
+{
+    position: absolute;
+    z-index: 1;
+    width: 370px;
+    height: 370px;
+}
+
+.player_theme_red .player__vinyl
+{
+    background-image:url("blocks/player/player_theme_red.png");
+}
+
+.player_theme_yellow .player__vinyl
+{
+    background-image:url("blocks/player/player_theme_yellow.png");
+}
+
+.player__needle
+{
+    position: absolute;
+    z-index: 2;
+    right: 27px;
+    width: 50px;
+    height: 76px;
+    background-image:url("blocks/player/player__needle.png");
+}
+
+/* blocks/player/player.css end */
+
