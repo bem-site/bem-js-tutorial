@@ -6,6 +6,8 @@
     width: 370px;
     height: 370px;
     position: relative;
+    display: inline-block;
+    margin: 0 30px;
 }
 .player .player__vinyl
 {
