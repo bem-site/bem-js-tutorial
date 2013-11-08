@@ -55,21 +55,21 @@ DOM event fires of the block DOM node or on an element.
 
 ### Initializing a block on DOM event
 
-<pre>├── desktop.bundles/
+<pre>├── pure.bundles/
 │   ├── 010-live-init-on-event/
 │   │   ├── blocks/
 │   │   │   ├── .bem/
 │   │   │   ├── text/
 │   │   │   └── translate/
-│   │   │       ├── <a href="https://github.com/toivonen/bem-js-tutorial/blob/master/desktop.bundles/010-live-init-on-event/blocks/translate/translate.bemhtml">translate.bemhtml</a>
-│   │   │       ├── <a href="https://github.com/toivonen/bem-js-tutorial/blob/master/desktop.bundles/010-live-init-on-event/blocks/translate/translate.css">translate.css</a>
-│   │   │       └── <a href="https://github.com/toivonen/bem-js-tutorial/blob/master/desktop.bundles/010-live-init-on-event/blocks/translate/translate.js">translate.js</a>
-│   │   └── <a href="https://github.com/toivonen/bem-js-tutorial/blob/master/desktop.bundles/010-live-init-on-event/010-live-init-on-event.bemjson.js">010-live-init-on-event.bemjson.js</a>
+│   │   │       ├── <a href="https://github.com/toivonen/bem-js-tutorial/blob/master/pure.bundles/010-live-init-on-event/blocks/translate/translate.bemhtml">translate.bemhtml</a>
+│   │   │       ├── <a href="https://github.com/toivonen/bem-js-tutorial/blob/master/pure.bundles/010-live-init-on-event/blocks/translate/translate.css">translate.css</a>
+│   │   │       └── <a href="https://github.com/toivonen/bem-js-tutorial/blob/master/pure.bundles/010-live-init-on-event/blocks/translate/translate.js">translate.js</a>
+│   │   └── <a href="https://github.com/toivonen/bem-js-tutorial/blob/master/pure.bundles/010-live-init-on-event/010-live-init-on-event.bemjson.js">010-live-init-on-event.bemjson.js</a>
 
->> <a href="http://varya.me/bem-js-tutorial/desktop.bundles/010-live-init-on-event/010-live-init-on-event.html">010-live-init-on-event.html</a></pre>
+>> <a href="http://varya.me/bem-js-tutorial/pure.bundles/010-live-init-on-event/010-live-init-on-event.html">010-live-init-on-event.html</a></pre>
 
 On the
-[010-live-init-on-event.html](http://varya.me/bem-js-tutorial/desktop.bundles/010-live-init-on-event/010-live-init-on-event.html)
+[010-live-init-on-event.html](http://varya.me/bem-js-tutorial/pure.bundles/010-live-init-on-event/010-live-init-on-event.html)
 page you can see the text in Dutch. Actually, this text is divided into a lot of
 pieces phrase by phrase. Then, they are framed with a `translate` block.
 
@@ -94,7 +94,7 @@ Note that there is no `translate_js_inited` class on a block DOM node even after
 the page is completely loaded. This means that there is no JavaScript object
 related to the block yet.<br/>
 In the
-[translate.js](https://github.com/toivonen/bem-js-tutorial/blob/master/desktop.bundles/010-live-init-on-event/blocks/translate/translate.js)
+[translate.js](https://github.com/toivonen/bem-js-tutorial/blob/master/pure.bundles/010-live-init-on-event/blocks/translate/translate.js)
 file of the block it is said to initialize it only after a `click` launches on
 the block DOM node.
 
@@ -164,7 +164,7 @@ dynamically changed pages. This you can see with the following example.
 ### Delegated initialization
 <pre>
 
->> <a href="http://varya.me/bem-js-tutorial/desktop.bundles/010_2-delegation/010_2-delegation.html">010_2-delegation.html</a></pre>
+>> <a href="http://varya.me/bem-js-tutorial/pure.bundles/010_2-delegation/010_2-delegation.html">010_2-delegation.html</a></pre>
 
 This page provides absolutely the same `translate` block as the previous one.
 But there is also a piece of crazy inline JavaScript on a page which works when a
@@ -178,21 +178,21 @@ when a user clicks any `translate` block, this click bubbles up to the `document
 and core initializes the block as it was instructed it its `live` section.
 
 ### Binding to live events
-<pre>├── desktop.bundles/
+<pre>├── pure.bundles/
 │   ├── 011-live-bind-to/
 │   │   ├── blocks/
 │   │   │   ├── .bem/
 │   │   │   ├── button/
-│   │   │   |   ├── <a href="https://github.com/toivonen/bem-js-tutorial/blob/master/desktop.bundles/011-live-bind-to/blocks/button/button.bemhtml">button.bemhtml</a>
-│   │   │   |   ├── <a href="https://github.com/toivonen/bem-js-tutorial/blob/master/desktop.bundles/011-live-bind-to/blocks/button/button.css">button.css</a>
-│   │   │   |   └── <a href="https://github.com/toivonen/bem-js-tutorial/blob/master/desktop.bundles/011-live-bind-to/blocks/button/button.js">button.js</a>
+│   │   │   |   ├── <a href="https://github.com/toivonen/bem-js-tutorial/blob/master/pure.bundles/011-live-bind-to/blocks/button/button.bemhtml">button.bemhtml</a>
+│   │   │   |   ├── <a href="https://github.com/toivonen/bem-js-tutorial/blob/master/pure.bundles/011-live-bind-to/blocks/button/button.css">button.css</a>
+│   │   │   |   └── <a href="https://github.com/toivonen/bem-js-tutorial/blob/master/pure.bundles/011-live-bind-to/blocks/button/button.js">button.js</a>
 │   │   │   └── page/
-│   │   └── <a href="https://github.com/toivonen/bem-js-tutorial/blob/master/desktop.bundles/011-live-bind-to/011-live-bind-to.bemjson.js">011-live-bind-to.bemjson.js</a>
+│   │   └── <a href="https://github.com/toivonen/bem-js-tutorial/blob/master/pure.bundles/011-live-bind-to/011-live-bind-to.bemjson.js">011-live-bind-to.bemjson.js</a>
 
->> <a href="http://varya.me/bem-js-tutorial/desktop.bundles/011-live-bind-to/011-live-bind-to.html">011-live-bind-to.html</a></pre>
+>> <a href="http://varya.me/bem-js-tutorial/pure.bundles/011-live-bind-to/011-live-bind-to.html">011-live-bind-to.html</a></pre>
 
 The next [example with 100 BonBon
-buttons](http://varya.me/bem-js-tutorial/desktop.bundles/011-live-bind-to/011-live-bind-to.html)
+buttons](http://varya.me/bem-js-tutorial/pure.bundles/011-live-bind-to/011-live-bind-to.html)
 shows that live events can be reacted not once when initializing a block but
 every time.
 
@@ -253,23 +253,23 @@ provide(DOM);
 ```
 
 ### Live initialization on many events
-<pre>├── desktop.bundles/
+<pre>├── pure.bundles/
 │   ├── 012-live-init-many-events/
 │   │   ├── blocks/
 │   │   │   ├── .bem/
 │   │   │   ├── checkbox/
-│   │   │   |   ├── <a href="https://github.com/toivonen/bem-js-tutorial/blob/master/desktop.bundles/012-live-init-many-events/blocks/checkbox/checkbox.bemhtml">checkbox.bemhtml</a>
-│   │   │   |   ├── <a href="https://github.com/toivonen/bem-js-tutorial/blob/master/desktop.bundles/012-live-init-many-events/blocks/checkbox/checkbox.css">checkbox.css</a>
-│   │   │   |   └── <a href="https://github.com/toivonen/bem-js-tutorial/blob/master/desktop.bundles/012-live-init-many-events/blocks/checkbox/checkbox.js">checkbox.js</a>
+│   │   │   |   ├── <a href="https://github.com/toivonen/bem-js-tutorial/blob/master/pure.bundles/012-live-init-many-events/blocks/checkbox/checkbox.bemhtml">checkbox.bemhtml</a>
+│   │   │   |   ├── <a href="https://github.com/toivonen/bem-js-tutorial/blob/master/pure.bundles/012-live-init-many-events/blocks/checkbox/checkbox.css">checkbox.css</a>
+│   │   │   |   └── <a href="https://github.com/toivonen/bem-js-tutorial/blob/master/pure.bundles/012-live-init-many-events/blocks/checkbox/checkbox.js">checkbox.js</a>
 │   │   │   └── page/
-│   │   └── <a href="https://github.com/toivonen/bem-js-tutorial/blob/master/desktop.bundles/012-live-init-many-events/012-live-init-many-events.bemjson.js">012-live-init-many-events.bemjson.js</a>
+│   │   └── <a href="https://github.com/toivonen/bem-js-tutorial/blob/master/pure.bundles/012-live-init-many-events/012-live-init-many-events.bemjson.js">012-live-init-many-events.bemjson.js</a>
 
->> <a href="http://varya.me/bem-js-tutorial/desktop.bundles/012-live-init-many-events/012-live-init-many-events.html">012-live-init-many-events.html</a></pre>
+>> <a href="http://varya.me/bem-js-tutorial/pure.bundles/012-live-init-many-events/012-live-init-many-events.html">012-live-init-many-events.html</a></pre>
 
 In the previous examples the core watched only one `click` event to decide if a
 block should start working or not. But sometimes reacting just one event is not
 enough. This is illustrated with the
-[012-live-init-many-events](http://varya.me/bem-js-tutorial/desktop.bundles/012-live-init-many-events/012-live-init-many-events.html)
+[012-live-init-many-events](http://varya.me/bem-js-tutorial/pure.bundles/012-live-init-many-events/012-live-init-many-events.html)
 example, where you can see customized checkboxes.
 
 ```html

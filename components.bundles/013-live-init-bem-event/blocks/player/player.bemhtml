@@ -1,0 +1,16 @@
+block('player')(
+
+    js()(true),
+
+    content()(function(){
+        return [
+            {
+                elem: 'needle'
+            },
+            {
+                elem: 'vinyl'
+            }
+        ]
+    })
+
+)
