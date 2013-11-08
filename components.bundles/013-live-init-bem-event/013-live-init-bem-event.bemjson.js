@@ -38,6 +38,13 @@
                 }
             ]
         },
+        {
+            tag: 'p',
+            attrs: {
+                style: 'text-align: right; margin-top: 2em;'
+            },
+            content: 'Idea, CSS and images are taken from <a href="http://demo.marcofolio.net/jquery_dj/">demo.marcofolio.net/jquery_dj</a>'
+        },
         { elem: 'js', url: '//yandex.st/jquery/1.10.2/jquery.min.js' },
         { elem: 'js', url: 'http://jqueryrotate.googlecode.com/svn/trunk/jQueryRotate.js' },
         { elem: 'js', url: '_013-live-init-bem-event.js' }
