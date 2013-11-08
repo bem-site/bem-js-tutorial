@@ -1,5 +1,7 @@
 block('player')(
 
+    js()(true),
+
     content()(function(){
         return [
             {

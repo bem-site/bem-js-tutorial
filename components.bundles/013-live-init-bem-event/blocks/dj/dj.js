@@ -4,35 +4,20 @@ DOM.decl('dj', {
     onSetMod: {
         'running' : {
             'true' : function() {
-                this._run = true;
                 var dj = this;
 
                 dj.findBlocksInside('player').forEach(function(player) {
-                    dj._rotate(player.elem('vinyl'));
+                    player.rotate();
                 });
             },
             '': function() {
-                this._run = false;
+                var dj = this;
+
+                dj.findBlocksInside('player').forEach(function(player) {
+                    player.stop();
+                });
             }
         }
-    },
-    _rotate: function(vinyl) {
-        if (!this._run) {
-            return;
-        }
-
-        var dj = this;
-
-        vinyl.rotate({
-            angle:0,
-            animateTo:360,
-            callback: function() {
-                dj._rotate(vinyl);
-            },
-            easing: function (x,t,b,c,d){        // t: current time, b: begInnIng value, c: change In value, d: duration
-                return c*(t/d)+b;
-            }
-        });
     }
 },{
     live: function() {
