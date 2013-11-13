@@ -1,6 +1,6 @@
 ({
     block: 'page',
-    title: 'Live (lazy) initialization on BEM events',
+    title: 'Live (lazy) initialization on initializing inner block',
     favicon: '/favicon.ico',
     head: [
         { elem: 'css', url: '_013-live-init-bem-event.css', ie: false },
