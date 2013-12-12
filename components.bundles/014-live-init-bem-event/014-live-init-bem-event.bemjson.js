@@ -8,22 +8,51 @@
         { elem: 'meta', attrs: { name: 'description', content: '' }},
     ],
     content:[
-        'Какой-то текст   ',
         {
-            block: 'attach',
-            mods: { size: 's' },
+            block: 'menu',
+            js: true,
             content: [
                 {
-                    block: 'button',
-                    mods: { size: 's' },
-                    mix: [{ block: 'attach', elem: 'button' }],
-                    tabindex: 1,
-                    id: 'bla',
-                    content: 'xxxx'
+                    elem: 'item',
+                    elemMods: { 'state' : 'current' },
+                    content: {
+                        block: 'link',
+                        js: true,
+                        mods : { 'pseudo' : 'yes' },
+                        mix: [{ block: 'menu', elem: 'item-selector'}],
+                        url: '/',
+                        content: 'First point'
+                    }
                 },
                 {
-                    elem: 'holder',
-                    content: 'yyy'
+                    elem: 'item',
+                    content: {
+                        block: 'link',
+                        mods : { 'pseudo' : 'yes'},
+                        mix: [{ block: 'menu', elem: 'item-selector'}],
+                        url: '/',
+                        content: 'Second point'
+                    }
+                },
+                {
+                    elem: 'item',
+                    content: {
+                        block: 'link',
+                        mods : { 'pseudo' : 'yes'},
+                        mix: [{ block: 'menu', elem: 'item-selector'}],
+                        url: '/',
+                        content: 'Third point'
+                    }
+                },
+                {
+                    elem: 'item',
+                    content: {
+                        block: 'link',
+                        mods : { 'pseudo' : 'yes'},
+                        mix: [{ block: 'menu', elem: 'item-selector'}],
+                        url: '/',
+                        content: 'Forth point'
+                    }
                 }
             ]
         },
