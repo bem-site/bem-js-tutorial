@@ -20,7 +20,6 @@
                         js: true,
                         mods : { 'pseudo' : 'yes' },
                         mix: [{ block: 'menu', elem: 'item-selector'}],
-                        url: '/',
                         content: 'First point'
                     }
                 },
@@ -30,7 +29,6 @@
                         block: 'link',
                         mods : { 'pseudo' : 'yes'},
                         mix: [{ block: 'menu', elem: 'item-selector'}],
-                        url: '/',
                         content: 'Second point'
                     }
                 },
@@ -40,7 +38,6 @@
                         block: 'link',
                         mods : { 'pseudo' : 'yes'},
                         mix: [{ block: 'menu', elem: 'item-selector'}],
-                        url: '/',
                         content: 'Third point'
                     }
                 },
@@ -50,7 +47,6 @@
                         block: 'link',
                         mods : { 'pseudo' : 'yes'},
                         mix: [{ block: 'menu', elem: 'item-selector'}],
-                        url: '/',
                         content: 'Forth point'
                     }
                 }
