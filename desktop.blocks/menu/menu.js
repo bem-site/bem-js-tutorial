@@ -1,4 +1,4 @@
-modules.define('i-bem__dom', function(provide, DOM) {
+modules.define('i-bem__dom', ['jquery'], function(provide, $, DOM) {
 
 DOM.decl('menu', {
 
@@ -31,7 +31,7 @@ DOM.decl('menu', {
     },
 
     _getItemByEvent : function(e) {
-        return e.data.domElem.closest(this.buildSelector('item'));
+        return $(e.currentTarget).closest(this.buildSelector('item'));
     }
 
 }, {
