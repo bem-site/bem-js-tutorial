@@ -15,7 +15,7 @@ DOM.decl('menu', {
                     var prev = this.elem('item', 'state', 'current');
                     this
                         .delMod(prev, 'state')
-                        .trigger('current', {
+                        .emit('current', {
                             prev    : prev,
                             current : elem
                         });
