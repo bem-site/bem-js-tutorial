@@ -12,8 +12,8 @@ MAKE.decl('Arch', {
     bundlesLevelsRegexp: /^.+?\.bundles$/,
 
     libraries: [
-        'bem-core @ b1f2677e5ecc2fa078627d9dae24157436a769d9',
-        'bem-components @ 1fd459ae2713f6bfa814a477ab0e42c5f806ea36'
+        'bem-core @ 56635d50c20a5a0c2815d99143bb41e316418b17',
+        'bem-components @ a37156b9646b97472776b8ce035ca1736dc7257c'
     ]
 
 });
