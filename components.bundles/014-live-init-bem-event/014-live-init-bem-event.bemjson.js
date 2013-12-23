@@ -69,7 +69,10 @@
                     ]
                 },
                 {
-                    elem: 'map'
+                    elem: 'map-container',
+                    content: {
+                        block: 'map'
+                    }
                 }
             ]
         },
