@@ -20,41 +20,50 @@
                             elem: 'item',
                             elemMods: { 'state' : 'current' },
                             js: {
-                                address: 'Herengracht 256, Amsterdam'
+                                address: 'Moscow, Lva Tolstogo, 16'
                             },
                             content: {
                                 block: 'link',
                                 js: true,
                                 mods : { 'pseudo' : 'yes' },
                                 mix: [{ block: 'menu', elem: 'item-selector'}],
-                                content: 'Home'
+                                content: 'Yandex'
                             }
                         },
                         {
                             elem: 'item',
+                            js: {
+                                address: 'Pennsylvania Ave NW, Washington, DC, United States'
+                            },
                             content: {
                                 block: 'link',
                                 mods : { 'pseudo' : 'yes'},
                                 mix: [{ block: 'menu', elem: 'item-selector'}],
-                                content: 'Second point'
+                                content: 'White House'
                             }
                         },
                         {
                             elem: 'item',
+                            js: {
+                                address: '221B Baker Street, London, United Kingdom'
+                            },
                             content: {
                                 block: 'link',
                                 mods : { 'pseudo' : 'yes'},
                                 mix: [{ block: 'menu', elem: 'item-selector'}],
-                                content: 'Third point'
+                                content: 'Sherlock Holmes'
                             }
                         },
                         {
                             elem: 'item',
+                            js: {
+                                address: '1 Infinite Loop, Cupertino, CA, United States'
+                            },
                             content: {
                                 block: 'link',
                                 mods : { 'pseudo' : 'yes'},
                                 mix: [{ block: 'menu', elem: 'item-selector'}],
-                                content: 'Forth point'
+                                content: 'Apple'
                             }
                         }
                     ]
