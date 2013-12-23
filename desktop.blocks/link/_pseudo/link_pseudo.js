@@ -13,8 +13,6 @@ BEMDOM.decl({'block': 'link', 'modName': 'pseudo', 'modVal': 'yes'}, {
      */
     _onClick: function(e) {
 
-        console.log('clicks');
-
         e.preventDefault();
 
         this.hasMod('disabled', 'yes') || this.afterCurrentEvent(function() {
@@ -45,10 +43,6 @@ BEMDOM.decl({'block': 'link', 'modName': 'pseudo', 'modVal': 'yes'}, {
     live: function() {
 
         this.__base.apply(this, arguments);
-
-        this.liveBindTo('pointerclick', function() {
-            console.log(222);
-        });
 
         this.liveBindTo({modName: 'pseudo', modVal: 'yes'}, 'pointerclick', function(e) {
             this._onClick(e);
