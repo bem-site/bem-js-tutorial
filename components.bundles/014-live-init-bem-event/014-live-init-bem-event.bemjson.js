@@ -9,46 +9,58 @@
     ],
     content:[
         {
-            block: 'menu',
-            js: true,
+            block: 'map-marks',
             content: [
                 {
-                    elem: 'item',
-                    elemMods: { 'state' : 'current' },
-                    content: {
-                        block: 'link',
-                        js: true,
-                        mods : { 'pseudo' : 'yes' },
-                        mix: [{ block: 'menu', elem: 'item-selector'}],
-                        content: 'First point'
-                    }
+                    block: 'menu',
+                    js: true,
+                    mix: [{ block: 'map-marks', elem: 'menu' }],
+                    content: [
+                        {
+                            elem: 'item',
+                            elemMods: { 'state' : 'current' },
+                            js: {
+                                address: 'Herengracht 256, Amsterdam'
+                            },
+                            content: {
+                                block: 'link',
+                                js: true,
+                                mods : { 'pseudo' : 'yes' },
+                                mix: [{ block: 'menu', elem: 'item-selector'}],
+                                content: 'Home'
+                            }
+                        },
+                        {
+                            elem: 'item',
+                            content: {
+                                block: 'link',
+                                mods : { 'pseudo' : 'yes'},
+                                mix: [{ block: 'menu', elem: 'item-selector'}],
+                                content: 'Second point'
+                            }
+                        },
+                        {
+                            elem: 'item',
+                            content: {
+                                block: 'link',
+                                mods : { 'pseudo' : 'yes'},
+                                mix: [{ block: 'menu', elem: 'item-selector'}],
+                                content: 'Third point'
+                            }
+                        },
+                        {
+                            elem: 'item',
+                            content: {
+                                block: 'link',
+                                mods : { 'pseudo' : 'yes'},
+                                mix: [{ block: 'menu', elem: 'item-selector'}],
+                                content: 'Forth point'
+                            }
+                        }
+                    ]
                 },
                 {
-                    elem: 'item',
-                    content: {
-                        block: 'link',
-                        mods : { 'pseudo' : 'yes'},
-                        mix: [{ block: 'menu', elem: 'item-selector'}],
-                        content: 'Second point'
-                    }
-                },
-                {
-                    elem: 'item',
-                    content: {
-                        block: 'link',
-                        mods : { 'pseudo' : 'yes'},
-                        mix: [{ block: 'menu', elem: 'item-selector'}],
-                        content: 'Third point'
-                    }
-                },
-                {
-                    elem: 'item',
-                    content: {
-                        block: 'link',
-                        mods : { 'pseudo' : 'yes'},
-                        mix: [{ block: 'menu', elem: 'item-selector'}],
-                        content: 'Forth point'
-                    }
+                    elem: 'map'
                 }
             ]
         },
