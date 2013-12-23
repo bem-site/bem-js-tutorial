@@ -5,14 +5,12 @@ DOM.decl('map-marks', {
     onSetMod: {
         'js' : {
             'inited' : function () {
-                console.log(222);
+                this._menu = this.findBlockInside('menu');
             }
         }
     },
     _showMap: function(e, elem) {
-        console.log('show map');
-        var params = this.elemParams(elem);
-        console.log(params);
+        var params = this._menu.elemParams(elem);
     }
 
 }, {
