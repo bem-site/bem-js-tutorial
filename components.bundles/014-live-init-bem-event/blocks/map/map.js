@@ -1,4 +1,4 @@
-modules.define('i-bem__dom', ['jquery'], function(provide, $, DOM) {
+modules.define('i-bem__dom', ['jquery', 'ymaps'], function(provide, $, ymaps, DOM) {
 
 DOM.decl('map', {
 
