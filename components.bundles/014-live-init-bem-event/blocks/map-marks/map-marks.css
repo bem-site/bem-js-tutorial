@@ -1,0 +1,22 @@
+.map-marks
+{
+    font: 18px/1.5em Tahoma;
+}
+
+.map-marks__menu
+{
+    display: inline-block;
+    vertical-align: top;
+    margin-right: 1em;
+}
+
+.map-marks__map-container
+{
+    display: inline-block;
+}
+
+.map-marks__map-container .map
+{
+    width: 500px;
+    height: 500px;
+}

@@ -6,11 +6,13 @@ DOM.decl('map-marks', {
         'js' : {
             'inited' : function () {
                 this._menu = this.findBlockInside('menu');
+                this._map = this.findBlockInside('map');
             }
         }
     },
     _showMap: function(e, elem) {
         var params = this._menu.elemParams(elem);
+        this._map.showAddress(params['address']);
     }
 
 }, {

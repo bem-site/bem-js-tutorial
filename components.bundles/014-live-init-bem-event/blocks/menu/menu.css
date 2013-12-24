@@ -17,8 +17,8 @@
 
 .menu__item_state_current .menu__item-selector
 {
-    background: lightblue;
-    padding-right: 1em;
+    background: #0062ff;
+    padding-right: 1.5em;
 }
 
 .menu__item-selector
