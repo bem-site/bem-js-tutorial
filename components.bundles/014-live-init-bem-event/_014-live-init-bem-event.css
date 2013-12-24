@@ -1,0 +1,41 @@
+/* blocks/menu/menu.css begin */
+.menu
+{
+    color: #FFF;
+    text-align: right;
+}
+
+.menu__item
+{
+    margin: 2px;
+    margin-right: 1em;
+}
+
+.menu__item_state_current
+{
+    margin-right: 0;
+}
+
+.menu__item_state_current .menu__item-selector
+{
+    background: lightblue;
+    padding-right: 1em;
+}
+
+.menu__item-selector
+{
+    display: inline-block;
+    background: #333;
+    padding: 0.5em;
+    cursor: pointer;
+}
+
+/* blocks/menu/menu.css end */
+/* ../../desktop.blocks/link/link.css begin */
+.link:hover,
+.link:visited:hover
+{
+    color: #d00 !important; /* Оторвать !important после того, как оторвем .i-global__hover */
+}
+
+/* ../../desktop.blocks/link/link.css end */
