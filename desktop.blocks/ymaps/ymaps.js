@@ -1,4 +1,4 @@
-modules.define('ymaps', ['loader'], function(provide, loader) {
+modules.define('ymaps', ['loader_type_js'], function(provide, loader) {
 
 var provideYMaps = function() {
     ym.ready(function() {
