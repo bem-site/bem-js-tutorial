@@ -13,11 +13,6 @@ DOM.decl('map', {
         }
     }
 
-}, {
-    live: function() {
-        $.getScript("http://api-maps.yandex.ru/2.0-stable/?load=package.standard&lang=ru-RU");
-        return false;
-    }
 });
 
 provide(DOM);
