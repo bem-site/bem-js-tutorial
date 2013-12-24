@@ -71,7 +71,10 @@
                 {
                     elem: 'map-container',
                     content: {
-                        block: 'map'
+                        block: 'map',
+                        js: {
+                            address: 'Moscow, Lva Tolstogo, 16'
+                        }
                     }
                 }
             ]
