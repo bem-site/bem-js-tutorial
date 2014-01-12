@@ -1,4 +1,4 @@
-block b-menu-vert {
+block menu {
 
     content: [
         this.ctx.title,
