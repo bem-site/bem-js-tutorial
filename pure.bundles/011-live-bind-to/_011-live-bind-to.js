@@ -7,220 +7,262 @@
  * http://www.opensource.org/licenses/mit-license.php
  * http://www.gnu.org/licenses/gpl.html
  *
- * @version 0.0.8
+ * @version 0.0.12
  */
 
 (function(global) {
 
-var DECL_STATES = {
-        NOT_RESOLVED : 0,
-        IN_RESOLVING : 1,
-        RESOLVED     : 2
-    },
-
-    curOptions = {
-        trackCircularDependencies : true
-    },
-
-    undef,
-    modulesStorage = {},
-    declsToCalc = [],
-    waitForNextTick = false,
-    pendingRequires = [],
-
-    /**
-     * Defines module
-     * @param {String} name
-     * @param {String[]} [deps]
-     * @param {Function} declFn
-     */
-    define = function(name, deps, declFn) {
-        if(!declFn) {
-            declFn = deps;
-            deps = [];
-        }
-
-        var module = modulesStorage[name] || (modulesStorage[name] = {
-                name : name,
-                decl : undef
-            });
-
-        declsToCalc.push(module.decl = {
-            name          : name,
-            fn            : declFn,
-            state         : DECL_STATES.NOT_RESOLVED,
-            deps          : deps,
-            prevDecl      : module.decl,
-            dependOnDecls : [],
-            dependents    : [],
-            exports       : undef
-        });
+var undef,
+    DECL_STATES = {
+        NOT_RESOLVED : 'NOT_RESOLVED',
+        IN_RESOLVING : 'IN_RESOLVING',
+        RESOLVED     : 'RESOLVED'
     },
 
     /**
-     * Requires modules
-     * @param {String[]} modules
-     * @param {Function} cb
+     * Creates a new instance of modular system
+     * @returns {Object}
      */
-    require = function(modules, cb) {
-        if(!waitForNextTick) {
-            waitForNextTick = true;
-            nextTick(onNextTick);
-        }
-
-        pendingRequires.push({
-            modules : modules,
-            cb      : cb
-        });
-    },
-
-    /**
-     * Returns whether the module is defined
-     * @param {String} name
-     * @returns {Boolean}
-     */
-    isDefined = function(name) {
-        return !!modulesStorage[name];
-    },
-
-    onNextTick = function() {
-        waitForNextTick = false;
-        calcDeclDeps();
-        applyRequires();
-    },
-
-    calcDeclDeps = function() {
-        var i = 0, decl, j, dep, dependOnDecls;
-        while(decl = declsToCalc[i++]) {
-            j = 0;
-            dependOnDecls = decl.dependOnDecls;
-            while(dep = decl.deps[j++]) {
-                if(!isDefined(dep)) {
-                    throwModuleNotFound(dep, decl);
-                    break;
-                }
-                dependOnDecls.push(modulesStorage[dep].decl);
-            }
-
-            if(decl.prevDecl) {
-                dependOnDecls.push(decl.prevDecl);
-                decl.prevDecl = undef;
-            }
-        }
-
-        declsToCalc = [];
-    },
-
-    applyRequires = function() {
-        var requiresToProcess = pendingRequires,
-            require, i = 0, j, dep, dependOnDecls, applyCb;
-
-        pendingRequires = [];
-
-        while(require = requiresToProcess[i++]) {
-            j = 0; dependOnDecls = []; applyCb = true;
-            while(dep = require.modules[j++]) {
-                if(!isDefined(dep)) {
-                    throwModuleNotFound(dep);
-                    applyCb = false;
-                    break;
-                }
-
-                dependOnDecls.push(modulesStorage[dep].decl);
-            }
-            applyCb && applyRequire(dependOnDecls, require.cb);
-        }
-    },
-
-    applyRequire = function(dependOnDecls, cb) {
-        requireDecls(
-            dependOnDecls,
-            function(exports) {
-                cb.apply(global, exports);
+    create = function() {
+        var curOptions = {
+                trackCircularDependencies : true,
+                allowMultipleDeclarations : true
             },
-            []);
-    },
 
-    requireDecls = function(decls, cb, path) {
-        var unresolvedDeclCnt = decls.length,
-            checkUnresolved = true;
+            modulesStorage = {},
+            declsToCalc = [],
+            waitForNextTick = false,
+            pendingRequires = [],
 
-        if(unresolvedDeclCnt) {
-            var onDeclResolved = function() {
-                    --unresolvedDeclCnt || onDeclsResolved(decls, cb);
-                },
-                i = 0, decl;
+            /**
+             * Defines module
+             * @param {String} name
+             * @param {String[]} [deps]
+             * @param {Function} declFn
+             */
+            define = function(name, deps, declFn) {
+                if(!declFn) {
+                    declFn = deps;
+                    deps = [];
+                }
 
-            while(decl = decls[i++]) {
-                if(decl.state === DECL_STATES.RESOLVED) {
-                    --unresolvedDeclCnt;
+                var module = modulesStorage[name];
+                if(module) {
+                    if(!curOptions.allowMultipleDeclarations) {
+                        throwMultipleDeclarationDetected(name);
+                        return;
+                    }
                 }
                 else {
-                    if(curOptions.trackCircularDependencies && isDependenceCircular(decl, path)) {
-                        throwCircularDependenceDetected(decl, path);
-                    }
+                    module = modulesStorage[name] = {
+                        name : name,
+                        decl : undef
+                    };
+                }
 
-                    decl.state === DECL_STATES.NOT_RESOLVED && startDeclResolving(decl, path);
+                declsToCalc.push(module.decl = {
+                    name          : name,
+                    fn            : declFn,
+                    state         : DECL_STATES.NOT_RESOLVED,
+                    deps          : deps,
+                    prevDecl      : module.decl,
+                    dependOnDecls : [],
+                    dependents    : [],
+                    exports       : undef
+                });
+            },
 
-                    if(decl.state === DECL_STATES.RESOLVED) { // decl was resolved synchronously
-                        --unresolvedDeclCnt;
-                    }
-                    else {
-                        decl.dependents.push(onDeclResolved);
-                        checkUnresolved = false;
+            /**
+             * Requires modules
+             * @param {String[]} modules
+             * @param {Function} cb
+             */
+            require = function(modules, cb) {
+                if(!waitForNextTick) {
+                    waitForNextTick = true;
+                    nextTick(onNextTick);
+                }
+
+                pendingRequires.push({
+                    modules : modules,
+                    cb      : cb
+                });
+            },
+
+            /**
+             * Returns state of module
+             * @param {String} name
+             * @returns {String} state, possible values NOT_DEFINED, NOT_RESOLVED, IN_RESOLVING, RESOLVED
+             */
+            getState = function(name) {
+                var module = modulesStorage[name];
+                return module?
+                    DECL_STATES[module.decl.state] :
+                    'NOT_DEFINED';
+            },
+
+            /**
+             * Returns whether the module is defined
+             * @param {String} name
+             * @returns {Boolean}
+             */
+            isDefined = function(name) {
+                return !!modulesStorage[name];
+            },
+
+            /**
+             * Sets options
+             * @param {Object} options
+             */
+            setOptions = function(options) {
+                for(var name in options) {
+                    if(options.hasOwnProperty(name)) {
+                        curOptions[name] = options[name];
                     }
                 }
-            }
-        }
-
-        if(checkUnresolved && !unresolvedDeclCnt) {
-            onDeclsResolved(decls, cb);
-        }
-    },
-
-    onDeclsResolved = function(decls, cb) {
-        var exports = [],
-            i = 0, decl;
-        while(decl = decls[i++]) {
-            exports.push(decl.exports);
-        }
-        cb(exports);
-    },
-
-    startDeclResolving = function(decl, path) {
-        curOptions.trackCircularDependencies && (path = path.slice()).push(decl);
-        decl.state = DECL_STATES.IN_RESOLVING;
-        var isProvided = false;
-        requireDecls(
-            decl.dependOnDecls,
-            function(depDeclsExports) {
-                decl.fn.apply(
-                    {
-                        name   : decl.name,
-                        deps   : decl.deps,
-                        global : global
-                    },
-                    [function(exports) {
-                        isProvided?
-                            throwDeclAlreadyProvided(decl) :
-                            isProvided = true;
-                        provideDecl(decl, exports);
-                        return exports;
-                    }].concat(depDeclsExports));
             },
-            path);
-    },
 
-    provideDecl = function(decl, exports) {
-        decl.exports = exports;
-        decl.state = DECL_STATES.RESOLVED;
+            onNextTick = function() {
+                waitForNextTick = false;
+                calcDeclDeps();
+                applyRequires();
+            },
 
-        var i = 0, dependent;
-        while(dependent = decl.dependents[i++]) {
-            dependent(decl.exports);
-        }
+            calcDeclDeps = function() {
+                var i = 0, decl, j, dep, dependOnDecls;
+                while(decl = declsToCalc[i++]) {
+                    j = 0;
+                    dependOnDecls = decl.dependOnDecls;
+                    while(dep = decl.deps[j++]) {
+                        if(!isDefined(dep)) {
+                            throwModuleNotFound(dep, decl);
+                            break;
+                        }
+                        dependOnDecls.push(modulesStorage[dep].decl);
+                    }
 
-        decl.dependents = undef;
+                    if(decl.prevDecl) {
+                        dependOnDecls.push(decl.prevDecl);
+                        decl.prevDecl = undef;
+                    }
+                }
+
+                declsToCalc = [];
+            },
+
+            applyRequires = function() {
+                var requiresToProcess = pendingRequires,
+                    require, i = 0, j, dep, dependOnDecls, applyCb;
+
+                pendingRequires = [];
+
+                while(require = requiresToProcess[i++]) {
+                    j = 0; dependOnDecls = []; applyCb = true;
+                    while(dep = require.modules[j++]) {
+                        if(!isDefined(dep)) {
+                            throwModuleNotFound(dep);
+                            applyCb = false;
+                            break;
+                        }
+
+                        dependOnDecls.push(modulesStorage[dep].decl);
+                    }
+                    applyCb && applyRequire(dependOnDecls, require.cb);
+                }
+            },
+
+            applyRequire = function(dependOnDecls, cb) {
+                requireDecls(
+                    dependOnDecls,
+                    function(exports) {
+                        cb.apply(global, exports);
+                    },
+                    []);
+            },
+
+            requireDecls = function(decls, cb, path) {
+                var unresolvedDeclCnt = decls.length;
+
+                if(unresolvedDeclCnt) {
+                    var onDeclResolved,
+                        i = 0, decl;
+
+                    while(decl = decls[i++]) {
+                        if(decl.state === DECL_STATES.RESOLVED) {
+                            --unresolvedDeclCnt;
+                        }
+                        else {
+                            if(curOptions.trackCircularDependencies && isDependenceCircular(decl, path)) {
+                                throwCircularDependenceDetected(decl, path);
+                            }
+
+                            decl.state === DECL_STATES.NOT_RESOLVED && startDeclResolving(decl, path);
+
+                            decl.state === DECL_STATES.RESOLVED? // decl resolved synchronously
+                                --unresolvedDeclCnt :
+                                decl.dependents.push(onDeclResolved || (onDeclResolved = function() {
+                                    --unresolvedDeclCnt || onDeclsResolved(decls, cb);
+                                }));
+                        }
+                    }
+                }
+
+                unresolvedDeclCnt || onDeclsResolved(decls, cb);
+            },
+
+            onDeclsResolved = function(decls, cb) {
+                var exports = [],
+                    i = 0, decl;
+                while(decl = decls[i++]) {
+                    exports.push(decl.exports);
+                }
+                cb(exports);
+            },
+
+            startDeclResolving = function(decl, path) {
+                curOptions.trackCircularDependencies && (path = path.slice()).push(decl);
+                decl.state = DECL_STATES.IN_RESOLVING;
+                var isProvided = false;
+                requireDecls(
+                    decl.dependOnDecls,
+                    function(depDeclsExports) {
+                        decl.fn.apply(
+                            {
+                                name   : decl.name,
+                                deps   : decl.deps,
+                                global : global
+                            },
+                            [function(exports) {
+                                isProvided?
+                                    throwDeclAlreadyProvided(decl) :
+                                    isProvided = true;
+                                provideDecl(decl, exports);
+                                return exports;
+                            }].concat(depDeclsExports));
+                    },
+                    path);
+            },
+
+            provideDecl = function(decl, exports) {
+                decl.exports = exports;
+                decl.state = DECL_STATES.RESOLVED;
+
+                var i = 0, dependent;
+                while(dependent = decl.dependents[i++]) {
+                    dependent(decl.exports);
+                }
+
+                decl.dependents = undef;
+            };
+
+        return {
+            create     : create,
+            define     : define,
+            require    : require,
+            getState   : getState,
+            isDefined  : isDefined,
+            setOptions : setOptions
+        };
     },
 
     isDependenceCircular = function(decl, path) {
@@ -231,14 +273,6 @@ var DECL_STATES = {
             }
         }
         return false;
-    },
-
-    options = function(inputOptions) {
-        for(var name in inputOptions) {
-            if(inputOptions.hasOwnProperty(name)) {
-                curOptions[name] = inputOptions[name];
-            }
-        }
     },
 
     throwException = function(e) {
@@ -269,6 +303,10 @@ var DECL_STATES = {
         throwException(Error('Declaration of module "' + decl.name + '" already provided'));
     },
 
+    throwMultipleDeclarationDetected = function(name) {
+        throwException(Error('Multiple declaration of module "' + name + '" detected'));
+    },
+
     nextTick = (function() {
         var fns = [],
             enqueueFn = function(fn) {
@@ -294,7 +332,7 @@ var DECL_STATES = {
             };
         }
 
-        if(global.postMessage) { // modern browsers
+        if(global.postMessage && !global.opera) { // modern browsers
             var isPostMessageAsync = true;
             if(global.attachEvent) {
                 var checkAsync = function() {
@@ -326,15 +364,16 @@ var DECL_STATES = {
 
         var doc = global.document;
         if('onreadystatechange' in doc.createElement('script')) { // ie6-ie8
-            var createScript = function() {
+            var head = doc.getElementsByTagName('head')[0],
+                createScript = function() {
                     var script = doc.createElement('script');
                     script.onreadystatechange = function() {
                         script.parentNode.removeChild(script);
                         script = script.onreadystatechange = null;
                         callFns();
+                    };
+                    head.appendChild(script);
                 };
-                (doc.documentElement || doc.body).appendChild(script);
-            };
 
             return function(fn) {
                 enqueueFn(fn) && createScript();
@@ -344,20 +383,13 @@ var DECL_STATES = {
         return function(fn) { // old browsers
             enqueueFn(fn) && setTimeout(callFns, 0);
         };
-    })(),
-
-    api = {
-        define    : define,
-        require   : require,
-        isDefined : isDefined,
-        options   : options
-    };
+    })();
 
 if(typeof exports === 'object') {
-    module.exports = api;
+    module.exports = create();
 }
 else {
-    global.modules = api;
+    global.modules = create();
 }
 
 })(this);
@@ -521,8 +553,7 @@ var BEM = inherit(events.Emitter, /** @lends BEM.prototype */ {
          * @protected
          * @type Object
          */
-        this._params = params; // это нужно для правильной сборки параметров у блока из нескольких нод
-        this.params = null;
+        this.params = objects.extend(this.getDefaultParams(), params);
 
         initImmediately !== false?
             this._init() :
@@ -534,20 +565,9 @@ var BEM = inherit(events.Emitter, /** @lends BEM.prototype */ {
      * @private
      */
     _init : function() {
-        if(!this._initing && !this.hasMod('js', 'inited')) {
-            this._initing = true;
-
-            if(!this.params) {
-                this.params = objects.extend(this.getDefaultParams(), this._params);
-                delete this._params;
-            }
-
-            this.setMod('js', 'inited');
-            delete this._initing;
-            this.hasMod('js', 'inited') && this.trigger('init');
-        }
-
-        return this;
+        return this
+            .setMod('js', 'inited')
+            .emit('init');
     },
 
     /**
@@ -560,7 +580,8 @@ var BEM = inherit(events.Emitter, /** @lends BEM.prototype */ {
     emit : function(e, data) {
         this
             .__base(e = this._buildEvent(e), data)
-            .__self.trigger(e, data);
+            .hasMod('js', 'inited') &&
+                this.__self.emit(e, data);
 
         return this;
     },
@@ -1311,15 +1332,16 @@ var global = this.global,
 
     var doc = global.document;
     if('onreadystatechange' in doc.createElement('script')) { // ie6-ie8
-        var createScript = function() {
+        var head = doc.getElementsByTagName('head')[0],
+            createScript = function() {
                 var script = doc.createElement('script');
                 script.onreadystatechange = function() {
                     script.parentNode.removeChild(script);
                     script = script.onreadystatechange = null;
                     callFns();
+                };
+                head.appendChild(script);
             };
-            (doc.documentElement || doc.body).appendChild(script);
-        };
 
         return provide(function(fn) {
             enqueueFn(fn) && createScript();
@@ -1975,7 +1997,7 @@ function init(domElem, uniqInitId) {
             if(block) {
                 if(block.domElem.index(domNode) < 0) {
                     block.domElem = block.domElem.add(domElem);
-                    objects.extend(block._params, blockParams);
+                    objects.extend(block.params, blockParams);
                 }
             } else {
                 initBlock(blockName, domElem, blockParams);
@@ -2017,7 +2039,7 @@ function initBlock(blockName, domElem, params, forceLive, callback) {
         $.unique(uniqIdToDomElems[uniqId]);
     }
 
-    var blockClass = blocks[blockName] || DOM.decl(blockName, {}, { live : true });
+    var blockClass = blocks[blockName] || DOM.decl(blockName, {}, { live : true }, true);
     if(!(blockClass._liveInitable = !!blockClass._processLive()) || forceLive || params.live === false) {
         forceLive && domElem.addClass(BEM_CLASS); // add css class for preventing memory leaks in further destructing
 
@@ -2084,15 +2106,6 @@ function getParams(domNode) {
 function extractParams(domNode) {
     var attrVal = domNode.getAttribute(BEM_PARAMS_ATTR);
     return attrVal? JSON.parse(attrVal) : {};
-}
-
-/**
- * Cleans up all the BEM storages associated with a DOM node
- * @private
- * @param {HTMLElement} domNode DOM node
- */
-function cleanupDomNode(domNode) {
-    delete domElemToParams[identify(domNode)];
 }
 
 /**
@@ -2602,12 +2615,19 @@ var DOM = BEM.decl('i-bem__dom',/** @lends DOM.prototype */{
         var _self = this.__self,
             selector = '.' +
                 names.split(' ').map(function(name) {
-                    return buildClass(_self._name, name, modName, modVal);
+                    return _self.buildClass(name, modName, modVal);
                 }).join(',.'),
             res = findDomElem(ctx, selector);
 
-        if(!strictMode) return res;
+        return strictMode? this._filterFindElemResults(res) : res;
+    },
 
+    /**
+     * Filters results of findElem helper execution in strict mode
+     * @param {jQuery} res DOM elements
+     * @returns {jQuery} DOM elements
+     */
+    _filterFindElemResults : function(res) {
         var blockSelector = this.buildSelector(),
             domElem = this.domElem;
         return res.filter(function() {
@@ -2661,9 +2681,19 @@ var DOM = BEM.decl('i-bem__dom',/** @lends DOM.prototype */{
     },
 
     /**
+     * Finds elements outside the context
+     * @param {jQuery} ctx context
+     * @param {String} elemName Element name
+     * @returns {jQuery} DOM elements
+     */
+    closestElem : function(ctx, elemName) {
+        return ctx.closest(this.buildSelector(elemName));
+    },
+
+    /**
      * Clearing the cache for elements
      * @protected
-     * @param {String} names Nested element name (or names separated by spaces)
+     * @param {String} [names] Nested element name (or names separated by spaces)
      * @param {String} [modName] Modifier name
      * @param {String} [modVal] Modifier value
      * @returns {BEM}
@@ -2697,7 +2727,7 @@ var DOM = BEM.decl('i-bem__dom',/** @lends DOM.prototype */{
             elemName = this.__self._extractElemNameFrom(elem);
         }
 
-        return extractParams(elem[0])[buildClass(this.__self.getName(), elemName)] || {};
+        return extractParams(elem[0])[this.__self.buildClass(elemName)] || {};
     },
 
     /**
@@ -2748,32 +2778,11 @@ var DOM = BEM.decl('i-bem__dom',/** @lends DOM.prototype */{
         var _this = this,
             _self = _this.__self;
 
-        _this._isDestructing = true;
         _this._needSpecialUnbind && _self.doc.add(_self.win).unbind('.' + _this._uniqId);
-
-        _this.dropElemCache().domElem.each(function(i, domNode) {
-            var params = getParams(domNode);
-            objects.each(params, function(blockParams, blockName) {
-                var block = uniqIdToBlock[blockParams.uniqId];
-                if(block) {
-                    if(!block._isDestructing) {
-                        removeDomNodeFromBlock(block, domNode);
-                        delete params[blockName];
-                    }
-                } else {
-                    delete uniqIdToDomElems[blockParams.uniqId];
-                }
-            });
-            objects.isEmpty(params) && cleanupDomNode(domNode);
-        });
-
-        _this.domElem.remove();
 
         _this.__base();
 
         delete uniqIdToBlock[_this.un()._uniqId];
-        delete _this.domElem;
-        delete _this._elemCache;
     }
 
 }, /** @lends DOM */{
@@ -2848,19 +2857,16 @@ var DOM = BEM.decl('i-bem__dom',/** @lends DOM.prototype */{
      */
     destruct : function(ctx, excludeSelf) {
         findDomElem(ctx, BEM_SELECTOR, excludeSelf).each(function(i, domNode) {
-            var params = getParams(this);
-            objects.each(params, function(blockParams, blockName) {
+            var params = getParams(domNode);
+            objects.each(params, function(blockParams) {
                 if(blockParams.uniqId) {
                     var block = uniqIdToBlock[blockParams.uniqId];
-                    if(block) {
-                        removeDomNodeFromBlock(block, domNode);
-                        delete params[blockName];
-                    } else {
+                    block?
+                        removeDomNodeFromBlock(block, domNode) :
                         delete uniqIdToDomElems[blockParams.uniqId];
-                    }
                 }
             });
-            objects.isEmpty(params) && cleanupDomNode(this);
+            delete domElemToParams[identify(domNode)];
         });
 
         excludeSelf? ctx.empty() : ctx.remove();
@@ -3067,7 +3073,7 @@ var DOM = BEM.decl('i-bem__dom',/** @lends DOM.prototype */{
         if(to.elem && to.elem.indexOf(' ') > 0) {
             to.elem.split(' ').forEach(function(elem) {
                 this._liveClassBind(
-                    buildClass(this._name, elem, to.modName, to.modVal),
+                    this.buildClass(elem, to.modName, to.modVal),
                     event,
                     callback,
                     invokeOnInit);
@@ -3076,7 +3082,7 @@ var DOM = BEM.decl('i-bem__dom',/** @lends DOM.prototype */{
         }
 
         return this._liveClassBind(
-            buildClass(this._name, to.elem, to.modName, to.modVal),
+            this.buildClass(to.elem, to.modName, to.modVal),
             event,
             callback,
             invokeOnInit);
@@ -3094,7 +3100,7 @@ var DOM = BEM.decl('i-bem__dom',/** @lends DOM.prototype */{
         if(elem.indexOf(' ') > 1) {
             elem.split(' ').forEach(function(elem) {
                 this._liveClassUnbind(
-                    buildClass(this._name, elem),
+                    this.buildClass(elem),
                     event,
                     callback);
             }, this);
@@ -3102,7 +3108,7 @@ var DOM = BEM.decl('i-bem__dom',/** @lends DOM.prototype */{
         }
 
         return this._liveClassUnbind(
-            buildClass(this._name, elem),
+            this.buildClass(elem),
             event,
             callback);
     },
@@ -3292,7 +3298,7 @@ var DOM = BEM.decl('i-bem__dom',/** @lends DOM.prototype */{
      * @returns {String}
      */
     _buildModClassPrefix : function(modName, elem) {
-        return buildClass(this._name) +
+        return this._name +
                (elem?
                    ELEM_DELIM + (typeof elem === 'string'? elem : this._extractElemNameFrom(elem)) :
                    '') +
@@ -3327,6 +3333,17 @@ var DOM = BEM.decl('i-bem__dom',/** @lends DOM.prototype */{
     },
 
     /**
+     * Builds a CSS class corresponding to the block/element and modifier
+     * @param {String} [elem] Element name
+     * @param {String} [modName] Modifier name
+     * @param {String} [modVal] Modifier value
+     * @returns {String}
+     */
+    buildClass : function(elem, modName, modVal) {
+        return buildClass(this._name, elem, modName, modVal);
+    },
+
+    /**
      * Builds a CSS selector corresponding to the block/element and modifier
      * @param {String} [elem] Element name
      * @param {String} [modName] Modifier name
@@ -3334,7 +3351,7 @@ var DOM = BEM.decl('i-bem__dom',/** @lends DOM.prototype */{
      * @returns {String}
      */
     buildSelector : function(elem, modName, modVal) {
-        return '.' + buildClass(this._name, elem, modName, modVal);
+        return '.' + this.buildClass(elem, modName, modVal);
     }
 });
 
@@ -3450,7 +3467,7 @@ provide(function(path, cb) {
 modules.define('jquery__config', function(provide) {
 
 provide({
-    url : '//yandex.st/jquery/1.10.2/jquery.min.js'
+    url : '//yandex.st/jquery/2.0.3/jquery.min.js'
 });
 
 });

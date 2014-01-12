@@ -1,4 +1,29 @@
 /* 014-live-init-bem-event.css begin */
+/* blocks/map-marks/map-marks.css begin */
+.map-marks
+{
+    font: 18px/1.5em Tahoma;
+}
+
+.map-marks__menu
+{
+    display: inline-block;
+    vertical-align: top;
+    margin-right: 1em;
+}
+
+.map-marks__map-container
+{
+    display: inline-block;
+}
+
+.map-marks__map-container .map
+{
+    width: 500px;
+    height: 500px;
+}
+
+/* blocks/map-marks/map-marks.css end */
 /* blocks/menu/menu.css begin */
 .menu
 {
@@ -19,8 +44,8 @@
 
 .menu__item_state_current .menu__item-selector
 {
-    background: lightblue;
-    padding-right: 1em;
+    background: #0062ff;
+    padding-right: 1.5em;
 }
 
 .menu__item-selector
