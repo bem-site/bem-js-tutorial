@@ -471,6 +471,74 @@ be able to change if checked
 as well as saves time for parsing selectors and bringing architectural
 consistency to the code.
 
+### Initializing on BEM block events
+
+#### BEM events
+
+Besides DOM events, `i-bem.js` operates with custom JavaScript events on the
+JavaScript objects corresponding to the blocks. These events are named `BEM
+events` and usually serve to normalize a component API.
+
+The [`link`
+block](https://github.com/bem/bem-components/tree/a37156b9646b97472776b8ce035ca1736dc7257c/common.blocks/link)
+of `bem-components` block library can provide an example of firing a custom BEM
+event. Its JavaScript functionality is to trigger the `click` event on the
+corresponding JavaScript object whenever a user clicks the left button if the
+current link is not disabled. An event is triggered with the help of `emit` method
+of the block.
+
+```js
+  _onClick : function(e) {
+      e.preventDefault();
+      this.hasMod('disabled') || this.emit('click');
+  }
+```
+
+Thus, the `link` block has an API which can be used by other blocks on a page.
+
+Another example is the [`menu` block](https://github.com/varya/bem-js-tutorial/tree/master/desktop.blocks/menu)
+of this tutorial. It is represets a list of menu items in HTML, one of those can be
+selected at the moment.
+
+```html
+<div class="menu i-bem" data-bem="{&quot;menu&quot;:{}}">
+  <ul class="menu__layout">
+    <li class="menu__layout-unit menu__layout-unit_position_first">
+      <div class="menu__item menu__item_state_current">
+        Item 1
+      </div>
+    </li>
+    <li class="menu__layout-unit">
+      <div class="menu__item menu__item_state_current">
+        Item 2
+      </div>
+    </li>
+    <li class="menu__layout-unit">
+      <div class="menu__item menu__item_state_current">
+        Item 3
+      </div>
+    </li>
+  </ul>
+</div>
+```
+
+The menu listens to the DOM clicks on its `item-selector` elements and emits the
+`current` event which signals about changing the current item and provides the
+data.
+
+```js
+this
+    .delMod(prev, 'state')
+    .emit('current', {
+        prev    : prev,
+        current : elem
+    });
+```
+
+This event fires on the JavaScript object corresponding to the menu block instance.
+With that, any other block subscribed to the `current` BEM event of the menu can
+learn when it changes its current item and react on it.
+
 ---------------------------------------
 ### Links
  * [Core document](README.md)
