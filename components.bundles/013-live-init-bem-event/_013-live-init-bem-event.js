@@ -7,220 +7,262 @@
  * http://www.opensource.org/licenses/mit-license.php
  * http://www.gnu.org/licenses/gpl.html
  *
- * @version 0.0.8
+ * @version 0.0.12
  */
 
 (function(global) {
 
-var DECL_STATES = {
-        NOT_RESOLVED : 0,
-        IN_RESOLVING : 1,
-        RESOLVED     : 2
-    },
-
-    curOptions = {
-        trackCircularDependencies : true
-    },
-
-    undef,
-    modulesStorage = {},
-    declsToCalc = [],
-    waitForNextTick = false,
-    pendingRequires = [],
-
-    /**
-     * Defines module
-     * @param {String} name
-     * @param {String[]} [deps]
-     * @param {Function} declFn
-     */
-    define = function(name, deps, declFn) {
-        if(!declFn) {
-            declFn = deps;
-            deps = [];
-        }
-
-        var module = modulesStorage[name] || (modulesStorage[name] = {
-                name : name,
-                decl : undef
-            });
-
-        declsToCalc.push(module.decl = {
-            name          : name,
-            fn            : declFn,
-            state         : DECL_STATES.NOT_RESOLVED,
-            deps          : deps,
-            prevDecl      : module.decl,
-            dependOnDecls : [],
-            dependents    : [],
-            exports       : undef
-        });
+var undef,
+    DECL_STATES = {
+        NOT_RESOLVED : 'NOT_RESOLVED',
+        IN_RESOLVING : 'IN_RESOLVING',
+        RESOLVED     : 'RESOLVED'
     },
 
     /**
-     * Requires modules
-     * @param {String[]} modules
-     * @param {Function} cb
+     * Creates a new instance of modular system
+     * @returns {Object}
      */
-    require = function(modules, cb) {
-        if(!waitForNextTick) {
-            waitForNextTick = true;
-            nextTick(onNextTick);
-        }
-
-        pendingRequires.push({
-            modules : modules,
-            cb      : cb
-        });
-    },
-
-    /**
-     * Returns whether the module is defined
-     * @param {String} name
-     * @returns {Boolean}
-     */
-    isDefined = function(name) {
-        return !!modulesStorage[name];
-    },
-
-    onNextTick = function() {
-        waitForNextTick = false;
-        calcDeclDeps();
-        applyRequires();
-    },
-
-    calcDeclDeps = function() {
-        var i = 0, decl, j, dep, dependOnDecls;
-        while(decl = declsToCalc[i++]) {
-            j = 0;
-            dependOnDecls = decl.dependOnDecls;
-            while(dep = decl.deps[j++]) {
-                if(!isDefined(dep)) {
-                    throwModuleNotFound(dep, decl);
-                    break;
-                }
-                dependOnDecls.push(modulesStorage[dep].decl);
-            }
-
-            if(decl.prevDecl) {
-                dependOnDecls.push(decl.prevDecl);
-                decl.prevDecl = undef;
-            }
-        }
-
-        declsToCalc = [];
-    },
-
-    applyRequires = function() {
-        var requiresToProcess = pendingRequires,
-            require, i = 0, j, dep, dependOnDecls, applyCb;
-
-        pendingRequires = [];
-
-        while(require = requiresToProcess[i++]) {
-            j = 0; dependOnDecls = []; applyCb = true;
-            while(dep = require.modules[j++]) {
-                if(!isDefined(dep)) {
-                    throwModuleNotFound(dep);
-                    applyCb = false;
-                    break;
-                }
-
-                dependOnDecls.push(modulesStorage[dep].decl);
-            }
-            applyCb && applyRequire(dependOnDecls, require.cb);
-        }
-    },
-
-    applyRequire = function(dependOnDecls, cb) {
-        requireDecls(
-            dependOnDecls,
-            function(exports) {
-                cb.apply(global, exports);
+    create = function() {
+        var curOptions = {
+                trackCircularDependencies : true,
+                allowMultipleDeclarations : true
             },
-            []);
-    },
 
-    requireDecls = function(decls, cb, path) {
-        var unresolvedDeclCnt = decls.length,
-            checkUnresolved = true;
+            modulesStorage = {},
+            declsToCalc = [],
+            waitForNextTick = false,
+            pendingRequires = [],
 
-        if(unresolvedDeclCnt) {
-            var onDeclResolved = function() {
-                    --unresolvedDeclCnt || onDeclsResolved(decls, cb);
-                },
-                i = 0, decl;
+            /**
+             * Defines module
+             * @param {String} name
+             * @param {String[]} [deps]
+             * @param {Function} declFn
+             */
+            define = function(name, deps, declFn) {
+                if(!declFn) {
+                    declFn = deps;
+                    deps = [];
+                }
 
-            while(decl = decls[i++]) {
-                if(decl.state === DECL_STATES.RESOLVED) {
-                    --unresolvedDeclCnt;
+                var module = modulesStorage[name];
+                if(module) {
+                    if(!curOptions.allowMultipleDeclarations) {
+                        throwMultipleDeclarationDetected(name);
+                        return;
+                    }
                 }
                 else {
-                    if(curOptions.trackCircularDependencies && isDependenceCircular(decl, path)) {
-                        throwCircularDependenceDetected(decl, path);
-                    }
+                    module = modulesStorage[name] = {
+                        name : name,
+                        decl : undef
+                    };
+                }
 
-                    decl.state === DECL_STATES.NOT_RESOLVED && startDeclResolving(decl, path);
+                declsToCalc.push(module.decl = {
+                    name          : name,
+                    fn            : declFn,
+                    state         : DECL_STATES.NOT_RESOLVED,
+                    deps          : deps,
+                    prevDecl      : module.decl,
+                    dependOnDecls : [],
+                    dependents    : [],
+                    exports       : undef
+                });
+            },
 
-                    if(decl.state === DECL_STATES.RESOLVED) { // decl was resolved synchronously
-                        --unresolvedDeclCnt;
-                    }
-                    else {
-                        decl.dependents.push(onDeclResolved);
-                        checkUnresolved = false;
+            /**
+             * Requires modules
+             * @param {String[]} modules
+             * @param {Function} cb
+             */
+            require = function(modules, cb) {
+                if(!waitForNextTick) {
+                    waitForNextTick = true;
+                    nextTick(onNextTick);
+                }
+
+                pendingRequires.push({
+                    modules : modules,
+                    cb      : cb
+                });
+            },
+
+            /**
+             * Returns state of module
+             * @param {String} name
+             * @returns {String} state, possible values NOT_DEFINED, NOT_RESOLVED, IN_RESOLVING, RESOLVED
+             */
+            getState = function(name) {
+                var module = modulesStorage[name];
+                return module?
+                    DECL_STATES[module.decl.state] :
+                    'NOT_DEFINED';
+            },
+
+            /**
+             * Returns whether the module is defined
+             * @param {String} name
+             * @returns {Boolean}
+             */
+            isDefined = function(name) {
+                return !!modulesStorage[name];
+            },
+
+            /**
+             * Sets options
+             * @param {Object} options
+             */
+            setOptions = function(options) {
+                for(var name in options) {
+                    if(options.hasOwnProperty(name)) {
+                        curOptions[name] = options[name];
                     }
                 }
-            }
-        }
-
-        if(checkUnresolved && !unresolvedDeclCnt) {
-            onDeclsResolved(decls, cb);
-        }
-    },
-
-    onDeclsResolved = function(decls, cb) {
-        var exports = [],
-            i = 0, decl;
-        while(decl = decls[i++]) {
-            exports.push(decl.exports);
-        }
-        cb(exports);
-    },
-
-    startDeclResolving = function(decl, path) {
-        curOptions.trackCircularDependencies && (path = path.slice()).push(decl);
-        decl.state = DECL_STATES.IN_RESOLVING;
-        var isProvided = false;
-        requireDecls(
-            decl.dependOnDecls,
-            function(depDeclsExports) {
-                decl.fn.apply(
-                    {
-                        name   : decl.name,
-                        deps   : decl.deps,
-                        global : global
-                    },
-                    [function(exports) {
-                        isProvided?
-                            throwDeclAlreadyProvided(decl) :
-                            isProvided = true;
-                        provideDecl(decl, exports);
-                        return exports;
-                    }].concat(depDeclsExports));
             },
-            path);
-    },
 
-    provideDecl = function(decl, exports) {
-        decl.exports = exports;
-        decl.state = DECL_STATES.RESOLVED;
+            onNextTick = function() {
+                waitForNextTick = false;
+                calcDeclDeps();
+                applyRequires();
+            },
 
-        var i = 0, dependent;
-        while(dependent = decl.dependents[i++]) {
-            dependent(decl.exports);
-        }
+            calcDeclDeps = function() {
+                var i = 0, decl, j, dep, dependOnDecls;
+                while(decl = declsToCalc[i++]) {
+                    j = 0;
+                    dependOnDecls = decl.dependOnDecls;
+                    while(dep = decl.deps[j++]) {
+                        if(!isDefined(dep)) {
+                            throwModuleNotFound(dep, decl);
+                            break;
+                        }
+                        dependOnDecls.push(modulesStorage[dep].decl);
+                    }
 
-        decl.dependents = undef;
+                    if(decl.prevDecl) {
+                        dependOnDecls.push(decl.prevDecl);
+                        decl.prevDecl = undef;
+                    }
+                }
+
+                declsToCalc = [];
+            },
+
+            applyRequires = function() {
+                var requiresToProcess = pendingRequires,
+                    require, i = 0, j, dep, dependOnDecls, applyCb;
+
+                pendingRequires = [];
+
+                while(require = requiresToProcess[i++]) {
+                    j = 0; dependOnDecls = []; applyCb = true;
+                    while(dep = require.modules[j++]) {
+                        if(!isDefined(dep)) {
+                            throwModuleNotFound(dep);
+                            applyCb = false;
+                            break;
+                        }
+
+                        dependOnDecls.push(modulesStorage[dep].decl);
+                    }
+                    applyCb && applyRequire(dependOnDecls, require.cb);
+                }
+            },
+
+            applyRequire = function(dependOnDecls, cb) {
+                requireDecls(
+                    dependOnDecls,
+                    function(exports) {
+                        cb.apply(global, exports);
+                    },
+                    []);
+            },
+
+            requireDecls = function(decls, cb, path) {
+                var unresolvedDeclCnt = decls.length;
+
+                if(unresolvedDeclCnt) {
+                    var onDeclResolved,
+                        i = 0, decl;
+
+                    while(decl = decls[i++]) {
+                        if(decl.state === DECL_STATES.RESOLVED) {
+                            --unresolvedDeclCnt;
+                        }
+                        else {
+                            if(curOptions.trackCircularDependencies && isDependenceCircular(decl, path)) {
+                                throwCircularDependenceDetected(decl, path);
+                            }
+
+                            decl.state === DECL_STATES.NOT_RESOLVED && startDeclResolving(decl, path);
+
+                            decl.state === DECL_STATES.RESOLVED? // decl resolved synchronously
+                                --unresolvedDeclCnt :
+                                decl.dependents.push(onDeclResolved || (onDeclResolved = function() {
+                                    --unresolvedDeclCnt || onDeclsResolved(decls, cb);
+                                }));
+                        }
+                    }
+                }
+
+                unresolvedDeclCnt || onDeclsResolved(decls, cb);
+            },
+
+            onDeclsResolved = function(decls, cb) {
+                var exports = [],
+                    i = 0, decl;
+                while(decl = decls[i++]) {
+                    exports.push(decl.exports);
+                }
+                cb(exports);
+            },
+
+            startDeclResolving = function(decl, path) {
+                curOptions.trackCircularDependencies && (path = path.slice()).push(decl);
+                decl.state = DECL_STATES.IN_RESOLVING;
+                var isProvided = false;
+                requireDecls(
+                    decl.dependOnDecls,
+                    function(depDeclsExports) {
+                        decl.fn.apply(
+                            {
+                                name   : decl.name,
+                                deps   : decl.deps,
+                                global : global
+                            },
+                            [function(exports) {
+                                isProvided?
+                                    throwDeclAlreadyProvided(decl) :
+                                    isProvided = true;
+                                provideDecl(decl, exports);
+                                return exports;
+                            }].concat(depDeclsExports));
+                    },
+                    path);
+            },
+
+            provideDecl = function(decl, exports) {
+                decl.exports = exports;
+                decl.state = DECL_STATES.RESOLVED;
+
+                var i = 0, dependent;
+                while(dependent = decl.dependents[i++]) {
+                    dependent(decl.exports);
+                }
+
+                decl.dependents = undef;
+            };
+
+        return {
+            create     : create,
+            define     : define,
+            require    : require,
+            getState   : getState,
+            isDefined  : isDefined,
+            setOptions : setOptions
+        };
     },
 
     isDependenceCircular = function(decl, path) {
@@ -231,14 +273,6 @@ var DECL_STATES = {
             }
         }
         return false;
-    },
-
-    options = function(inputOptions) {
-        for(var name in inputOptions) {
-            if(inputOptions.hasOwnProperty(name)) {
-                curOptions[name] = inputOptions[name];
-            }
-        }
     },
 
     throwException = function(e) {
@@ -269,6 +303,10 @@ var DECL_STATES = {
         throwException(Error('Declaration of module "' + decl.name + '" already provided'));
     },
 
+    throwMultipleDeclarationDetected = function(name) {
+        throwException(Error('Multiple declaration of module "' + name + '" detected'));
+    },
+
     nextTick = (function() {
         var fns = [],
             enqueueFn = function(fn) {
@@ -294,7 +332,7 @@ var DECL_STATES = {
             };
         }
 
-        if(global.postMessage) { // modern browsers
+        if(global.postMessage && !global.opera) { // modern browsers
             var isPostMessageAsync = true;
             if(global.attachEvent) {
                 var checkAsync = function() {
@@ -326,15 +364,16 @@ var DECL_STATES = {
 
         var doc = global.document;
         if('onreadystatechange' in doc.createElement('script')) { // ie6-ie8
-            var createScript = function() {
+            var head = doc.getElementsByTagName('head')[0],
+                createScript = function() {
                     var script = doc.createElement('script');
                     script.onreadystatechange = function() {
                         script.parentNode.removeChild(script);
                         script = script.onreadystatechange = null;
                         callFns();
+                    };
+                    head.appendChild(script);
                 };
-                (doc.documentElement || doc.body).appendChild(script);
-            };
 
             return function(fn) {
                 enqueueFn(fn) && createScript();
@@ -344,20 +383,13 @@ var DECL_STATES = {
         return function(fn) { // old browsers
             enqueueFn(fn) && setTimeout(callFns, 0);
         };
-    })(),
-
-    api = {
-        define    : define,
-        require   : require,
-        isDefined : isDefined,
-        options   : options
-    };
+    })();
 
 if(typeof exports === 'object') {
-    module.exports = api;
+    module.exports = create();
 }
 else {
-    global.modules = api;
+    global.modules = create();
 }
 
 })(this);
@@ -521,8 +553,7 @@ var BEM = inherit(events.Emitter, /** @lends BEM.prototype */ {
          * @protected
          * @type Object
          */
-        this._params = params; // это нужно для правильной сборки параметров у блока из нескольких нод
-        this.params = null;
+        this.params = objects.extend(this.getDefaultParams(), params);
 
         initImmediately !== false?
             this._init() :
@@ -534,20 +565,9 @@ var BEM = inherit(events.Emitter, /** @lends BEM.prototype */ {
      * @private
      */
     _init : function() {
-        if(!this._initing && !this.hasMod('js', 'inited')) {
-            this._initing = true;
-
-            if(!this.params) {
-                this.params = objects.extend(this.getDefaultParams(), this._params);
-                delete this._params;
-            }
-
-            this.setMod('js', 'inited');
-            delete this._initing;
-            this.hasMod('js', 'inited') && this.trigger('init');
-        }
-
-        return this;
+        return this
+            .setMod('js', 'inited')
+            .emit('init');
     },
 
     /**
@@ -560,7 +580,8 @@ var BEM = inherit(events.Emitter, /** @lends BEM.prototype */ {
     emit : function(e, data) {
         this
             .__base(e = this._buildEvent(e), data)
-            .__self.trigger(e, data);
+            .hasMod('js', 'inited') &&
+                this.__self.emit(e, data);
 
         return this;
     },
@@ -1311,15 +1332,16 @@ var global = this.global,
 
     var doc = global.document;
     if('onreadystatechange' in doc.createElement('script')) { // ie6-ie8
-        var createScript = function() {
+        var head = doc.getElementsByTagName('head')[0],
+            createScript = function() {
                 var script = doc.createElement('script');
                 script.onreadystatechange = function() {
                     script.parentNode.removeChild(script);
                     script = script.onreadystatechange = null;
                     callFns();
+                };
+                head.appendChild(script);
             };
-            (doc.documentElement || doc.body).appendChild(script);
-        };
 
         return provide(function(fn) {
             enqueueFn(fn) && createScript();
@@ -1975,7 +1997,7 @@ function init(domElem, uniqInitId) {
             if(block) {
                 if(block.domElem.index(domNode) < 0) {
                     block.domElem = block.domElem.add(domElem);
-                    objects.extend(block._params, blockParams);
+                    objects.extend(block.params, blockParams);
                 }
             } else {
                 initBlock(blockName, domElem, blockParams);
@@ -2017,7 +2039,7 @@ function initBlock(blockName, domElem, params, forceLive, callback) {
         $.unique(uniqIdToDomElems[uniqId]);
     }
 
-    var blockClass = blocks[blockName] || DOM.decl(blockName, {}, { live : true });
+    var blockClass = blocks[blockName] || DOM.decl(blockName, {}, { live : true }, true);
     if(!(blockClass._liveInitable = !!blockClass._processLive()) || forceLive || params.live === false) {
         forceLive && domElem.addClass(BEM_CLASS); // add css class for preventing memory leaks in further destructing
 
@@ -2084,15 +2106,6 @@ function getParams(domNode) {
 function extractParams(domNode) {
     var attrVal = domNode.getAttribute(BEM_PARAMS_ATTR);
     return attrVal? JSON.parse(attrVal) : {};
-}
-
-/**
- * Cleans up all the BEM storages associated with a DOM node
- * @private
- * @param {HTMLElement} domNode DOM node
- */
-function cleanupDomNode(domNode) {
-    delete domElemToParams[identify(domNode)];
 }
 
 /**
@@ -2602,12 +2615,19 @@ var DOM = BEM.decl('i-bem__dom',/** @lends DOM.prototype */{
         var _self = this.__self,
             selector = '.' +
                 names.split(' ').map(function(name) {
-                    return buildClass(_self._name, name, modName, modVal);
+                    return _self.buildClass(name, modName, modVal);
                 }).join(',.'),
             res = findDomElem(ctx, selector);
 
-        if(!strictMode) return res;
+        return strictMode? this._filterFindElemResults(res) : res;
+    },
 
+    /**
+     * Filters results of findElem helper execution in strict mode
+     * @param {jQuery} res DOM elements
+     * @returns {jQuery} DOM elements
+     */
+    _filterFindElemResults : function(res) {
         var blockSelector = this.buildSelector(),
             domElem = this.domElem;
         return res.filter(function() {
@@ -2661,9 +2681,19 @@ var DOM = BEM.decl('i-bem__dom',/** @lends DOM.prototype */{
     },
 
     /**
+     * Finds elements outside the context
+     * @param {jQuery} ctx context
+     * @param {String} elemName Element name
+     * @returns {jQuery} DOM elements
+     */
+    closestElem : function(ctx, elemName) {
+        return ctx.closest(this.buildSelector(elemName));
+    },
+
+    /**
      * Clearing the cache for elements
      * @protected
-     * @param {String} names Nested element name (or names separated by spaces)
+     * @param {String} [names] Nested element name (or names separated by spaces)
      * @param {String} [modName] Modifier name
      * @param {String} [modVal] Modifier value
      * @returns {BEM}
@@ -2697,7 +2727,7 @@ var DOM = BEM.decl('i-bem__dom',/** @lends DOM.prototype */{
             elemName = this.__self._extractElemNameFrom(elem);
         }
 
-        return extractParams(elem[0])[buildClass(this.__self.getName(), elemName)] || {};
+        return extractParams(elem[0])[this.__self.buildClass(elemName)] || {};
     },
 
     /**
@@ -2748,32 +2778,11 @@ var DOM = BEM.decl('i-bem__dom',/** @lends DOM.prototype */{
         var _this = this,
             _self = _this.__self;
 
-        _this._isDestructing = true;
         _this._needSpecialUnbind && _self.doc.add(_self.win).unbind('.' + _this._uniqId);
-
-        _this.dropElemCache().domElem.each(function(i, domNode) {
-            var params = getParams(domNode);
-            objects.each(params, function(blockParams, blockName) {
-                var block = uniqIdToBlock[blockParams.uniqId];
-                if(block) {
-                    if(!block._isDestructing) {
-                        removeDomNodeFromBlock(block, domNode);
-                        delete params[blockName];
-                    }
-                } else {
-                    delete uniqIdToDomElems[blockParams.uniqId];
-                }
-            });
-            objects.isEmpty(params) && cleanupDomNode(domNode);
-        });
-
-        _this.domElem.remove();
 
         _this.__base();
 
         delete uniqIdToBlock[_this.un()._uniqId];
-        delete _this.domElem;
-        delete _this._elemCache;
     }
 
 }, /** @lends DOM */{
@@ -2848,19 +2857,16 @@ var DOM = BEM.decl('i-bem__dom',/** @lends DOM.prototype */{
      */
     destruct : function(ctx, excludeSelf) {
         findDomElem(ctx, BEM_SELECTOR, excludeSelf).each(function(i, domNode) {
-            var params = getParams(this);
-            objects.each(params, function(blockParams, blockName) {
+            var params = getParams(domNode);
+            objects.each(params, function(blockParams) {
                 if(blockParams.uniqId) {
                     var block = uniqIdToBlock[blockParams.uniqId];
-                    if(block) {
-                        removeDomNodeFromBlock(block, domNode);
-                        delete params[blockName];
-                    } else {
+                    block?
+                        removeDomNodeFromBlock(block, domNode) :
                         delete uniqIdToDomElems[blockParams.uniqId];
-                    }
                 }
             });
-            objects.isEmpty(params) && cleanupDomNode(this);
+            delete domElemToParams[identify(domNode)];
         });
 
         excludeSelf? ctx.empty() : ctx.remove();
@@ -3067,7 +3073,7 @@ var DOM = BEM.decl('i-bem__dom',/** @lends DOM.prototype */{
         if(to.elem && to.elem.indexOf(' ') > 0) {
             to.elem.split(' ').forEach(function(elem) {
                 this._liveClassBind(
-                    buildClass(this._name, elem, to.modName, to.modVal),
+                    this.buildClass(elem, to.modName, to.modVal),
                     event,
                     callback,
                     invokeOnInit);
@@ -3076,7 +3082,7 @@ var DOM = BEM.decl('i-bem__dom',/** @lends DOM.prototype */{
         }
 
         return this._liveClassBind(
-            buildClass(this._name, to.elem, to.modName, to.modVal),
+            this.buildClass(to.elem, to.modName, to.modVal),
             event,
             callback,
             invokeOnInit);
@@ -3094,7 +3100,7 @@ var DOM = BEM.decl('i-bem__dom',/** @lends DOM.prototype */{
         if(elem.indexOf(' ') > 1) {
             elem.split(' ').forEach(function(elem) {
                 this._liveClassUnbind(
-                    buildClass(this._name, elem),
+                    this.buildClass(elem),
                     event,
                     callback);
             }, this);
@@ -3102,7 +3108,7 @@ var DOM = BEM.decl('i-bem__dom',/** @lends DOM.prototype */{
         }
 
         return this._liveClassUnbind(
-            buildClass(this._name, elem),
+            this.buildClass(elem),
             event,
             callback);
     },
@@ -3292,7 +3298,7 @@ var DOM = BEM.decl('i-bem__dom',/** @lends DOM.prototype */{
      * @returns {String}
      */
     _buildModClassPrefix : function(modName, elem) {
-        return buildClass(this._name) +
+        return this._name +
                (elem?
                    ELEM_DELIM + (typeof elem === 'string'? elem : this._extractElemNameFrom(elem)) :
                    '') +
@@ -3327,6 +3333,17 @@ var DOM = BEM.decl('i-bem__dom',/** @lends DOM.prototype */{
     },
 
     /**
+     * Builds a CSS class corresponding to the block/element and modifier
+     * @param {String} [elem] Element name
+     * @param {String} [modName] Modifier name
+     * @param {String} [modVal] Modifier value
+     * @returns {String}
+     */
+    buildClass : function(elem, modName, modVal) {
+        return buildClass(this._name, elem, modName, modVal);
+    },
+
+    /**
      * Builds a CSS selector corresponding to the block/element and modifier
      * @param {String} [elem] Element name
      * @param {String} [modName] Modifier name
@@ -3334,7 +3351,7 @@ var DOM = BEM.decl('i-bem__dom',/** @lends DOM.prototype */{
      * @returns {String}
      */
     buildSelector : function(elem, modName, modVal) {
-        return '.' + buildClass(this._name, elem, modName, modVal);
+        return '.' + this.buildClass(elem, modName, modVal);
     }
 });
 
@@ -3450,11 +3467,71 @@ provide(function(path, cb) {
 modules.define('jquery__config', function(provide) {
 
 provide({
-    url : '//yandex.st/jquery/1.10.2/jquery.min.js'
+    url : '//yandex.st/jquery/2.0.3/jquery.min.js'
 });
 
 });
 /* ../../libs/bem-core/common.blocks/jquery/__config/jquery__config.js end */
+;
+/* ../../libs/bem-core/desktop.blocks/jquery/__config/jquery__config.js begin */
+/**
+ * @module jquery__config
+ */
+
+modules.define(
+    'jquery__config',
+    ['ua', 'objects'],
+    function(provide, ua, objects, base) {
+
+provide(
+    ua.msie && parseInt(ua.version, 10) < 9?
+        objects.extend(
+            base,
+            {
+                url : '//yandex.st/jquery/1.10.2/jquery.min.js'
+            }) :
+        base);
+
+});
+/* ../../libs/bem-core/desktop.blocks/jquery/__config/jquery__config.js end */
+;
+/* ../../libs/bem-core/desktop.blocks/ua/ua.js begin */
+/** 
+ * @module ua
+ * @description inspired by http://code.jquery.com/jquery-migrate-1.1.1.js
+ */
+
+modules.define('ua', function(provide) {
+
+var ua = navigator.userAgent.toLowerCase(),
+    match = /(chrome)[ \/]([\w.]+)/.exec(ua) ||
+        /(webkit)[ \/]([\w.]+)/.exec(ua) ||
+        /(opera)(?:.*version|)[ \/]([\w.]+)/.exec(ua) ||
+        /(msie) ([\w.]+)/.exec(ua) ||
+        ua.indexOf('compatible') < 0 && /(mozilla)(?:.*? rv:([\w.]+)|)/.exec(ua) ||
+        [],
+    matched = {
+        browser : match[1] || '',
+        version : match[2] || '0'
+    },
+    browser = {};
+
+if(matched.browser) {
+    browser[matched.browser] = true;
+    browser.version = matched.version;
+}
+
+if(browser.chrome) {
+    browser.webkit = true;
+} else if(browser.webkit) {
+    browser.safari = true;
+}
+
+provide(browser);
+
+});
+
+/* ../../libs/bem-core/desktop.blocks/ua/ua.js end */
 ;
 /* ../../libs/bem-core/common.blocks/dom/dom.js begin */
 /**
@@ -3926,522 +4003,399 @@ provide(BEMDOM);
 
 /* ../../libs/bem-components/common.blocks/checkbox/checkbox.js end */
 ;
-/* ../../libs/bem-core/common.blocks/pointer-events/pointer-events.js begin */
-﻿// https://handjs.codeplex.com/
+/* ../../libs/bem-core/common.blocks/jquery/__event/_type/jquery__event_type_pointer.js begin */
+﻿/**
+ * Basic polyfill for "Pointer Events" W3C Candidate Recommendation
+ * with addition of custom pointerpress/pointerrelease events.
+ *
+ * @see http://www.w3.org/TR/pointerevents/
+ * @see https://dvcs.w3.org/hg/pointerevents/raw-file/tip/pointerEvents.html
+ * @see https://dvcs.w3.org/hg/webevents/raw-file/default/touchevents.html
+ * @see http://msdn.microsoft.com/en-US/library/ie/hh673557.aspx
+ * @see http://www.benalman.com/news/2010/03/jquery-special-events/
+ * @see http://api.jquery.com/category/events/event-object/
+ *
+ * @modules pointerevents
+ *
+ * @author Kir Belevich <kir@soulshine.in>
+ * @copyright Kir Belevich 2013
+ * @license MIT
+ * @version 0.1.0
+ */
+modules.define('jquery', function(provide, $) {
 
-(function () {
-    // Installing Hand.js
-    var supportedEventsNames = ["PointerDown", "PointerUp", "PointerMove", "PointerOver", "PointerOut", "PointerCancel", "PointerEnter", "PointerLeave",
-                                "pointerdown", "pointerup", "pointermove", "pointerover", "pointerout", "pointercancel", "pointerenter", "pointerleave"
-    ];
+// nothing to do
+if(window.navigator.pointerEnabled) {
+    provide($);
+    return;
+}
 
-    var POINTER_TYPE_TOUCH = "touch";
-    var POINTER_TYPE_PEN = "pen";
-    var POINTER_TYPE_MOUSE = "mouse";
+// current events type and aliases
+var current;
 
-    var previousTargets = {};
+// touch
+// https://github.com/ariya/phantomjs/issues/10375
+if('ontouchstart' in window && !('_phantom' in window)) {
+    current = {
+        type : 'touch',
+        enter : 'touchstart',
+        over : 'touchstart',
+        down : 'touchstart',
+        move : 'touchmove',
+        up : 'touchend',
+        out : 'touchend',
+        leave : 'touchend',
+        cancel : 'touchcancel'
+    };
+// msPointer
+} else if(window.navigator.msPointerEnabled) {
+    current = {
+        type : 'mspointer',
+        enter : 'mouseenter', // :(
+        over : 'MSPointerOver',
+        down : 'MSPointerDown',
+        move : 'MSPointerMove',
+        up : 'MSPointerUp',
+        out : 'MSPointerOut',
+        leave : 'mouseleave', // :(
+        cancel : 'MSPointerCancel'
+    };
+// mouse
+} else {
+    current = {
+        type : 'mouse',
+        enter : 'mouseenter',
+        over : 'mouseover',
+        down : 'mousedown',
+        move : 'mousemove',
+        up : 'mouseup',
+        out : 'mouseout',
+        leave : 'mouseleave'
+    };
+}
 
-    // Touch events
-    var generateTouchClonedEvent = function (sourceEvent, newName) {
-        // Considering touch events are almost like super mouse events
-        var evObj;
+var isTouch = current.type === 'touch',
+    isMouse = current.type === 'mouse';
 
-        if (document.createEvent) {
-            evObj = document.createEvent('MouseEvents');
-            evObj.initMouseEvent(newName, true, true, window, 1, sourceEvent.screenX, sourceEvent.screenY,
-                sourceEvent.clientX, sourceEvent.clientY, sourceEvent.ctrlKey, sourceEvent.altKey,
-                sourceEvent.shiftKey, sourceEvent.metaKey, sourceEvent.button, null);
-        }
-        else {
-            evObj = document.createEventObject();
-            evObj.screenX = sourceEvent.screenX;
-            evObj.screenY = sourceEvent.screenY;
-            evObj.clientX = sourceEvent.clientX;
-            evObj.clientY = sourceEvent.clientY;
-            evObj.ctrlKey = sourceEvent.ctrlKey;
-            evObj.altKey = sourceEvent.altKey;
-            evObj.shiftKey = sourceEvent.shiftKey;
-            evObj.metaKey = sourceEvent.metaKey;
-            evObj.button = sourceEvent.button;
-        }
-        // offsets
-        if (evObj.offsetX === undefined) {
-            if (sourceEvent.offsetX !== undefined) {
+/**
+ * Mutate an argument event to PointerEvent.
+ *
+ * @param {Object} e current event
+ * @param {String} type new pointerevent type
+ */
+function PointerEvent(e, type) {
+    e.type = type;
+    // do not do anything with multiple touch-events because of gestures
+    if(!(type === 'touch' && e.originalEvent.changedTouches.length > 1)) {
+        normalizeToJQueryEvent(e);
+        extendToPointerEvent(e);
+        $.extend(this, e);
+    }
+}
 
-                // For Opera which creates readonly properties
-                if (Object && Object.defineProperty !== undefined) {
-                    Object.defineProperty(evObj, "offsetX", {
-                        writable: true
-                    });
-                    Object.defineProperty(evObj, "offsetY", {
-                        writable: true
-                    });
-                }
+/**
+ * Dispatch current event.
+ *
+ * @param {Element} target target element
+ */
+PointerEvent.prototype.dispatch = function(target) {
+    this.type && ($.event.handle || $.event.dispatch).call(target, this);
+    return this;
+};
 
-                evObj.offsetX = sourceEvent.offsetX;
-                evObj.offsetY = sourceEvent.offsetY;
+/**
+ * Normalize only touch-event to jQuery event interface.
+ *
+ * @see http://api.jquery.com/category/events/event-object/
+ *
+ * @param {Object} e input event
+ */
+function normalizeToJQueryEvent(e) {
+    if(!isTouch) return;
+
+    var touchPoint = e.originalEvent.changedTouches[0];
+
+    // keep all the properties normalized by jQuery
+    e.clientX = touchPoint.clientX;
+    e.clientY = touchPoint.clientY;
+    e.pageX = touchPoint.pageX;
+    e.pageY = touchPoint.pageY;
+    e.screenX = touchPoint.screenX;
+    e.screenY = touchPoint.screenY;
+    e.layerX = e.originalEvent.layerX;
+    e.layerY = e.originalEvent.layerY;
+    e.offsetX = e.layerX - e.currentTarget.offsetLeft;
+    e.offsetY = e.layerY - e.currentTarget.offsetTop;
+    e.target = touchPoint.target;
+    e.identifier = touchPoint.identifier;
+}
+
+/**
+ * Extend event to match PointerEvent Interface.
+ *
+ * @see https://dvcs.w3.org/hg/pointerevents/raw-file/tip/pointerEvents.html#pointer-events-and-interfaces
+ * @see https://dvcs.w3.org/hg/webevents/raw-file/default/touchevents.html
+ * @param {Object} e input event
+ */
+function extendToPointerEvent(e) {
+    e.width = e.width ||
+        e.webkitRadiusX ||
+        e.radiusX ||
+        0;
+
+    e.height = e.width ||
+        e.webkitRadiusY ||
+        e.radiusY ||
+        0;
+
+    // TODO: stupid Android somehow could send "force" > 1 ;(
+    e.pressure = e.pressure ||
+        e.mozPressure ||
+        e.webkitForce ||
+        e.force ||
+        e.which && 0.5 ||
+        0;
+
+    e.tiltX = e.tiltX || 0;
+    e.tiltY = e.tiltY || 0;
+    e.pointerType = e.pointerType || current.type;
+
+    // https://dvcs.w3.org/hg/pointerevents/raw-file/tip/pointerEvents.html#the-primary-pointer
+    e.isPrimary = true;
+
+    // "1" is always for mouse, need to +2 for touch which can start from "0"
+    e.pointerId = e.identifier? e.identifier + 2 : 1;
+}
+
+function addSpecialEvent(eventType, extend) {
+    var pointerEventType = 'pointer' + eventType,
+        handlerFn = 'handler' + (isTouch? 'Touch' : 'NonTouch'),
+        specialEvent = $.event.special[pointerEventType] = {
+            setup : function() {
+                $(this).on(current[eventType], specialEvent.handler);
+            },
+
+            teardown : function() {
+                $(this).off(current[eventType], specialEvent.handler);
+            },
+
+            handler : function() {
+                specialEvent[handlerFn].apply(this, arguments);
+            },
+
+            handlerTouch : function(e) {
+                var pointerEvent = new PointerEvent(e, pointerEventType);
+                pointerEvent.dispatch(pointerEvent.target);
+            },
+
+            handlerNonTouch : function(e) {
+                new PointerEvent(e, pointerEventType).dispatch(this);
             }
-            else if (sourceEvent.layerX !== undefined) {
-                evObj.offsetX = sourceEvent.layerX - sourceEvent.currentTarget.offsetLeft;
-                evObj.offsetY = sourceEvent.layerY - sourceEvent.currentTarget.offsetTop;
-            }
-        }
-
-        // adding missing properties
-
-        if (sourceEvent.isPrimary !== undefined)
-            evObj.isPrimary = sourceEvent.isPrimary;
-        else
-            evObj.isPrimary = true;
-
-        if (sourceEvent.pressure)
-            evObj.pressure = sourceEvent.pressure;
-        else {
-            var button = 0;
-
-            if (sourceEvent.which !== undefined)
-                button = sourceEvent.which;
-            else if (sourceEvent.button !== undefined) {
-                button = sourceEvent.button;
-            }
-            evObj.pressure = (button == 0) ? 0 : 0.5;
-        }
-
-
-        if (sourceEvent.rotation)
-            evObj.rotation = sourceEvent.rotation;
-        else
-            evObj.rotation = 0;
-
-        // Timestamp
-        if (sourceEvent.hwTimestamp)
-            evObj.hwTimestamp = sourceEvent.hwTimestamp;
-        else
-            evObj.hwTimestamp = 0;
-
-        // Tilts
-        if (sourceEvent.tiltX)
-            evObj.tiltX = sourceEvent.tiltX;
-        else
-            evObj.tiltX = 0;
-
-        if (sourceEvent.tiltY)
-            evObj.tiltY = sourceEvent.tiltY;
-        else
-            evObj.tiltY = 0;
-
-        // Width and Height
-        if (sourceEvent.height)
-            evObj.height = sourceEvent.height;
-        else
-            evObj.height = 0;
-
-        if (sourceEvent.width)
-            evObj.width = sourceEvent.width;
-        else
-            evObj.width = 0;
-
-        // preventDefault
-        evObj.preventDefault = function () {
-            if (sourceEvent.preventDefault !== undefined)
-                sourceEvent.preventDefault();
         };
 
-        // stopPropagation
-        if (evObj.stopPropagation !== undefined) {
-            var current = evObj.stopPropagation;
-            evObj.stopPropagation = function () {
-                if (sourceEvent.stopPropagation !== undefined)
-                    sourceEvent.stopPropagation();
-                current.call(this);
-            };
-        }
+    extend && $.extend(specialEvent, extend(specialEvent, pointerEventType));
+}
 
-        // Constants
-        evObj.POINTER_TYPE_TOUCH = POINTER_TYPE_TOUCH;
-        evObj.POINTER_TYPE_PEN = POINTER_TYPE_PEN;
-        evObj.POINTER_TYPE_MOUSE = POINTER_TYPE_MOUSE;
-
-        // Pointer values
-        evObj.pointerId = sourceEvent.pointerId;
-        evObj.pointerType = sourceEvent.pointerType;
-
-        switch (evObj.pointerType) {// Old spec version check
-            case 2:
-                evObj.pointerType = evObj.POINTER_TYPE_TOUCH;
-                break;
-            case 3:
-                evObj.pointerType = evObj.POINTER_TYPE_PEN;
-                break;
-            case 4:
-                evObj.pointerType = evObj.POINTER_TYPE_MOUSE;
-                break;
-        }
-
-        // If force preventDefault
-        if (sourceEvent.currentTarget && sourceEvent.currentTarget.handjs_forcePreventDefault === true)
-            evObj.preventDefault();
-
-        // Fire event
-        if (sourceEvent.target) {
-            sourceEvent.target.dispatchEvent(evObj);
-        } else {
-            sourceEvent.srcElement.fireEvent("on" + getMouseEquivalentEventName(newName), evObj); // We must fallback to mouse event for very old browsers
+function extendHandlerTouchByElement(_, pointerEventType) {
+    return {
+        handlerTouch : function(e) {
+            var pointerEvent = new PointerEvent(e, pointerEventType),
+                target = document.elementFromPoint(pointerEvent.clientX, pointerEvent.clientY);
+            pointerEvent.dispatch(target);
         }
     };
+}
 
-    var generateMouseProxy = function (evt, eventName) {
-        if (!evt.button) {
-            evt.pointerId = 1;
-            evt.pointerType = POINTER_TYPE_MOUSE;
-            generateTouchClonedEvent(evt, eventName);
-        }
-    };
+function pressAndReleaseHandlerStub(specialEvent, pointerEventType) {
+    var eventTypeForMouse = current[pointerEventType === 'pointerpress'? 'down' : 'up'];
+    return {
+        setup : function() {
+            isMouse?
+                $(this).on(eventTypeForMouse, specialEvent.handlerMouse) :
+                $(this)
+                    .on(current.down, specialEvent.handlerNonMouseDown)
+                    .on(current.move, specialEvent.handlerNonMouseMove)
+                    .on(current.up, specialEvent.handlerNonMouseUp);
+        },
 
-    var generateTouchEventProxy = function (name, touchPoint, target, eventObject) {
-        var touchPointId = touchPoint.identifier + 2; // Just to not override mouse id
+        teardown : function() {
+            isMouse?
+                $(this).off(eventTypeForMouse, specialEvent.handlerMouse) :
+                $(this)
+                    .off(current.down, specialEvent.handlerNonMouseDown)
+                    .off(current.move, specialEvent.handlerNonMouseMove)
+                    .off(current.up, specialEvent.handlerNonMouseUp);
+        },
 
-        touchPoint.pointerId = touchPointId;
-        touchPoint.pointerType = POINTER_TYPE_TOUCH;
-        touchPoint.currentTarget = target;
-        touchPoint.target = target;
-
-        if (eventObject.preventDefault !== undefined) {
-            touchPoint.preventDefault = function () {
-                eventObject.preventDefault();
-            };
-        }
-
-        generateTouchClonedEvent(touchPoint, name);
-    };
-
-    var generateTouchEventProxyIfRegistered = function (eventName, touchPoint, target, eventObject) { // Check if user registered this event
-        if (target.__handjsGlobalRegisteredEvents && target.__handjsGlobalRegisteredEvents[eventName]) {
-            generateTouchEventProxy(eventName, touchPoint, target, eventObject);
-        }
-    };
-
-    var handleOtherEvent = function (eventObject, name, useLocalTarget, checkRegistration) {
-        if (eventObject.preventManipulation)
-            eventObject.preventManipulation();
-
-        for (var i = 0; i < eventObject.changedTouches.length; ++i) {
-            var touchPoint = eventObject.changedTouches[i];
-
-            if (useLocalTarget) {
-                previousTargets[touchPoint.identifier] = touchPoint.target;
+        handlerNonMouseMove : function(e) {
+            var data = specialEvent.data;
+            if(Math.abs(e.clientX - data.clientX) > 5 ||
+                Math.abs(e.clientY - data.clientY) > 5) {
+                data.move = true;
             }
+        },
 
-            if (checkRegistration) {
-                generateTouchEventProxyIfRegistered(name, touchPoint, previousTargets[touchPoint.identifier], eventObject);
-            } else {
-                generateTouchEventProxy(name, touchPoint, previousTargets[touchPoint.identifier], eventObject);
-            }
+        handlerMouse : function(e) {
+            // only left mouse button
+            e.which === 1 && new PointerEvent(e, pointerEventType).dispatch(this);
         }
     };
+}
 
-    var getMouseEquivalentEventName = function (eventName) {
-        return eventName.toLowerCase().replace("pointer", "mouse");
-    };
+addSpecialEvent('enter');
+addSpecialEvent('over');
+addSpecialEvent('down');
+addSpecialEvent('up', extendHandlerTouchByElement);
+addSpecialEvent('out', extendHandlerTouchByElement);
+addSpecialEvent('leave', extendHandlerTouchByElement);
+addSpecialEvent('move', function(specialEvent) {
+    return {
+        setup : function() {
+            isTouch && $(this).on(current.down, specialEvent.downHandler);
+            $(this).on(current.move, specialEvent.moveHandler);
+        },
 
-    var getPrefixEventName = function (item, prefix, eventName) {
-        var newEventName;
+        teardown : function() {
+            isTouch && $(this).off(current.down, specialEvent.downHandler);
+            $(this).off(current.move, specialEvent.moveHandler);
+        },
 
-        if (eventName == eventName.toLowerCase()) {
-            var indexOfUpperCase = supportedEventsNames.indexOf(eventName) - (supportedEventsNames.length / 2);
-            newEventName = prefix + supportedEventsNames[indexOfUpperCase];
-        }
-        else {
-            newEventName = prefix + eventName;
-        }
+        downHandler : function(e) {
+            var pointerEvent = new PointerEvent(e, 'pointerdown');
+            specialEvent.target = pointerEvent.target;
+        },
 
-        // Fallback to PointerOver if PointerEnter is not currently supported
-        if (newEventName === prefix + "PointerEnter" && item["on" + prefix.toLowerCase() + "pointerenter"] === undefined) {
-            newEventName = prefix + "PointerOver";
-        }
+        moveHandler : function(e) {
+            var pointerEvent = new PointerEvent(e, 'pointermove');
+            if(isTouch) {
+                var newTarget = document.elementFromPoint(pointerEvent.clientX, pointerEvent.clientY),
+                    currentTarget = specialEvent.target;
 
-        // Fallback to PointerOut if PointerLeave is not currently supported
-        if (newEventName === prefix + "PointerLeave" && item["on" + prefix.toLowerCase() + "pointerleave"] === undefined) {
-            newEventName = prefix + "PointerOut";
-        }
+                pointerEvent.dispatch(currentTarget);
 
-        return newEventName;
-    };
+                if(currentTarget !== newTarget) {
+                    // out current target
+                    pointerEvent = new PointerEvent(e, 'pointerout');
+                    pointerEvent.dispatch(currentTarget);
 
-    var registerOrUnregisterEvent = function (item, name, func, enable) {
-        if (item.__handjsRegisteredEvents === undefined) {
-            item.__handjsRegisteredEvents = [];
-        }
-
-        if (enable) {
-            if (item.__handjsRegisteredEvents[name] !== undefined) {
-                item.__handjsRegisteredEvents[name]++;
-                return;
-            }
-
-            item.__handjsRegisteredEvents[name] = 1;
-            item.addEventListener(name, func, false);
-        } else {
-
-            if (item.__handjsRegisteredEvents.indexOf(name) !== -1) {
-                item.__handjsRegisteredEvents[name]--;
-
-                if (item.__handjsRegisteredEvents[name] != 0) {
-                    return;
-                }
-            }
-            item.removeEventListener(name, func);
-            item.__handjsRegisteredEvents[name] = 0;
-        }
-    };
-
-    var setTouchAware = function (item, eventName, enable) {
-        // If item is already touch aware, do nothing
-        if (item.onpointerdown !== undefined) {
-            return;
-        }
-
-        // IE 10
-        if (item.onmspointerdown !== undefined) {
-            var msEventName = getPrefixEventName(item, "MS", eventName);
-
-            registerOrUnregisterEvent(item, msEventName, function (evt) { generateTouchClonedEvent(evt, eventName); }, enable);
-
-            // We can return because MSPointerXXX integrate mouse support
-            return;
-        }
-
-        // Chrome, Firefox
-        if (item.ontouchstart !== undefined) {
-            switch (eventName) {
-                case "pointermove":
-                    registerOrUnregisterEvent(item, "touchmove", function (evt) { handleOtherEvent(evt, eventName); }, enable);
-                    break;
-                case "pointercancel":
-                    registerOrUnregisterEvent(item, "touchcancel", function (evt) { handleOtherEvent(evt, eventName); }, enable);
-                    break;
-                case "pointerdown":
-                case "pointerup":
-                case "pointerout":
-                case "pointerover":
-                case "pointerleave":
-                case "pointerenter":
-                    // These events will be handled by the window.ontouchmove function
-                    if (!item.__handjsGlobalRegisteredEvents) {
-                        item.__handjsGlobalRegisteredEvents = [];
+                    // new target is not a child of the current -> leave current target
+                    if(!currentTarget.contains(newTarget)) {
+                        pointerEvent = new PointerEvent(e, 'pointerleave');
+                        pointerEvent.dispatch(currentTarget);
                     }
 
-                    if (enable) {
-                        if (item.__handjsGlobalRegisteredEvents[eventName] !== undefined) {
-                            item.__handjsGlobalRegisteredEvents[eventName]++;
-                            return;
-                        }
-                        item.__handjsGlobalRegisteredEvents[eventName] = 1;
-                    } else {
-                        if (item.__handjsGlobalRegisteredEvents[eventName] !== undefined) {
-                            item.__handjsGlobalRegisteredEvents[eventName]--;
-                            if (item.__handjsGlobalRegisteredEvents[eventName] < 0) {
-                                item.__handjsGlobalRegisteredEvents[eventName] = 0;
+                    // new target is not the parent of the current -> leave new target
+                    if(!newTarget.contains(currentTarget)) {
+                        pointerEvent = new PointerEvent(e, 'pointerenter');
+                        pointerEvent.dispatch(newTarget);
+                    }
+
+                    // over new target
+                    pointerEvent = new PointerEvent(e, 'pointerover');
+                    pointerEvent.dispatch(newTarget);
+
+                    // new target -> current target
+                    specialEvent.target = newTarget;
+                }
+            } else {
+                pointerEvent.dispatch(this);
+            }
+        }
+    };
+});
+
+addSpecialEvent('press', function(specialEvent, pointerEventType) {
+    return $.extend(
+        pressAndReleaseHandlerStub(specialEvent, pointerEventType),
+        {
+            handlerNonMouseDown : function(e) {
+                specialEvent.data = {
+                    timer : (function() {
+                        return setTimeout(function() {
+                            if(!specialEvent.data.move) {
+                                var pointerevent = new PointerEvent(e, pointerEventType);
+                                pointerevent.dispatch(pointerevent.target);
                             }
-                        }
-                    }
-                    break;
-            }
-        }
+                        }, 80);
+                    })(),
+                    clientX : e.clientX,
+                    clientY : e.clientY
+                };
+            },
 
-        // Fallback to mouse
-        switch (eventName) {
-            case "pointerdown":
-                registerOrUnregisterEvent(item, "mousedown", function (evt) { generateMouseProxy(evt, eventName); }, enable);
-                break;
-            case "pointermove":
-                registerOrUnregisterEvent(item, "mousemove", function (evt) { generateMouseProxy(evt, eventName); }, enable);
-                break;
-            case "pointerup":
-                registerOrUnregisterEvent(item, "mouseup", function (evt) { generateMouseProxy(evt, eventName); }, enable);
-                break;
-            case "pointerover":
-                registerOrUnregisterEvent(item, "mouseover", function (evt) { generateMouseProxy(evt, eventName); }, enable);
-                break;
-            case "pointerout":
-                registerOrUnregisterEvent(item, "mouseout", function (evt) { generateMouseProxy(evt, eventName); }, enable);
-                break;
-            case "pointerenter":
-                if (item.onmouseenter === undefined) { // Fallback to mouseover
-                    registerOrUnregisterEvent(item, "mouseover", function (evt) { generateMouseProxy(evt, eventName); }, enable);
-                } else {
-                    registerOrUnregisterEvent(item, "mouseenter", function (evt) { generateMouseProxy(evt, eventName); }, enable);
+            handlerNonMouseUp : function() {
+                clearTimeout(specialEvent.data.timer);
+                delete specialEvent.data;
+            }
+        });
+});
+
+addSpecialEvent('release', function(specialEvent, pointerEventType) {
+    return $.extend(
+        pressAndReleaseHandlerStub(specialEvent, pointerEventType),
+        {
+            handlerNonMouseDown : function(e) {
+                var data = specialEvent.data = {
+                    timer : (function() {
+                        return setTimeout(function() {
+                            data.move || (data.pressed = true);
+                        }, 80);
+                    })(),
+                    clientX : e.clientX,
+                    clientY : e.clientY
+                };
+            },
+
+            handlerNonMouseUp : function(e) {
+                clearTimeout(specialEvent.data.timer);
+
+                if(specialEvent.data.pressed) {
+                    var pointerEvent = new PointerEvent(e, pointerEventType),
+                        target = document.elementFromPoint(pointerEvent.clientX, pointerEvent.clientY);
+                    pointerEvent.dispatch(target);
                 }
-                break;
-            case "pointerleave":
-                if (item.onmouseleave === undefined) { // Fallback to mouseout
-                    registerOrUnregisterEvent(item, "mouseout", function (evt) { generateMouseProxy(evt, eventName); }, enable);
-                } else {
-                    registerOrUnregisterEvent(item, "mouseleave", function (evt) { generateMouseProxy(evt, eventName); }, enable);
-                }
-                break;
+
+                delete specialEvent.data;
+            }
+        });
+});
+
+provide($);
+
+});
+/* ../../libs/bem-core/common.blocks/jquery/__event/_type/jquery__event_type_pointer.js end */
+;
+/* ../../libs/bem-core/desktop.blocks/jquery/__event/_type/jquery__event_type_pointerclick.js begin */
+/**
+ * @modules jquery__event_type_pointerclick
+ * @version 1.0.2
+ * @author Filatov Dmitry <dfilatov@yandex-team.ru>
+ */
+
+modules.define('jquery', function(provide, $) {
+
+var event = $.event.special.pointerclick = {
+        setup : function() {
+            $(this).on('click', event.handler);
+        },
+
+        teardown : function() {
+            $(this).off('click', event.handler);
+        },
+
+        handler : function(e) {
+            if(!e.button) {
+                e.type = 'pointerclick';
+                $.event.dispatch.apply(this, arguments);
+                e.type = 'click';
+            }
         }
     };
 
-    // Intercept addEventListener calls by changing the prototype
-    var interceptAddEventListener = function (root) {
-        var current = root.prototype ? root.prototype.addEventListener : root.addEventListener;
+provide($);
 
-        var customAddEventListener = function (name, func, capture) {
-            // Branch when a PointerXXX is used
-            if (supportedEventsNames.indexOf(name) != -1) {
-                setTouchAware(this, name, true);
-            }
-
-            if (current === undefined) {
-                this.attachEvent("on" + getMouseEquivalentEventName(name), func);
-            } else {
-                current.call(this, name, func, capture);
-            }
-        };
-
-        if (root.prototype) {
-            root.prototype.addEventListener = customAddEventListener;
-        } else {
-            root.addEventListener = customAddEventListener;
-        }
-    };
-
-    // Intercept removeEventListener calls by changing the prototype
-    var interceptRemoveEventListener = function (root) {
-        var current = root.prototype ? root.prototype.removeEventListener : root.removeEventListener;
-
-        var customRemoveEventListener = function (name, func, capture) {
-            // Release when a PointerXXX is used
-            if (supportedEventsNames.indexOf(name) != -1) {
-                setTouchAware(this, name, false);
-            }
-
-            if (current === undefined) {
-                this.detachEvent(getMouseEquivalentEventName(name), func);
-            } else {
-                current.call(this, name, func, capture);
-            }
-        };
-        if (root.prototype) {
-            root.prototype.removeEventListener = customRemoveEventListener;
-        } else {
-            root.removeEventListener = customRemoveEventListener;
-        }
-    };
-
-    // Hooks
-    interceptAddEventListener(HTMLElement);
-    interceptAddEventListener(document);
-    interceptAddEventListener(HTMLBodyElement);
-    interceptAddEventListener(HTMLDivElement);
-    interceptAddEventListener(HTMLImageElement);
-    interceptAddEventListener(HTMLUListElement);
-    interceptAddEventListener(HTMLAnchorElement);
-    interceptAddEventListener(HTMLLIElement);
-    interceptAddEventListener(HTMLTableElement);
-    if (window.HTMLSpanElement) {
-        interceptAddEventListener(HTMLSpanElement);
-    }
-    if (window.HTMLCanvasElement) {
-        interceptAddEventListener(HTMLCanvasElement);
-    }
-    if (window.SVGElement) {
-        interceptAddEventListener(SVGElement);
-    }
-
-    interceptRemoveEventListener(HTMLElement);
-    interceptRemoveEventListener(document);
-    interceptRemoveEventListener(HTMLBodyElement);
-    interceptRemoveEventListener(HTMLDivElement);
-    interceptRemoveEventListener(HTMLImageElement);
-    interceptRemoveEventListener(HTMLUListElement);
-    interceptRemoveEventListener(HTMLAnchorElement);
-    interceptRemoveEventListener(HTMLLIElement);
-    interceptRemoveEventListener(HTMLTableElement);
-    if (window.HTMLSpanElement) {
-        interceptRemoveEventListener(HTMLSpanElement);
-    }
-    if (window.HTMLCanvasElement) {
-        interceptRemoveEventListener(HTMLCanvasElement);
-    }
-    if (window.SVGElement) {
-        interceptRemoveEventListener(SVGElement);
-    }
-
-    // Handling move on window to detect pointerleave/out/over
-    if (window.ontouchstart !== undefined) {
-        window.addEventListener('touchstart', function (eventObject) {
-            for (var i = 0; i < eventObject.changedTouches.length; ++i) {
-                var touchPoint = eventObject.changedTouches[i];
-                previousTargets[touchPoint.identifier] = touchPoint.target;
-
-                generateTouchEventProxyIfRegistered("pointerenter", touchPoint, touchPoint.target, eventObject);
-                generateTouchEventProxyIfRegistered("pointerover", touchPoint, touchPoint.target, eventObject);
-                generateTouchEventProxyIfRegistered("pointerdown", touchPoint, touchPoint.target, eventObject);
-            }
-        });
-
-        window.addEventListener('touchend', function (eventObject) {
-            for (var i = 0; i < eventObject.changedTouches.length; ++i) {
-                var touchPoint = eventObject.changedTouches[i];
-                var currentTarget = previousTargets[touchPoint.identifier];
-
-                generateTouchEventProxyIfRegistered("pointerup", touchPoint, currentTarget, eventObject);
-                generateTouchEventProxyIfRegistered("pointerout", touchPoint, currentTarget, eventObject);
-                generateTouchEventProxyIfRegistered("pointerleave", touchPoint, currentTarget, eventObject);
-            }
-        });
-
-        window.addEventListener('touchmove', function (eventObject) {
-            for (var i = 0; i < eventObject.changedTouches.length; ++i) {
-                var touchPoint = eventObject.changedTouches[i];
-                var newTarget = document.elementFromPoint(touchPoint.clientX, touchPoint.clientY);
-                var currentTarget = previousTargets[touchPoint.identifier];
-
-                if (currentTarget === newTarget) {
-                    continue; // We can skip this as the pointer is effectively over the current target
-                }
-
-                if (currentTarget) {
-                    // Raise out
-                    generateTouchEventProxyIfRegistered("pointerout", touchPoint, currentTarget, eventObject);
-
-                    // Raise leave
-                    if (!currentTarget.contains(newTarget)) { // Leave must be called if the new target is not a child of the current
-                        generateTouchEventProxyIfRegistered("pointerleave", touchPoint, currentTarget, eventObject);
-                    }
-                }
-
-                if (newTarget) {
-                    // Raise over
-                    generateTouchEventProxyIfRegistered("pointerover", touchPoint, newTarget, eventObject);
-
-                    // Raise enter
-                    if (!newTarget.contains(currentTarget)) { // Leave must be called if the new target is not the parent of the current
-                        generateTouchEventProxyIfRegistered("pointerenter", touchPoint, newTarget, eventObject);
-                    }
-                }
-                previousTargets[touchPoint.identifier] = newTarget;
-            }
-        });
-    }
-
-    // Extension to navigator
-    if (navigator.pointerEnabled === undefined) {
-
-        // Indicates if the browser will fire pointer events for pointing input
-        navigator.pointerEnabled = true;
-
-        // IE
-        if (navigator.msPointerEnabled) {
-            navigator.maxTouchPoints = navigator.msMaxTouchPoints;
-        }
-    }
-
-})();
-
-/* ../../libs/bem-core/common.blocks/pointer-events/pointer-events.js end */
+});
+/* ../../libs/bem-core/desktop.blocks/jquery/__event/_type/jquery__event_type_pointerclick.js end */
 ;
 /* blocks/jquery/__rotate/jquery__rotate.js begin */
 modules.define('jquery', function(provide, $) {

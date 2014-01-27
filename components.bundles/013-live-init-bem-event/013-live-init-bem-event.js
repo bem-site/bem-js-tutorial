@@ -14,6 +14,8 @@
 /*borschik:include:../../libs/bem-core/common.blocks/jquery/jquery.js*/;
 /*borschik:include:../../libs/bem-core/common.blocks/loader/_type/loader_type_js.js*/;
 /*borschik:include:../../libs/bem-core/common.blocks/jquery/__config/jquery__config.js*/;
+/*borschik:include:../../libs/bem-core/desktop.blocks/jquery/__config/jquery__config.js*/;
+/*borschik:include:../../libs/bem-core/desktop.blocks/ua/ua.js*/;
 /*borschik:include:../../libs/bem-core/common.blocks/dom/dom.js*/;
 /*borschik:include:../../libs/bem-core/common.blocks/i-bem/__internal/i-bem__internal.vanilla.js*/;
 /*borschik:include:../../libs/bem-core/common.blocks/ecma/__string/ecma__string.js*/;
@@ -21,6 +23,7 @@
 /*borschik:include:../../libs/bem-core/common.blocks/i-bem/__dom/_init/i-bem__dom_init_auto.js*/;
 /*borschik:include:blocks/dj/dj.js*/;
 /*borschik:include:../../libs/bem-components/common.blocks/checkbox/checkbox.js*/;
-/*borschik:include:../../libs/bem-core/common.blocks/pointer-events/pointer-events.js*/;
+/*borschik:include:../../libs/bem-core/common.blocks/jquery/__event/_type/jquery__event_type_pointer.js*/;
+/*borschik:include:../../libs/bem-core/desktop.blocks/jquery/__event/_type/jquery__event_type_pointerclick.js*/;
 /*borschik:include:blocks/jquery/__rotate/jquery__rotate.js*/;
 /*borschik:include:blocks/player/player.js*/;

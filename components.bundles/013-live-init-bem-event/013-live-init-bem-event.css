@@ -1,4 +1,7 @@
 @import url(blocks/page/page.css);
 @import url(blocks/dj/dj.css);
+@import url(../../libs/bem-components/design/common.blocks/checkbox/checkbox.css);
 @import url(blocks/checkbox/checkbox.css);
+@import url(../../libs/bem-components/design/common.blocks/checkbox/_disabled/checkbox_disabled.css);
+@import url(../../libs/bem-components/design/common.blocks/checkbox/_checked/checkbox_checked.css);
 @import url(blocks/player/player.css);
