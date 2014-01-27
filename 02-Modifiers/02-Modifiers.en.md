@@ -1,8 +1,8 @@
 # Tutorial on JavaScript in BEM terms
 
 ### Links
- * [Core document](README.md)
- * [Previous chapter. Block structure](01-Block-structure.md)
+ * [Core document](../00-Intro/00-Intro.en.md)
+ * [Previous chapter. Block structure](../01-Block-structure/01-Block-structure.en.md)
 
 ----------------------------------
 
@@ -504,6 +504,6 @@ Here it checks if the clicked item is disabled and prevents such an item to be
 
 ---------------------------------------
 ### Links
- * [Core document](README.md)
- * [Previous chapter. Block structure](01-Block-structure.md)
- * [Next chapter. Live initialization](03-Live-initialization.md)
+ * [Core document](../00-Intro/00-Intro.en.md)
+ * [Previous chapter. Block structure](../01-Block-structure/01-Block-structure.md)
+ * [Next chapter. Live initialization](../03-Live-initialization/03-Live-initialization.md)

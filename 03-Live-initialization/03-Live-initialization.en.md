@@ -1,8 +1,8 @@
 # Tutorial on JavaScript in BEM terms
 
 ### Links
- * [Core document](README.md)
- * [Previous chapter. Modifiers](02-Modifiers.md)
+ * [Core document](../00-Intro/00-Intro.en.md)
+ * [Previous chapter. Modifiers](../02-Modifiers/02-Modifiers.en.md)
 
 ----------------------------------
 
@@ -471,7 +471,192 @@ be able to change if checked
 as well as saves time for parsing selectors and bringing architectural
 consistency to the code.
 
+### BEM events
+
+Besides DOM events, `i-bem.js` operates with custom JavaScript events on the
+JavaScript objects corresponding to the blocks. These events are named `BEM
+events` and usually serve to normalize a component API.
+
+The [`link`
+block](https://github.com/bem/bem-components/tree/a37156b9646b97472776b8ce035ca1736dc7257c/common.blocks/link)
+of `bem-components` block library can provide an example of firing a custom BEM
+event. Its JavaScript functionality is to trigger the `click` event on the
+corresponding JavaScript object whenever a user clicks the left button if the
+current link is not disabled. An event is triggered with the help of `emit` method
+of the block.
+
+```js
+  _onClick : function(e) {
+      e.preventDefault();
+      this.hasMod('disabled') || this.emit('click');
+  }
+```
+
+Thus, the `link` block has an API which can be used by other blocks on a page.
+
+Another example is the [`menu` block](https://github.com/varya/bem-js-tutorial/tree/master/desktop.blocks/menu)
+of this tutorial. It is represets a list of menu items in HTML, one of those can be
+selected at the moment.
+
+```html
+<div class="menu i-bem" data-bem="{&quot;menu&quot;:{}}">
+  <ul class="menu__layout">
+    <li class="menu__layout-unit menu__layout-unit_position_first">
+      <div class="menu__item menu__item_state_current">
+        Item 1
+      </div>
+    </li>
+    <li class="menu__layout-unit">
+      <div class="menu__item menu__item_state_current">
+        Item 2
+      </div>
+    </li>
+    <li class="menu__layout-unit">
+      <div class="menu__item menu__item_state_current">
+        Item 3
+      </div>
+    </li>
+  </ul>
+</div>
+```
+
+The menu listens to the DOM clicks on its `item-selector` elements and emits the
+`current` event which signals about changing the current item and provides the
+data.
+
+```js
+this
+    .delMod(prev, 'state')
+    .emit('current', {
+        prev    : prev,
+        current : elem
+    });
+```
+
+This event fires on the JavaScript object corresponding to the menu block instance.
+With that, any other block subscribed to the `current` BEM event of the menu can
+learn when it changes its current item and react on it.
+
+### Live initialization on BEM a event of an inner block
+
+<pre>├── components.bundles/
+│   ├── 014-live-init-bem-event/
+│   │   ├── blocks/
+│   │   │   ├── .bem/
+│   │   │   ├── map-marks/
+│   │   │   |   ├── <a href="https://github.com/toivonen/bem-js-tutorial/blob/master/components.bundles/014-live-init-bem-event/blocks/map-marks/map-marks.bemhtml">map-marks.bemhtml</a>
+│   │   │   |   ├── <a href="https://github.com/toivonen/bem-js-tutorial/blob/master/components.bundles/014-live-init-bem-event/blocks/map-marks/map-marks.css">map-marks.css</a>
+│   │   │   |   └── <a href="https://github.com/toivonen/bem-js-tutorial/blob/master/components.bundles/014-live-init-bem-event/blocks/map-marks/map-marks.js">map-marks.js</a>
+│   │   │   ├── map/
+│   │   │   |   ├── <a href="https://github.com/toivonen/bem-js-tutorial/blob/master/components.bundles/014-live-init-bem-event/blocks/map/map.bemhtml">map.bemhtml</a>
+│   │   │   |   ├── <a href="https://github.com/toivonen/bem-js-tutorial/blob/master/components.bundles/014-live-init-bem-event/blocks/map/map.deps.js">map.deps.js</a>
+│   │   │   |   └── <a href="https://github.com/toivonen/bem-js-tutorial/blob/master/components.bundles/014-live-init-bem-event/blocks/map/map.js">map.js</a>
+│   │   │   ├── menu/
+│   │   │   |   └── <a href="https://github.com/toivonen/bem-js-tutorial/blob/master/components.bundles/014-live-init-bem-event/blocks/menu/menu.css">menu.css</a>
+│   │   │   └── page/
+│   │   └── <a href="https://github.com/toivonen/bem-js-tutorial/blob/master/components.bundles/014-live-init-bem-event/014-live-init-bem-event.bemjson.js">014-live-init-bem-event.bemjson.js</a>
+
+>> <a href="http://varya.me/bem-js-tutorial/components.bundles/014-live-init-bem-event/014-live-init-bem-event.html">014-live-init-bem-event.html</a></pre>
+
+The example shows [`map-marks`
+block](https://github.com/varya/bem-js-tutorial/tree/master/components.bundles/014-live-init-bem-event/blocks/map-marks)
+which binds a menu and a map so that a user can select the menu item and see a
+related mark in the map.
+
+The `map-marks` block contains the blocks `menu` and `map`. This can be seen
+from [bemjson description of the
+page](https://github.com/varya/bem-js-tutorial/blob/master/components.bundles/014-live-init-bem-event/014-live-init-bem-event.bemjson.js)
+or inside the page html
+[014-live-init-bem-event.html](http://varya.me/bem-js-tutorial/components.bundles/014-live-init-bem-event/014-live-init-bem-event.html).
+
+This block is only needed when a user has been started to interact with the
+menu. So the block uses live initialization and it is declared to initialize the
+block only when the `current` BEM event fires on the included `menu` block.
+
+The JavaScript implementation of the block [map-marks.js](https://github.com/varya/bem-js-tutorial/blob/master/components.bundles/014-live-init-bem-event/blocks/map-marks/map-marks.js)
+uses live initialization depending on the inner block.
+
+```js
+modules.define('i-bem__dom', ['jquery'], function(provide, $, DOM) {
+
+DOM.decl('map-marks', {
+    ...
+}, {
+    live: function() {
+        this.liveInitOnBlockInsideEvent('current', 'menu', function(e, data){
+            this._showMap(e, data.current);
+        });
+    }
+});
+
+provide(DOM);
+
+});
+```
+
+The `liveInitOnBlockInsideEvent` methods requests the names of an event and the
+included block s well as a callback.
+
+Once a user clicks a menu item, it becomes current and the menu block emits
+`current` event. Being catched, it initializes the `map-marks` block, which means
+it gets `js_inited` modifier ans the related method runs:
+
+```js
+modules.define('i-bem__dom', ['jquery'], function(provide, $, DOM) {
+
+DOM.decl('map-marks', {
+
+  onSetMod: {
+      'js' : {
+          'inited' : function () {
+              this._menu = this.findBlockInside('menu');
+              this._map = this.findBlockInside('map');
+          }
+      }
+  },
+
+  ...
+
+}, {
+    live: function() {
+        ...
+    }
+});
+
+provide(DOM);
+
+});
+```
+
+Then the callback runs the `_showMap` method of the block instance. This shows a
+mark on a map using the `map` block.
+
+```js
+modules.define('i-bem__dom', ['jquery'], function(provide, $, DOM) {
+
+DOM.decl('map-marks', {
+
+    ...
+
+    _showMap: function(e, elem) {
+        var params = this._menu.elemParams(elem);
+        this._map.showAddress(params['address']);
+    }
+
+    ...
+
+}, {
+    live: function() {
+        ...
+    }
+});
+
+provide(DOM);
+
+});
+```
+
 ---------------------------------------
 ### Links
- * [Core document](README.md)
- * [Previous chapter. Modifiers](02-Modifiers.md)
+ * [Core document](../00-Intro/00-Intro.en.md)
+ * [Previous chapter. Modifiers](../02-Modifiers/02-Modifiers.en.md)

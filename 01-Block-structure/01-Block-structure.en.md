@@ -1,7 +1,7 @@
 # Tutorial on JavaScript in BEM terms
 
 ### Links
- * [Core document](README.md)
+ * [Core document](../00-Intro/00-Intro.en.md)
 
 ----------------------------------
 
@@ -171,5 +171,5 @@ In the example presented above, this code is a `console.log` call with the block
 
 ---------------------------------------
 ### Links
- * [Core document](README.md)
- * [Next chapter. Modifiers](02-Modifiers.md)
+ * [Core document](../00-Intro/00-Intro.en.md)
+ * [Next chapter. Modifiers](../02-Modifiers/02-Modifiers.en.md)
