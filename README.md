@@ -1,4 +1,4 @@
 # Tutorial on JavaScript in BEM terms
 
- * [**In English**](00-Intro/Intro.en.md)
- * [**По-русски**](00-Intro/Intro.ru.md)
+ * [**In English**](https://github.com/bem/bem-js-tutorial/blob/master/00-Intro/00-Intro.en.md)
+ * [**По-русски**](https://github.com/bem/bem-js-tutorial/blob/master/00-Intro/00-Intro.ru.md)
