@@ -63,26 +63,26 @@ JavaScript файл в директорию блока.
 │   │   ├── blocks/
 │   │   │   ├── .bem/
 │   │   │   └── my-block/
-│   │   │       └── <a href="https://github.com/toivonen/bem-js-tutorial/blob/master/pure.bundles/001-simple-block/blocks/my-block/my-block.js">my-block.js</a>
-│   │   └── <a href="https://github.com/toivonen/bem-js-tutorial/blob/master/pure.bundles/001-simple-block/001-simple-block.bemjson.js">001-simple-block.bemjson.js</a>
+│   │   │       └── <a href="https://github.com/bem/bem-js-tutorial/blob/master/pure.bundles/001-simple-block/blocks/my-block/my-block.js">my-block.js</a>
+│   │   └── <a href="https://github.com/bem/bem-js-tutorial/blob/master/pure.bundles/001-simple-block/001-simple-block.bemjson.js">001-simple-block.bemjson.js</a>
 
->> <a href="http://varya.me/bem-js-tutorial/pure.bundles/001-simple-block/001-simple-block.html">001-simple-block.html</a></pre>
+>> <a href="http://bem.github.io/bem-js-tutorial/pure.bundles/001-simple-block/001-simple-block.html">001-simple-block.html</a></pre>
 
 Первый пример — самый простой. Он показывает структуру блока и работающий
 JavaScript.<br/>
 Загрузите пример
-[001-simple-block](http://varya.me/bem-js-tutorial/pure.bundles/001-simple-block/001-simple-block.html)
+[001-simple-block](http://bem.github.io/bem-js-tutorial/pure.bundles/001-simple-block/001-simple-block.html)
 в браузере с открытой консолью, и вы увидите вывод строки, соответствующей
 `outerHTML` блока.
 
 BEMJSON декларация этого примера
-[001-simple-block.bemjson.js](https://github.com/toivonen/bem-js-tutorial/blob/master/pure.bundles/001-simple-block/001-simple-block.bemjson.js)
+[001-simple-block.bemjson.js](https://github.com/bem/bem-js-tutorial/blob/master/pure.bundles/001-simple-block/001-simple-block.bemjson.js)
 описывает простую страницу с одним-единственным блоком `my-block`.
 
 Компонент `my-block` расположен на уровне переопределения
-[001-simple-block/blocks](https://github.com/toivonen/bem-js-tutorial/tree/master/pure.bundles/001-simple-block/blocks/my-block)
+[001-simple-block/blocks](https://github.com/bem/bem-js-tutorial/tree/master/pure.bundles/001-simple-block/blocks/my-block)
 и содержит JavaScript файл. Это файл
-[my-block.js](https://github.com/toivonen/bem-js-tutorial/blob/master/pure.bundles/001-simple-block/blocks/my-block/my-block.js),
+[my-block.js](https://github.com/bem/bem-js-tutorial/blob/master/pure.bundles/001-simple-block/blocks/my-block/my-block.js),
 в нем довольно простой код.
 
 ```js

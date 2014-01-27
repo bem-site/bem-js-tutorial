@@ -62,15 +62,15 @@ provide(DOM);
 │   │   │   ├── .bem/
 │   │   │   ├── text/
 │   │   │   └── translate/
-│   │   │       ├── <a href="https://github.com/toivonen/bem-js-tutorial/blob/master/pure.bundles/010-live-init-on-event/blocks/translate/translate.bemhtml">translate.bemhtml</a>
-│   │   │       ├── <a href="https://github.com/toivonen/bem-js-tutorial/blob/master/pure.bundles/010-live-init-on-event/blocks/translate/translate.css">translate.css</a>
-│   │   │       └── <a href="https://github.com/toivonen/bem-js-tutorial/blob/master/pure.bundles/010-live-init-on-event/blocks/translate/translate.js">translate.js</a>
-│   │   └── <a href="https://github.com/toivonen/bem-js-tutorial/blob/master/pure.bundles/010-live-init-on-event/010-live-init-on-event.bemjson.js">010-live-init-on-event.bemjson.js</a>
+│   │   │       ├── <a href="https://github.com/bem/bem-js-tutorial/blob/master/pure.bundles/010-live-init-on-event/blocks/translate/translate.bemhtml">translate.bemhtml</a>
+│   │   │       ├── <a href="https://github.com/bem/bem-js-tutorial/blob/master/pure.bundles/010-live-init-on-event/blocks/translate/translate.css">translate.css</a>
+│   │   │       └── <a href="https://github.com/bem/bem-js-tutorial/blob/master/pure.bundles/010-live-init-on-event/blocks/translate/translate.js">translate.js</a>
+│   │   └── <a href="https://github.com/bem/bem-js-tutorial/blob/master/pure.bundles/010-live-init-on-event/010-live-init-on-event.bemjson.js">010-live-init-on-event.bemjson.js</a>
 
->> <a href="http://varya.me/bem-js-tutorial/pure.bundles/010-live-init-on-event/010-live-init-on-event.html">010-live-init-on-event.html</a></pre>
+>> <a href="http://bem.github.io/bem-js-tutorial/pure.bundles/010-live-init-on-event/010-live-init-on-event.html">010-live-init-on-event.html</a></pre>
 
 На странице
-[010-live-init-on-event.html](http://varya.me/bem-js-tutorial/pure.bundles/010-live-init-on-event/010-live-init-on-event.html)
+[010-live-init-on-event.html](http://bem.github.io/bem-js-tutorial/pure.bundles/010-live-init-on-event/010-live-init-on-event.html)
 вы можете увидеть историю, написанную на голландском языке. На самом деле текст
 разделен на множество маленьких кусочков, по фразам. Каждая фраза завернута в
 блок `translate`.
@@ -95,7 +95,7 @@ provide(DOM);
 появляется даже при полной загрузке страницы. Это означает, что и
 JavaScript-объект, соответствующий экземпляру блока, пока не создан.<br/>
 В файле
-[translate.js](https://github.com/toivonen/bem-js-tutorial/blob/master/pure.bundles/010-live-init-on-event/blocks/translate/translate.js)
+[translate.js](https://github.com/bem/bem-js-tutorial/blob/master/pure.bundles/010-live-init-on-event/blocks/translate/translate.js)
 сказано, что блок нужно инициализироват тогда, когда на его DOM-узле случится
 событие `click`.
 
@@ -168,7 +168,7 @@ provide(DOM);
 ### Делегированная инициализация
 <pre>
 
->> <a href="http://varya.me/bem-js-tutorial/pure.bundles/010_2-delegation/010_2-delegation.html">010_2-delegation.html</a></pre>
+>> <a href="http://bem.github.io/bem-js-tutorial/pure.bundles/010_2-delegation/010_2-delegation.html">010_2-delegation.html</a></pre>
 
 В этом примере используется блок `translate` — тот же самый, что и в предыдущем.
 Но кроме этого там есть страшный JavaScript, он срабатывает, если пользователь
@@ -187,16 +187,16 @@ provide(DOM);
 │   │   ├── blocks/
 │   │   │   ├── .bem/
 │   │   │   ├── button/
-│   │   │   |   ├── <a href="https://github.com/toivonen/bem-js-tutorial/blob/master/pure.bundles/011-live-bind-to/blocks/button/button.bemhtml">button.bemhtml</a>
-│   │   │   |   ├── <a href="https://github.com/toivonen/bem-js-tutorial/blob/master/pure.bundles/011-live-bind-to/blocks/button/button.css">button.css</a>
-│   │   │   |   └── <a href="https://github.com/toivonen/bem-js-tutorial/blob/master/pure.bundles/011-live-bind-to/blocks/button/button.js">button.js</a>
+│   │   │   |   ├── <a href="https://github.com/bem/bem-js-tutorial/blob/master/pure.bundles/011-live-bind-to/blocks/button/button.bemhtml">button.bemhtml</a>
+│   │   │   |   ├── <a href="https://github.com/bem/bem-js-tutorial/blob/master/pure.bundles/011-live-bind-to/blocks/button/button.css">button.css</a>
+│   │   │   |   └── <a href="https://github.com/bem/bem-js-tutorial/blob/master/pure.bundles/011-live-bind-to/blocks/button/button.js">button.js</a>
 │   │   │   └── page/
-│   │   └── <a href="https://github.com/toivonen/bem-js-tutorial/blob/master/pure.bundles/011-live-bind-to/011-live-bind-to.bemjson.js">011-live-bind-to.bemjson.js</a>
+│   │   └── <a href="https://github.com/bem/bem-js-tutorial/blob/master/pure.bundles/011-live-bind-to/011-live-bind-to.bemjson.js">011-live-bind-to.bemjson.js</a>
 
->> <a href="http://varya.me/bem-js-tutorial/pure.bundles/011-live-bind-to/011-live-bind-to.html">011-live-bind-to.html</a></pre>
+>> <a href="http://bem.github.io/bem-js-tutorial/pure.bundles/011-live-bind-to/011-live-bind-to.html">011-live-bind-to.html</a></pre>
 
 Следующий пример — [страница со 100 BonBon
-кнопками](http://varya.me/bem-js-tutorial/pure.bundles/011-live-bind-to/011-live-bind-to.html)
+кнопками](http://bem.github.io/bem-js-tutorial/pure.bundles/011-live-bind-to/011-live-bind-to.html)
 — показывает, что реашировать на live события можно всегда,
 а не только при инициализации.
 
@@ -260,18 +260,18 @@ provide(DOM);
 │   │   ├── blocks/
 │   │   │   ├── .bem/
 │   │   │   ├── checkbox/
-│   │   │   |   ├── <a href="https://github.com/toivonen/bem-js-tutorial/blob/master/pure.bundles/012-live-init-many-events/blocks/checkbox/checkbox.bemhtml">checkbox.bemhtml</a>
-│   │   │   |   ├── <a href="https://github.com/toivonen/bem-js-tutorial/blob/master/pure.bundles/012-live-init-many-events/blocks/checkbox/checkbox.css">checkbox.css</a>
-│   │   │   |   └── <a href="https://github.com/toivonen/bem-js-tutorial/blob/master/pure.bundles/012-live-init-many-events/blocks/checkbox/checkbox.js">checkbox.js</a>
+│   │   │   |   ├── <a href="https://github.com/bem/bem-js-tutorial/blob/master/pure.bundles/012-live-init-many-events/blocks/checkbox/checkbox.bemhtml">checkbox.bemhtml</a>
+│   │   │   |   ├── <a href="https://github.com/bem/bem-js-tutorial/blob/master/pure.bundles/012-live-init-many-events/blocks/checkbox/checkbox.css">checkbox.css</a>
+│   │   │   |   └── <a href="https://github.com/bem/bem-js-tutorial/blob/master/pure.bundles/012-live-init-many-events/blocks/checkbox/checkbox.js">checkbox.js</a>
 │   │   │   └── page/
-│   │   └── <a href="https://github.com/toivonen/bem-js-tutorial/blob/master/pure.bundles/012-live-init-many-events/012-live-init-many-events.bemjson.js">012-live-init-many-events.bemjson.js</a>
+│   │   └── <a href="https://github.com/bem/bem-js-tutorial/blob/master/pure.bundles/012-live-init-many-events/012-live-init-many-events.bemjson.js">012-live-init-many-events.bemjson.js</a>
 
->> <a href="http://varya.me/bem-js-tutorial/pure.bundles/012-live-init-many-events/012-live-init-many-events.html">012-live-init-many-events.html</a></pre>
+>> <a href="http://bem.github.io/bem-js-tutorial/pure.bundles/012-live-init-many-events/012-live-init-many-events.html">012-live-init-many-events.html</a></pre>
 
 В предыдущих примерах инициализация блоков проходила по возникновению на них
 события  `click`. Но иногда слушать одно-единственное событие недостаточно.
 Пример
-[012-live-init-many-events](http://varya.me/bem-js-tutorial/pure.bundles/012-live-init-many-events/012-live-init-many-events.html)
+[012-live-init-many-events](http://bem.github.io/bem-js-tutorial/pure.bundles/012-live-init-many-events/012-live-init-many-events.html)
 демонстрирует такой случай на кастомизированном checkbox.
 
 ```html
@@ -553,19 +553,19 @@ this
 │   │   ├── blocks/
 │   │   │   ├── .bem/
 │   │   │   ├── map-marks/
-│   │   │   |   ├── <a href="https://github.com/toivonen/bem-js-tutorial/blob/master/components.bundles/014-live-init-bem-event/blocks/map-marks/map-marks.bemhtml">map-marks.bemhtml</a>
-│   │   │   |   ├── <a href="https://github.com/toivonen/bem-js-tutorial/blob/master/components.bundles/014-live-init-bem-event/blocks/map-marks/map-marks.css">map-marks.css</a>
-│   │   │   |   └── <a href="https://github.com/toivonen/bem-js-tutorial/blob/master/components.bundles/014-live-init-bem-event/blocks/map-marks/map-marks.js">map-marks.js</a>
+│   │   │   |   ├── <a href="https://github.com/bem/bem-js-tutorial/blob/master/components.bundles/014-live-init-bem-event/blocks/map-marks/map-marks.bemhtml">map-marks.bemhtml</a>
+│   │   │   |   ├── <a href="https://github.com/bem/bem-js-tutorial/blob/master/components.bundles/014-live-init-bem-event/blocks/map-marks/map-marks.css">map-marks.css</a>
+│   │   │   |   └── <a href="https://github.com/bem/bem-js-tutorial/blob/master/components.bundles/014-live-init-bem-event/blocks/map-marks/map-marks.js">map-marks.js</a>
 │   │   │   ├── map/
-│   │   │   |   ├── <a href="https://github.com/toivonen/bem-js-tutorial/blob/master/components.bundles/014-live-init-bem-event/blocks/map/map.bemhtml">map.bemhtml</a>
-│   │   │   |   ├── <a href="https://github.com/toivonen/bem-js-tutorial/blob/master/components.bundles/014-live-init-bem-event/blocks/map/map.deps.js">map.deps.js</a>
-│   │   │   |   └── <a href="https://github.com/toivonen/bem-js-tutorial/blob/master/components.bundles/014-live-init-bem-event/blocks/map/map.js">map.js</a>
+│   │   │   |   ├── <a href="https://github.com/bem/bem-js-tutorial/blob/master/components.bundles/014-live-init-bem-event/blocks/map/map.bemhtml">map.bemhtml</a>
+│   │   │   |   ├── <a href="https://github.com/bem/bem-js-tutorial/blob/master/components.bundles/014-live-init-bem-event/blocks/map/map.deps.js">map.deps.js</a>
+│   │   │   |   └── <a href="https://github.com/bem/bem-js-tutorial/blob/master/components.bundles/014-live-init-bem-event/blocks/map/map.js">map.js</a>
 │   │   │   ├── menu/
-│   │   │   |   └── <a href="https://github.com/toivonen/bem-js-tutorial/blob/master/components.bundles/014-live-init-bem-event/blocks/menu/menu.css">menu.css</a>
+│   │   │   |   └── <a href="https://github.com/bem/bem-js-tutorial/blob/master/components.bundles/014-live-init-bem-event/blocks/menu/menu.css">menu.css</a>
 │   │   │   └── page/
-│   │   └── <a href="https://github.com/toivonen/bem-js-tutorial/blob/master/components.bundles/014-live-init-bem-event/014-live-init-bem-event.bemjson.js">014-live-init-bem-event.bemjson.js</a>
+│   │   └── <a href="https://github.com/bem/bem-js-tutorial/blob/master/components.bundles/014-live-init-bem-event/014-live-init-bem-event.bemjson.js">014-live-init-bem-event.bemjson.js</a>
 
->> <a href="http://varya.me/bem-js-tutorial/components.bundles/014-live-init-bem-event/014-live-init-bem-event.html">014-live-init-bem-event.html</a></pre>
+>> <a href="http://bem.github.io/bem-js-tutorial/components.bundles/014-live-init-bem-event/014-live-init-bem-event.html">014-live-init-bem-event.html</a></pre>
 
 На этом примере вы можете видеть
 [блок
@@ -577,7 +577,7 @@ this
 [bemjson описания
 страницы](https://github.com/varya/bem-js-tutorial/blob/master/components.bundles/014-live-init-bem-event/014-live-init-bem-event.bemjson.js)
 или заглянув в HTML
-[014-live-init-bem-event.html](http://varya.me/bem-js-tutorial/components.bundles/014-live-init-bem-event/014-live-init-bem-event.html).
+[014-live-init-bem-event.html](http://bem.github.io/bem-js-tutorial/components.bundles/014-live-init-bem-event/014-live-init-bem-event.html).
 
 Этот блок нужен только при взаимодействии пользователя со страницей. Поэтому
 блок использует live-инициализацию, где сказано инициализировать блок только
