@@ -18,11 +18,11 @@
 │   │   ├── blocks/
 │   │   │   ├── .bem/
 │   │   │   └── call-button/
-│   │   │       ├── <a href="https://github.com/toivonen/bem-js-tutorial/blob/master/pure.bundles/002-change-modifier/blocks/call-button/call-button.bemhtml">call-button.bemhtml</a>
-│   │   │       ├── <a href="https://github.com/toivonen/bem-js-tutorial/blob/master/pure.bundles/002-change-modifier/blocks/call-button/call-button.css">call-button.css</a>
-│   │   │       ├── <a href="https://github.com/toivonen/bem-js-tutorial/blob/master/pure.bundles/002-change-modifier/blocks/call-button/call-button.js">call-button.js</a>
+│   │   │       ├── <a href="https://github.com/bem/bem-js-tutorial/blob/master/pure.bundles/002-change-modifier/blocks/call-button/call-button.bemhtml">call-button.bemhtml</a>
+│   │   │       ├── <a href="https://github.com/bem/bem-js-tutorial/blob/master/pure.bundles/002-change-modifier/blocks/call-button/call-button.css">call-button.css</a>
+│   │   │       ├── <a href="https://github.com/bem/bem-js-tutorial/blob/master/pure.bundles/002-change-modifier/blocks/call-button/call-button.js">call-button.js</a>
 │   │   │       └── call-button.png
-│   │   └── <a href="https://github.com/toivonen/bem-js-tutorial/blob/master/pure.bundles/002-change-modifier/002-change-modifier.bemjson.js">002-change-modifier.bemjson.js</a>
+│   │   └── <a href="https://github.com/bem/bem-js-tutorial/blob/master/pure.bundles/002-change-modifier/002-change-modifier.bemjson.js">002-change-modifier.bemjson.js</a>
 
 >> <a href="http://varya.me/bem-js-tutorial/pure.bundles/002-change-modifier/002-change-modifier.html">002-change-modifier.html</a></pre>
 
@@ -33,10 +33,10 @@
 Кнопка — это БЭМ блок `call-button`, представленный CSS, JavaScript и шаблонами.
 Все эти технологии находятся в
 [папке
-блока](https://github.com/toivonen/bem-js-tutorial/tree/master/pure.bundles/002-change-modifier/blocks/call-button).
+блока](https://github.com/bem/bem-js-tutorial/tree/master/pure.bundles/002-change-modifier/blocks/call-button).
 
 В JavaScript файле
-[blocks/call-button/call-button.js](https://github.com/toivonen/bem-js-tutorial/blob/master/pure.bundles/002-change-modifier/blocks/call-button/call-button.js)
+[blocks/call-button/call-button.js](https://github.com/bem/bem-js-tutorial/blob/master/pure.bundles/002-change-modifier/blocks/call-button/call-button.js)
 — стандартная декларация для DOM блока.
 
 Коллбэк, соответствующий модификатору `js_inited`, запускается, когда ядро
@@ -126,10 +126,10 @@ provide(DOM);
 │   │   │   └── traffic-light/
 │   │   │       ├── __go/
 │   │   │       │   └── traffic-light__go.mp3
-│   │   │       ├── <a href="https://github.com/toivonen/bem-js-tutorial/blob/master/pure.bundles/003-element-modifier/blocks/traffic-light/traffic-light.bemhtml">traffic-light.bemhtml</a>
-│   │   │       ├── <a href="https://github.com/toivonen/bem-js-tutorial/blob/master/pure.bundles/003-element-modifier/blocks/traffic-light/traffic-light.css">traffic-light.css</a>
-│   │   │       └── <a href="https://github.com/toivonen/bem-js-tutorial/blob/master/pure.bundles/003-element-modifier/blocks/traffic-light/traffic-light.js">traffic-light.js</a>
-│   │   └── <a href="https://github.com/toivonen/bem-js-tutorial/blob/master/pure.bundles/003-element-modifier/003-element-modifier.bemjson.js">003-element-modifier.bemjson.js</a>
+│   │   │       ├── <a href="https://github.com/bem/bem-js-tutorial/blob/master/pure.bundles/003-element-modifier/blocks/traffic-light/traffic-light.bemhtml">traffic-light.bemhtml</a>
+│   │   │       ├── <a href="https://github.com/bem/bem-js-tutorial/blob/master/pure.bundles/003-element-modifier/blocks/traffic-light/traffic-light.css">traffic-light.css</a>
+│   │   │       └── <a href="https://github.com/bem/bem-js-tutorial/blob/master/pure.bundles/003-element-modifier/blocks/traffic-light/traffic-light.js">traffic-light.js</a>
+│   │   └── <a href="https://github.com/bem/bem-js-tutorial/blob/master/pure.bundles/003-element-modifier/003-element-modifier.bemjson.js">003-element-modifier.bemjson.js</a>
 
 >> <a href="http://varya.me/bem-js-tutorial/pure.bundles/003-element-modifier/003-element-modifier.html">003-element-modifier.html</a></pre>
 
@@ -141,7 +141,7 @@ provide(DOM);
 
 Блок `traffic-light` содержит три элемента: `stop`, `slow` и `go`. У каждого из
 них может быть модификатор `status` со значениями `on` и `off`.
-[traffic-light.js](https://github.com/toivonen/bem-js-tutorial/blob/master/pure.bundles/003-element-modifier/blocks/traffic-light/traffic-light.js).
+[traffic-light.js](https://github.com/bem/bem-js-tutorial/blob/master/pure.bundles/003-element-modifier/blocks/traffic-light/traffic-light.js).
 
 Также как и в предыдущем примере, блок `traffic-light` объявляется как DOM-блок.
 
@@ -296,10 +296,10 @@ provide(DOM);
 │   │   │   ├── .bem/
 │   │   │   ├── page/
 │   │   │   └── switch/
-│   │   │       ├── <a href="https://github.com/toivonen/bem-js-tutorial/blob/master/pure.bundles/004-toggle-mod/blocks/switch/switch.bemhtml">switch.bemhtml</a>
-│   │   │       ├── <a href="https://github.com/toivonen/bem-js-tutorial/blob/master/pure.bundles/004-toggle-mod/blocks/switch/switch.css">switch.css</a>
-│   │   │       └── <a href="https://github.com/toivonen/bem-js-tutorial/blob/master/pure.bundles/004-toggle-mod/blocks/switch/switch.js">switch.js</a>
-│   │   └── <a href="https://github.com/toivonen/bem-js-tutorial/blob/master/pure.bundles/004-toggle-mod/004-toggle-mod.bemjson.js">004-toggle-mod.bemjson.js</a>
+│   │   │       ├── <a href="https://github.com/bem/bem-js-tutorial/blob/master/pure.bundles/004-toggle-mod/blocks/switch/switch.bemhtml">switch.bemhtml</a>
+│   │   │       ├── <a href="https://github.com/bem/bem-js-tutorial/blob/master/pure.bundles/004-toggle-mod/blocks/switch/switch.css">switch.css</a>
+│   │   │       └── <a href="https://github.com/bem/bem-js-tutorial/blob/master/pure.bundles/004-toggle-mod/blocks/switch/switch.js">switch.js</a>
+│   │   └── <a href="https://github.com/bem/bem-js-tutorial/blob/master/pure.bundles/004-toggle-mod/004-toggle-mod.bemjson.js">004-toggle-mod.bemjson.js</a>
 
 >> <a href="http://varya.me/bem-js-tutorial/pure.bundles/004-toggle-mod/004-toggle-mod.html">004-toggle-mod.html</a></pre>
 
@@ -309,7 +309,7 @@ provide(DOM);
 
 На этой странице вы можете видеть кнопку — блок `swicth` с модификатором
 `switched_off`, что означает выключенное состояние. Файл
-[switch.js](https://github.com/toivonen/bem-js-tutorial/blob/master/pure.bundles/004-toggle-mod/blocks/switch/switch.js)
+[switch.js](https://github.com/bem/bem-js-tutorial/blob/master/pure.bundles/004-toggle-mod/blocks/switch/switch.js)
 говорит кнопке слушать события `click` и переключаться из состояния
 `swicthed_off` в `switched_on` и обратно при помощи метода `toggleMod`.
 
@@ -344,10 +344,10 @@ provide(DOM);
 │   │   │   ├── .bem/
 │   │   │   ├── page/
 │   │   │   └── todo/
-│   │   │       ├── <a href="https://github.com/toivonen/bem-js-tutorial/blob/master/pure.bundles/005-modifier-removing/blocks/todo/todo.bemhtml">todo.bemhtml</a>
-│   │   │       ├── <a href="https://github.com/toivonen/bem-js-tutorial/blob/master/pure.bundles/005-modifier-removing/blocks/todo/todo.css">todo.css</a>
-│   │   │       └── <a href="https://github.com/toivonen/bem-js-tutorial/blob/master/pure.bundles/005-modifier-removing/blocks/todo/todo.js">todo.js</a>
-│   │   └── <a href="https://github.com/toivonen/bem-js-tutorial/blob/master/pure.bundles/005-modifier-removing/005-modifier-removing.bemjson.js">005-modifier-removing.bemjson.js</a>
+│   │   │       ├── <a href="https://github.com/bem/bem-js-tutorial/blob/master/pure.bundles/005-modifier-removing/blocks/todo/todo.bemhtml">todo.bemhtml</a>
+│   │   │       ├── <a href="https://github.com/bem/bem-js-tutorial/blob/master/pure.bundles/005-modifier-removing/blocks/todo/todo.css">todo.css</a>
+│   │   │       └── <a href="https://github.com/bem/bem-js-tutorial/blob/master/pure.bundles/005-modifier-removing/blocks/todo/todo.js">todo.js</a>
+│   │   └── <a href="https://github.com/bem/bem-js-tutorial/blob/master/pure.bundles/005-modifier-removing/005-modifier-removing.bemjson.js">005-modifier-removing.bemjson.js</a>
 
 >> <a href="http://varya.me/bem-js-tutorial/pure.bundles/005-modifier-removing/005-modifier-removing.html">005-modifier-removing.html</a></pre>
 
@@ -371,7 +371,7 @@ provide(DOM);
 ```
 
 Поведение блока описано в файле
-[todo.js](https://github.com/toivonen/bem-js-tutorial/blob/master/pure.bundles/005-modifier-removing/blocks/todo/todo.js).
+[todo.js](https://github.com/bem/bem-js-tutorial/blob/master/pure.bundles/005-modifier-removing/blocks/todo/todo.js).
 
 ```js
 modules.define('i-bem__dom', function(provide, DOM) {
@@ -416,10 +416,10 @@ provide(DOM);
 │   │   │   ├── .bem/
 │   │   │   ├── page/
 │   │   │   └── accordion-menu/
-│   │   │       ├── <a href="https://github.com/toivonen/bem-js-tutorial/blob/master/pure.bundles/006-before-set-mod/blocks/accordion-menu/accordion-menu.bemhtml">accordion-menu.bemhtml</a>
-│   │   │       ├── <a href="https://github.com/toivonen/bem-js-tutorial/blob/master/pure.bundles/006-before-set-mod/blocks/accordion-menu/accordion-menu.css">accordion-menu.css</a>
-│   │   │       └── <a href="https://github.com/toivonen/bem-js-tutorial/blob/master/pure.bundles/006-before-set-mod/blocks/accordion-menu/accordion-menu.js">accordion-menu.js</a>
-│   │   └── <a href="https://github.com/toivonen/bem-js-tutorial/blob/master/pure.bundles/006-before-set-mod/006-before-set-mod.bemjson.js">006-before-set-mod.bemjson.js</a>
+│   │   │       ├── <a href="https://github.com/bem/bem-js-tutorial/blob/master/pure.bundles/006-before-set-mod/blocks/accordion-menu/accordion-menu.bemhtml">accordion-menu.bemhtml</a>
+│   │   │       ├── <a href="https://github.com/bem/bem-js-tutorial/blob/master/pure.bundles/006-before-set-mod/blocks/accordion-menu/accordion-menu.css">accordion-menu.css</a>
+│   │   │       └── <a href="https://github.com/bem/bem-js-tutorial/blob/master/pure.bundles/006-before-set-mod/blocks/accordion-menu/accordion-menu.js">accordion-menu.js</a>
+│   │   └── <a href="https://github.com/bem/bem-js-tutorial/blob/master/pure.bundles/006-before-set-mod/006-before-set-mod.bemjson.js">006-before-set-mod.bemjson.js</a>
 
 >> <a href="http://varya.me/bem-js-tutorial/pure.bundles/006-before-set-mod/006-before-set-mod.html">006-before-set-mod.html</a></pre>
 
@@ -430,7 +430,7 @@ provide(DOM);
 Пример
 [006-before-set-mod](http://varya.me/bem-js-tutorial/pure.bundles/006-before-set-mod/006-before-set-mod.html)
 демонстрирует такой случай на примере блока
-[accordion-menu](https://github.com/toivonen/bem-js-tutorial/tree/master/pure.bundles/006-before-set-mod/blocks/accordion-menu).
+[accordion-menu](https://github.com/bem/bem-js-tutorial/tree/master/pure.bundles/006-before-set-mod/blocks/accordion-menu).
 Меню на странице состоит из нескольких пунктов, каждый из которых может
 раскрываться по клику и открывать доступ к своим подпунктам. Чтобы это
 произошло, обработчик события `click` устанавливает активному пункту модификатор
