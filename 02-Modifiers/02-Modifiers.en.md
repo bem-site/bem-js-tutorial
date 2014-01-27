@@ -24,10 +24,10 @@ this modifier.
 │   │   │       └── call-button.png
 │   │   └── <a href="https://github.com/bem/bem-js-tutorial/blob/master/pure.bundles/002-change-modifier/002-change-modifier.bemjson.js">002-change-modifier.bemjson.js</a>
 
->> <a href="http://varya.me/bem-js-tutorial/pure.bundles/002-change-modifier/002-change-modifier.html">002-change-modifier.html</a></pre>
+>> <a href="http://bem.github.io/bem-js-tutorial/pure.bundles/002-change-modifier/002-change-modifier.html">002-change-modifier.html</a></pre>
 
 In the
-[002-change-modifier](http://varya.me/bem-js-tutorial/pure.bundles/002-change-modifier/002-change-modifier.html)
+[002-change-modifier](http://bem.github.io/bem-js-tutorial/pure.bundles/002-change-modifier/002-change-modifier.html)
 example you can see a button changing its state after a user clicks on it.
 
 The button is a BEM block named `call-button` and is represented by CSS,
@@ -128,12 +128,12 @@ in the tutorial below.
 │   │   │       └── <a href="https://github.com/bem/bem-js-tutorial/blob/master/pure.bundles/003-element-modifier/blocks/traffic-light/traffic-light.js">traffic-light.js</a>
 │   │   └── <a href="https://github.com/bem/bem-js-tutorial/blob/master/pure.bundles/003-element-modifier/003-element-modifier.bemjson.js">003-element-modifier.bemjson.js</a>
 
->> <a href="http://varya.me/bem-js-tutorial/pure.bundles/003-element-modifier/003-element-modifier.html">003-element-modifier.html</a></pre>
+>> <a href="http://bem.github.io/bem-js-tutorial/pure.bundles/003-element-modifier/003-element-modifier.html">003-element-modifier.html</a></pre>
 
 According to BEM, elements can be modified in the same way as blocks. JavaScript methods
 are similar in both. The next
 example
-[003-element-modifier](http://varya.me/bem-js-tutorial/pure.bundles/003-element-modifier/003-element-modifier.html)
+[003-element-modifier](http://bem.github.io/bem-js-tutorial/pure.bundles/003-element-modifier/003-element-modifier.html)
 illustrates this.
 
 The `traffic-light` block contains three light elements `stop`, `slow` and `go`
@@ -293,11 +293,11 @@ This makes a browser play a traffic light sound when an element is switched into
 │   │   │       └── <a href="https://github.com/bem/bem-js-tutorial/blob/master/pure.bundles/004-toggle-mod/blocks/switch/switch.js">switch.js</a>
 │   │   └── <a href="https://github.com/bem/bem-js-tutorial/blob/master/pure.bundles/004-toggle-mod/004-toggle-mod.bemjson.js">004-toggle-mod.bemjson.js</a>
 
->> <a href="http://varya.me/bem-js-tutorial/pure.bundles/004-toggle-mod/004-toggle-mod.html">004-toggle-mod.html</a></pre>
+>> <a href="http://bem.github.io/bem-js-tutorial/pure.bundles/004-toggle-mod/004-toggle-mod.html">004-toggle-mod.html</a></pre>
 
 It is useful to toggle a modifier if there are 2 values of it to be changed one
 by one. This is what the
-[004-toggle-mod](http://varya.me/bem-js-tutorial/pure.bundles/004-toggle-mod/004-toggle-mod.html)
+[004-toggle-mod](http://bem.github.io/bem-js-tutorial/pure.bundles/004-toggle-mod/004-toggle-mod.html)
 example demonstrates.
 
 It shows a `switch` block, which is a nice button, with its `switched_off`
@@ -343,10 +343,10 @@ helper method.
 │   │   │       └── <a href="https://github.com/bem/bem-js-tutorial/blob/master/pure.bundles/005-modifier-removing/blocks/todo/todo.js">todo.js</a>
 │   │   └── <a href="https://github.com/bem/bem-js-tutorial/blob/master/pure.bundles/005-modifier-removing/005-modifier-removing.bemjson.js">005-modifier-removing.bemjson.js</a>
 
->> <a href="http://varya.me/bem-js-tutorial/pure.bundles/005-modifier-removing/005-modifier-removing.html">005-modifier-removing.html</a></pre>
+>> <a href="http://bem.github.io/bem-js-tutorial/pure.bundles/005-modifier-removing/005-modifier-removing.html">005-modifier-removing.html</a></pre>
 
 Removing a modifier from an element (or a block) explained with
-[005-modifier-removing](http://varya.me/bem-js-tutorial/pure.bundles/005-modifier-removing/005-modifier-removing.html)
+[005-modifier-removing](http://bem.github.io/bem-js-tutorial/pure.bundles/005-modifier-removing/005-modifier-removing.html)
 example. This is a kind of To-Do list, where each task is a sticky note and can
 be hidden (which means to be marked done) with a click.
 
@@ -416,14 +416,14 @@ here.
 │   │   │       └── <a href="https://github.com/bem/bem-js-tutorial/blob/master/pure.bundles/006-before-set-mod/blocks/accordion-menu/accordion-menu.js">accordion-menu.js</a>
 │   │   └── <a href="https://github.com/bem/bem-js-tutorial/blob/master/pure.bundles/006-before-set-mod/006-before-set-mod.bemjson.js">006-before-set-mod.bemjson.js</a>
 
->> <a href="http://varya.me/bem-js-tutorial/pure.bundles/006-before-set-mod/006-before-set-mod.html">006-before-set-mod.html</a></pre>
+>> <a href="http://bem.github.io/bem-js-tutorial/pure.bundles/006-before-set-mod/006-before-set-mod.html">006-before-set-mod.html</a></pre>
 
 Besides the possibility to react on a modifier setting, you can do something
 before that happens. It is widely adopted for the cases when you need to prevent
 setting a modifier.
 
 The
-[006-before-set-mod](http://varya.me/bem-js-tutorial/pure.bundles/006-before-set-mod/006-before-set-mod.html)
+[006-before-set-mod](http://bem.github.io/bem-js-tutorial/pure.bundles/006-before-set-mod/006-before-set-mod.html)
 example illustrates such a case with an
 [accordion-menu](https://github.com/bem/bem-js-tutorial/tree/master/pure.bundles/006-before-set-mod/blocks/accordion-menu)
 block. You can see a menu with a few items on a page. Each of them can reveal

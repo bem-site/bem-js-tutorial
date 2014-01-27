@@ -24,10 +24,10 @@
 │   │   │       └── call-button.png
 │   │   └── <a href="https://github.com/bem/bem-js-tutorial/blob/master/pure.bundles/002-change-modifier/002-change-modifier.bemjson.js">002-change-modifier.bemjson.js</a>
 
->> <a href="http://varya.me/bem-js-tutorial/pure.bundles/002-change-modifier/002-change-modifier.html">002-change-modifier.html</a></pre>
+>> <a href="http://bem.github.io/bem-js-tutorial/pure.bundles/002-change-modifier/002-change-modifier.html">002-change-modifier.html</a></pre>
 
 В примере
-[002-change-modifier](http://varya.me/bem-js-tutorial/pure.bundles/002-change-modifier/002-change-modifier.html)
+[002-change-modifier](http://bem.github.io/bem-js-tutorial/pure.bundles/002-change-modifier/002-change-modifier.html)
 вы можете увидеть кнопку, меняюшую свое состояние по клику на ней.
 
 Кнопка — это БЭМ блок `call-button`, представленный CSS, JavaScript и шаблонами.
@@ -131,13 +131,13 @@ provide(DOM);
 │   │   │       └── <a href="https://github.com/bem/bem-js-tutorial/blob/master/pure.bundles/003-element-modifier/blocks/traffic-light/traffic-light.js">traffic-light.js</a>
 │   │   └── <a href="https://github.com/bem/bem-js-tutorial/blob/master/pure.bundles/003-element-modifier/003-element-modifier.bemjson.js">003-element-modifier.bemjson.js</a>
 
->> <a href="http://varya.me/bem-js-tutorial/pure.bundles/003-element-modifier/003-element-modifier.html">003-element-modifier.html</a></pre>
+>> <a href="http://bem.github.io/bem-js-tutorial/pure.bundles/003-element-modifier/003-element-modifier.html">003-element-modifier.html</a></pre>
 
 Согласно БЭМ, модификаторы могут быть не только у блоков, но и у элементов.
 Используемые для этого методы похожи.
 
 Посмотрите на следующем примере
-[003-element-modifier](http://varya.me/bem-js-tutorial/pure.bundles/003-element-modifier/003-element-modifier.html).
+[003-element-modifier](http://bem.github.io/bem-js-tutorial/pure.bundles/003-element-modifier/003-element-modifier.html).
 
 Блок `traffic-light` содержит три элемента: `stop`, `slow` и `go`. У каждого из
 них может быть модификатор `status` со значениями `on` и `off`.
@@ -301,11 +301,11 @@ provide(DOM);
 │   │   │       └── <a href="https://github.com/bem/bem-js-tutorial/blob/master/pure.bundles/004-toggle-mod/blocks/switch/switch.js">switch.js</a>
 │   │   └── <a href="https://github.com/bem/bem-js-tutorial/blob/master/pure.bundles/004-toggle-mod/004-toggle-mod.bemjson.js">004-toggle-mod.bemjson.js</a>
 
->> <a href="http://varya.me/bem-js-tutorial/pure.bundles/004-toggle-mod/004-toggle-mod.html">004-toggle-mod.html</a></pre>
+>> <a href="http://bem.github.io/bem-js-tutorial/pure.bundles/004-toggle-mod/004-toggle-mod.html">004-toggle-mod.html</a></pre>
 
 Если у модификатора 2 значения, и они должны меняться друг за другом, удобно
 воспользоваться переключением (toggle). Это показано в примере
-[004-toggle-mod](http://varya.me/bem-js-tutorial/pure.bundles/004-toggle-mod/004-toggle-mod.html).
+[004-toggle-mod](http://bem.github.io/bem-js-tutorial/pure.bundles/004-toggle-mod/004-toggle-mod.html).
 
 На этой странице вы можете видеть кнопку — блок `swicth` с модификатором
 `switched_off`, что означает выключенное состояние. Файл
@@ -349,10 +349,10 @@ provide(DOM);
 │   │   │       └── <a href="https://github.com/bem/bem-js-tutorial/blob/master/pure.bundles/005-modifier-removing/blocks/todo/todo.js">todo.js</a>
 │   │   └── <a href="https://github.com/bem/bem-js-tutorial/blob/master/pure.bundles/005-modifier-removing/005-modifier-removing.bemjson.js">005-modifier-removing.bemjson.js</a>
 
->> <a href="http://varya.me/bem-js-tutorial/pure.bundles/005-modifier-removing/005-modifier-removing.html">005-modifier-removing.html</a></pre>
+>> <a href="http://bem.github.io/bem-js-tutorial/pure.bundles/005-modifier-removing/005-modifier-removing.html">005-modifier-removing.html</a></pre>
 
 Удаление модификатора с элемента (или блока) проиллюстрировано примером
-[005-modifier-removing](http://varya.me/bem-js-tutorial/pure.bundles/005-modifier-removing/005-modifier-removing.html).
+[005-modifier-removing](http://bem.github.io/bem-js-tutorial/pure.bundles/005-modifier-removing/005-modifier-removing.html).
 Это страница с todo-листом, в котором каждое дело показано клейким листочком.
 Листочек можно спрятать (пометить как выполненный), кликнув на нем.
 
@@ -421,14 +421,14 @@ provide(DOM);
 │   │   │       └── <a href="https://github.com/bem/bem-js-tutorial/blob/master/pure.bundles/006-before-set-mod/blocks/accordion-menu/accordion-menu.js">accordion-menu.js</a>
 │   │   └── <a href="https://github.com/bem/bem-js-tutorial/blob/master/pure.bundles/006-before-set-mod/006-before-set-mod.bemjson.js">006-before-set-mod.bemjson.js</a>
 
->> <a href="http://varya.me/bem-js-tutorial/pure.bundles/006-before-set-mod/006-before-set-mod.html">006-before-set-mod.html</a></pre>
+>> <a href="http://bem.github.io/bem-js-tutorial/pure.bundles/006-before-set-mod/006-before-set-mod.html">006-before-set-mod.html</a></pre>
 
 Иногда нужно произвести какие-то действия до установки модификатора. Это
 особенно применимо, если в результате вычислений оказывается, что установку
 модификатора надо предотвратить.
 
 Пример
-[006-before-set-mod](http://varya.me/bem-js-tutorial/pure.bundles/006-before-set-mod/006-before-set-mod.html)
+[006-before-set-mod](http://bem.github.io/bem-js-tutorial/pure.bundles/006-before-set-mod/006-before-set-mod.html)
 демонстрирует такой случай на примере блока
 [accordion-menu](https://github.com/bem/bem-js-tutorial/tree/master/pure.bundles/006-before-set-mod/blocks/accordion-menu).
 Меню на странице состоит из нескольких пунктов, каждый из которых может

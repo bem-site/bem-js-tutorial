@@ -64,12 +64,12 @@ The `data-bem` attribute stores block parameters in JSON, which structure is:
 │   │   │       └── <a href="https://github.com/bem/bem-js-tutorial/blob/master/pure.bundles/001-simple-block/blocks/my-block/my-block.js">my-block.js</a>
 │   │   └── <a href="https://github.com/bem/bem-js-tutorial/blob/master/pure.bundles/001-simple-block/001-simple-block.bemjson.js">001-simple-block.bemjson.js</a>
 
->> <a href="http://varya.me/bem-js-tutorial/pure.bundles/001-simple-block/001-simple-block.html">001-simple-block.html</a></pre>
+>> <a href="http://bem.github.io/bem-js-tutorial/pure.bundles/001-simple-block/001-simple-block.html">001-simple-block.html</a></pre>
 
 The first example is the most simple. It demonstrates the block's structure and
 shows how the JavaScript starts working.<br/>
 Load the example page
-[001-simple-block](http://varya.me/bem-js-tutorial/pure.bundles/001-simple-block/001-simple-block.html)
+[001-simple-block](http://bem.github.io/bem-js-tutorial/pure.bundles/001-simple-block/001-simple-block.html)
 with your console tool open, and you can see the `outerHTML` of the `my-block` on
 the page.
 

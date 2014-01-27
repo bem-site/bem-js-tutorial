@@ -66,12 +66,12 @@ JavaScript файл в директорию блока.
 │   │   │       └── <a href="https://github.com/bem/bem-js-tutorial/blob/master/pure.bundles/001-simple-block/blocks/my-block/my-block.js">my-block.js</a>
 │   │   └── <a href="https://github.com/bem/bem-js-tutorial/blob/master/pure.bundles/001-simple-block/001-simple-block.bemjson.js">001-simple-block.bemjson.js</a>
 
->> <a href="http://varya.me/bem-js-tutorial/pure.bundles/001-simple-block/001-simple-block.html">001-simple-block.html</a></pre>
+>> <a href="http://bem.github.io/bem-js-tutorial/pure.bundles/001-simple-block/001-simple-block.html">001-simple-block.html</a></pre>
 
 Первый пример — самый простой. Он показывает структуру блока и работающий
 JavaScript.<br/>
 Загрузите пример
-[001-simple-block](http://varya.me/bem-js-tutorial/pure.bundles/001-simple-block/001-simple-block.html)
+[001-simple-block](http://bem.github.io/bem-js-tutorial/pure.bundles/001-simple-block/001-simple-block.html)
 в браузере с открытой консолью, и вы увидите вывод строки, соответствующей
 `outerHTML` блока.
 
