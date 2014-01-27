@@ -181,7 +181,7 @@ provide(DOM);
 пользователь кликает по блокам, событие поднимается наверх до `document`, и ядро
 инициализирует блок, следуя инструкциям в секции `live`.
 
-### Binding to live events
+### Обработчики live событий
 <pre>├── pure.bundles/
 │   ├── 011-live-bind-to/
 │   │   ├── blocks/
@@ -195,14 +195,13 @@ provide(DOM);
 
 >> <a href="http://varya.me/bem-js-tutorial/pure.bundles/011-live-bind-to/011-live-bind-to.html">011-live-bind-to.html</a></pre>
 
-The next [example with 100 BonBon
-buttons](http://varya.me/bem-js-tutorial/pure.bundles/011-live-bind-to/011-live-bind-to.html)
-shows that live events can be reacted not once when initializing a block but
-every time.
+Следующий пример — [страница со 100 BonBon
+кнопками](http://varya.me/bem-js-tutorial/pure.bundles/011-live-bind-to/011-live-bind-to.html)
+— показывает, что реашировать на live события можно всегда,
+а не только при инициализации.
 
-This `button` block is again equipped with live initialization instructions since
-it would be madness to initialize all the 100 buttons at once and then listen to
-the clicks on each of them.
+У представленного на странице блока `button` есть live инициализация. Было бы
+неразумно инициализировать их все сразу, и на каждом слушать событие click.
 
 ```js
 modules.define('i-bem__dom', function(provide, DOM) {
@@ -227,11 +226,10 @@ provide(DOM);
 });
 ```
 
-Similar to the examples with `liveInitOnEvent` this code initializes a block
-instance and runs the `js_inited` modifier callback.
-
-Unlike the `liveInitOnEvent` the `liveBindTo` method runs its callback not
-just once but every time a user clicks the button.
+Также как и в предыдущем примере (где использовался `liveInitOnEvent`), этот код
+инициализирует блок и запускает коллбэк модификатора `js_inited`. Но разница
+состоит в том, что `liveBindTo` говорит запускать коллбэк не только при
+инициализации, а каждый раз когда пользователь кликает по кнопке.
 
 ```js
 modules.define('i-bem__dom', function(provide, DOM) {
@@ -256,7 +254,7 @@ provide(DOM);
 });
 ```
 
-### Live initialization on many events
+### Инициализация по нескольким событиям
 <pre>├── pure.bundles/
 │   ├── 012-live-init-many-events/
 │   │   ├── blocks/
@@ -270,11 +268,11 @@ provide(DOM);
 
 >> <a href="http://varya.me/bem-js-tutorial/pure.bundles/012-live-init-many-events/012-live-init-many-events.html">012-live-init-many-events.html</a></pre>
 
-In the previous examples the core watched only one `click` event to decide if a
-block should start working or not. But sometimes reacting just one event is not
-enough. This is illustrated with the
+В предыдущих примерах инициализация блоков проходила по возникновению на них
+события  `click`. Но иногда слушать одно-единственное событие недостаточно.
+Пример
 [012-live-init-many-events](http://varya.me/bem-js-tutorial/pure.bundles/012-live-init-many-events/012-live-init-many-events.html)
-example, where you can see customized checkboxes.
+демонстрирует такой случай на кастомизированном checkbox.
 
 ```html
 <span
@@ -285,8 +283,8 @@ example, where you can see customized checkboxes.
 </span>
 ```
 
-It is obvious an instance of this block has to be initialized when a user clicks
-its `label` element.
+Очевидно, что экзепляр блока должен быть инициализирован, когда пользователь
+кликает по элементу `label`.
 
 ```js
 modules.define('i-bem__dom', function(provide, DOM) {
@@ -310,16 +308,16 @@ provide(DOM);
 });
 ```
 
-The same `liveBindTo` method is used here to initialized the block and listen to
-its next clicks. Notice that here it is provided with an additional parameter
-(the first one) with the name of a block element whose clicks we are interested
-in.
+Здесь тоже используется метод `liveBindTo`, чтобы не только проинициализировать
+блок, но и запускать коллбэк на следующих кликах. Заметьте, что здесь
+использован опциональный параметр с именем элемента `label`, т.к. нас интересуют
+клики именно на нем.
 
-But more than that, the control can be changed with a keyboard (or from another
-JavaScript piece) and this must also be taken into account.<br/>
-You can put in the `live` method as many instructions about how to initialize as
-you need. Here it happens after a `click` event on the `label` element and also
-after a `change` event on the embedded `control` element, which is native `input`.
+Кроме того, контрол может быть изменен с клавиатуры (или другим JavaScript), и
+это тоже нужно учесть.<br/>
+Внутри метода `live` можно поместить столько инструкций по инициализации,
+сколько нужно для данного блока. Здесь она случается по клику на элементе
+`label` и по событию `change` элемента `control` (это узел `input`).
 
 ```js
 modules.define('i-bem__dom', function(provide, DOM) {
@@ -349,7 +347,8 @@ provide(DOM);
 });
 ```
 
-The block should also be inited when focused in or focused out.
+Также блок должен быть проинициализирован, если он оказывается в фокусе и если
+фокус уходит из него.
 
 ```js
 modules.define('i-bem__dom', function(provide, DOM) {
@@ -377,10 +376,10 @@ provide(DOM);
 });
 ```
 
-As you can see, it is possible to bind to more than one event with the same
-callback if list their names separated with a space.
+Как видно из кода, один и тот же коллбэк можно привязать к нескольким событиям.
+Для этого имена событий пишутся через пробел.
 
-Then, with adding modifiers' functionality to the components, it can be finished.
+После добавляения коллбэков на модификаторы, программирование блока закончено.
 
 ```js
 modules.define('i-bem__dom', function(provide, DOM) {
@@ -411,17 +410,21 @@ provide(DOM);
 });
 ```
 
-This approach makes the control behaviour consistent. No matter how a user or
-another piece of JavaScript or a browser start to interact with the component,
-it will work fine. Getting the `focused` modifier from something, it would focus
-the embedded input control. Having the control focused, it would set `focused`
-modifier to itself providing the proper view. When changed either manually or
-automatically the block would get `checked` modifier and a `checked` attribute
-for the control or loose them.
+Такой подход позволяет описать компонент консистентно. Вне зависимости от того,
+как начнет использоваться блок — взаимодействуя с пользователем, или из другого
+JavaScript страницы, или реагируя на события в браузере — он будет работать как
+задумано. Получив модификатор `focused`, блок установит фокус на встроенном в
+него input. И наоборот — увидев, что встроенный input по каким-то причинам
+получил focus, блок установит себе модификатор `focused` и таким образом
+приобретет нужный внешний вид. При изменении блока — и вручную, и автоматически
+— блок получит модификатор `checked` и задаст атрибут `checked` встроенному
+input, или снимет их.
 
-#### Why not :checked?
-As you might notice, in this example an internal 'control' element (the input)
-is indicated to be checked with the `checked` modifier on its parent block.
+#### Почему не :checked?
+
+Как вы могли заметить, в этом примере выделенность встроенного элемента
+`control` (input) проверяется при помощи модификатора `checked` соответствующего
+блока.
 
 ```html
 <span
@@ -447,8 +450,9 @@ is indicated to be checked with the `checked` modifier on its parent block.
 }
 ```
 
-Indeed, it would be possible to use `:checked` pseudo selector as it was done in
-the [control prototype](http://codepen.io/bbodine1/pen/novBm).
+Конечно, можно было бы воспользоваться псевдо-селектором `:checked` как это
+сделано здесь:
+[control prototype](http://codepen.io/bbodine1/pen/novBm).
 
 ```css
 .checkbox input[type=checkbox]:checked + label {
@@ -460,8 +464,8 @@ the [control prototype](http://codepen.io/bbodine1/pen/novBm).
 }
 ```
 
-However the modifier approach supplies more flexibility making the whole block
-be able to change if checked
+Но использование модификаторов более гибкое, и позволяет всему блоку менять
+внешний вид при выделении.
 
 ```css
 .checkbox_checked
@@ -472,22 +476,21 @@ be able to change if checked
 }
 ```
 
-as well as saves time for parsing selectors and bringing architectural
-consistency to the code.
+И, конечно, позволяет экономить на парсинге селекторов и делает код более
+консистентным.
 
-### BEM events
+### БЭМ события
 
-Besides DOM events, `i-bem.js` operates with custom JavaScript events on the
-JavaScript objects corresponding to the blocks. These events are named `BEM
-events` and usually serve to normalize a component API.
+Кроме DOM-событий, `i-bem.js` умеет работать с кастомными JavaScript событиями
+на объектах, соответствующих блокам. Эти события назваются `БЭМ события` и
+обычно составляют API блока.
 
-The [`link`
-block](https://github.com/bem/bem-components/tree/a37156b9646b97472776b8ce035ca1736dc7257c/common.blocks/link)
-of `bem-components` block library can provide an example of firing a custom BEM
-event. Its JavaScript functionality is to trigger the `click` event on the
-corresponding JavaScript object whenever a user clicks the left button if the
-current link is not disabled. An event is triggered with the help of `emit` method
-of the block.
+Примером порождения таких событий может быть [блок
+`link`](https://github.com/bem/bem-components/tree/a37156b9646b97472776b8ce035ca1736dc7257c/common.blocks/link)
+библиотеки `bem-components`. На JavaScript-объекте, соответствующем блоку,
+возникает кастомное событие `click` в том случае, если пользователь кликает по
+ссылке левой кнопкой, и ссылка не является неактивной в данный момент.
+Запускается это событие при помощи метода `emit`.
 
 ```js
   _onClick : function(e) {
@@ -496,11 +499,13 @@ of the block.
   }
 ```
 
-Thus, the `link` block has an API which can be used by other blocks on a page.
+Таким образом, блок `link` получает API, и им может воспользоваться любой другой
+блок страницы.
 
-Another example is the [`menu` block](https://github.com/varya/bem-js-tutorial/tree/master/desktop.blocks/menu)
-of this tutorial. It is represets a list of menu items in HTML, one of those can be
-selected at the moment.
+Другим примером может служить
+[блок
+`menu`](https://github.com/varya/bem-js-tutorial/tree/master/desktop.blocks/menu).
+Он представляет список пунктов меню в HTML, один из которых может быть выделен.
 
 ```html
 <div class="menu i-bem" data-bem="{&quot;menu&quot;:{}}">
@@ -524,9 +529,9 @@ selected at the moment.
 </div>
 ```
 
-The menu listens to the DOM clicks on its `item-selector` elements and emits the
-`current` event which signals about changing the current item and provides the
-data.
+Блок слушает DOM-события click на своих элементах `item-selector` и запускает
+событие `current`, сигнализирующее о смене выделенного пункта меню и дающее
+данные о текущем пункте.
 
 ```js
 this
@@ -537,11 +542,11 @@ this
     });
 ```
 
-This event fires on the JavaScript object corresponding to the menu block instance.
-With that, any other block subscribed to the `current` BEM event of the menu can
-learn when it changes its current item and react on it.
+Это событие возникает на JavaScript-объекте, соответствующем экземпляру блока.
+Используя это, другой блок может подписаться на БЭМ-событие `current` блока
+`menu`, узнавать о изменении текущего пункта меню и реагировать на это.
 
-### Live initialization on BEM a event of an inner block
+### Live инициализация по БЭМ-событию вложенного блока
 
 <pre>├── components.bundles/
 │   ├── 014-live-init-bem-event/
@@ -562,23 +567,25 @@ learn when it changes its current item and react on it.
 
 >> <a href="http://varya.me/bem-js-tutorial/components.bundles/014-live-init-bem-event/014-live-init-bem-event.html">014-live-init-bem-event.html</a></pre>
 
-The example shows [`map-marks`
-block](https://github.com/varya/bem-js-tutorial/tree/master/components.bundles/014-live-init-bem-event/blocks/map-marks)
-which binds a menu and a map so that a user can select the menu item and see a
-related mark in the map.
+На этом примере вы можете видеть
+[блок
+`map-marks`](https://github.com/varya/bem-js-tutorial/tree/master/components.bundles/014-live-init-bem-event/blocks/map-marks).
+Он связывает вместе блоки меню и карты таким образом, что пользователю кликающий
+по меню, может видеть соответствуюшую точку на карте.
 
-The `map-marks` block contains the blocks `menu` and `map`. This can be seen
-from [bemjson description of the
-page](https://github.com/varya/bem-js-tutorial/blob/master/components.bundles/014-live-init-bem-event/014-live-init-bem-event.bemjson.js)
-or inside the page html
+Блок `map-marks` содержит блок `menu` и `map`. Это можно увидеть из
+[bemjson описания
+страницы](https://github.com/varya/bem-js-tutorial/blob/master/components.bundles/014-live-init-bem-event/014-live-init-bem-event.bemjson.js)
+или заглянув в HTML
 [014-live-init-bem-event.html](http://varya.me/bem-js-tutorial/components.bundles/014-live-init-bem-event/014-live-init-bem-event.html).
 
-This block is only needed when a user has been started to interact with the
-menu. So the block uses live initialization and it is declared to initialize the
-block only when the `current` BEM event fires on the included `menu` block.
+Этот блок нужен только при взаимодействии пользователя со страницей. Поэтому
+блок использует live-инициализацию, где сказано инициализировать блок только
+тогда, когда на вложенном в него блоке `menu` возникнет событие `current`.
 
-The JavaScript implementation of the block [map-marks.js](https://github.com/varya/bem-js-tutorial/blob/master/components.bundles/014-live-init-bem-event/blocks/map-marks/map-marks.js)
-uses live initialization depending on the inner block.
+JavaScript реализация блока
+[map-marks.js](https://github.com/varya/bem-js-tutorial/blob/master/components.bundles/014-live-init-bem-event/blocks/map-marks/map-marks.js)
+использует live-инициализацию, зависящую от вложенного блока.
 
 ```js
 modules.define('i-bem__dom', ['jquery'], function(provide, $, DOM) {
@@ -598,12 +605,13 @@ provide(DOM);
 });
 ```
 
-The `liveInitOnBlockInsideEvent` methods requests the names of an event and the
-included block s well as a callback.
+Методу `liveInitOnBlockInsideEvent` в качестве параметров передаются имя
+события, имя блока и коллбэк.
 
-Once a user clicks a menu item, it becomes current and the menu block emits
-`current` event. Being catched, it initializes the `map-marks` block, which means
-it gets `js_inited` modifier ans the related method runs:
+Как только пользователь кликает по какому-нибудь пункту меню, он становится
+активным, и на блоке `menu` возникает событие `current`. Событие ловится блоком
+`map-marks`, и блок инициализируеются. То есть блок приобретает модификатор
+`js_inited`, и запускается соответствующий коллбэк:
 
 ```js
 modules.define('i-bem__dom', ['jquery'], function(provide, $, DOM) {
@@ -632,8 +640,8 @@ provide(DOM);
 });
 ```
 
-Then the callback runs the `_showMap` method of the block instance. This shows a
-mark on a map using the `map` block.
+Затем вызывается метод `_showMap` экземпляра блока. Он показывает точку на
+карте, обращаясь к блоку `map`.
 
 ```js
 modules.define('i-bem__dom', ['jquery'], function(provide, $, DOM) {
@@ -661,6 +669,6 @@ provide(DOM);
 ```
 
 ---------------------------------------
-### Links
+### Ссылки
  * [Содержание](../00-Intro/00-Intro.ru.md)
  * [Ранее. Модификаторы](../02-Modifiers/02-Modifiers.ru.md)
