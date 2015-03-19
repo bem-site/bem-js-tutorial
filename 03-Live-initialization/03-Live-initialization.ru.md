@@ -22,16 +22,16 @@
 браузера, проинициализировав компонент только когда пользователь начал с ним
 работать.
 
-Это называется "живая" или "ленивая" инициализация.
+Это называется «живая» или «ленивая» инициализация.
 
 ### Статический метод `live`
 
 Инструкции по ленивой инициализации блока даются в статическом методе `live`.
 
 ```js
-modules.define('i-bem__dom', function(provide, DOM) {
+modules.define('my-block', ['i-bem__dom'], function(provide, BEMDOM) {
 
-DOM.decl('my-block', {
+provide(BEMDOM.decl(this.name, {
     onSetMod: {
         ...
     },
@@ -41,9 +41,7 @@ DOM.decl('my-block', {
         // Здесь можно сказать, когда инициализировать
         // экземпляр блока
     }
-});
-
-provide(DOM);
+}));
 
 });
 ```
@@ -100,28 +98,26 @@ JavaScript-объект, соответствующий экземпляру б�
 событие `click`.
 
 ```js
-modules.define('i-bem__dom', function(provide, DOM) {
+modules.define('translate', ['i-bem__dom'], function(provide, BEMDOM) {
 
-DOM.decl('translate', {
+provide(BEMDOM.decl(this.name, {
     ...
 },{
     live: function() {
         this.liveInitOnEvent('click');
     }
-});
-
-provide(DOM);
+}));
 
 });
 ```
 
 По клику ядро устанавливает для блока модификатор `js_inited` и запускает
-"конструктор" — функцию, проассоциированную с этим модификатором.
+«конструктор» — функцию, проассоциированную с этим модификатором.
 
 ```js
-modules.define('i-bem__dom', function(provide, DOM) {
+modules.define('translate', ['i-bem__dom'], function(provide, BEMDOM) {
 
-DOM.decl('translate', {
+provide(BEMDOM.decl(this.name, {
     onSetMod: {
         'js' : {
             'inited' : function() {
@@ -138,16 +134,14 @@ DOM.decl('translate', {
     }
 },{
     ...
-});
-
-provide(DOM);
+}));
 
 });
 ```
 
 Вложенному элементу `prompt` назначается модификатор `visible` со значением
 `true`, что делает его видимым на страницы. Также это означает, что из
-параметров блока берется перевод — свойство `this.params['prompt']` — и
+параметров блока берется перевод — свойство `this.params.prompt` — и
 вставляется внутрь элемента.<br/>
 На самом деле, текст перевода можно было и раньше вставить в элемент, ведь он не
 был виден пользователю. Но для демонстрации того, как получать параметры из
@@ -158,7 +152,7 @@ provide(DOM);
 событие. Это экономит память, и страница работает быстрее.
 
 В основе лежит 
-[делегация событий](http://davidwalsh.name/event-delegate). То есть, несмотря на
+[делегирование событий](http://davidwalsh.name/event-delegate). То есть, несмотря на
 то, что блоков много, есть всего один обработчик события `click` на объекте
 `document`.<br/>
 Это не только выгодно с точки зрения производительности, но и добавляет гибкости
@@ -204,9 +198,9 @@ provide(DOM);
 неразумно инициализировать их все сразу, и на каждом слушать событие click.
 
 ```js
-modules.define('i-bem__dom', function(provide, DOM) {
+modules.define('button', ['i-bem__dom'], function(provide, BEMDOM) {
 
-DOM.decl('button', {
+provide(BEMDOM.decl(this.name, {
     onSetMod: {
         'js' : {
             'inited' : function() {
@@ -219,9 +213,7 @@ DOM.decl('button', {
     live: function() {
         this.liveBindTo('click');
     }
-});
-
-provide(DOM);
+}));
 
 });
 ```
@@ -232,9 +224,9 @@ provide(DOM);
 инициализации, а каждый раз когда пользователь кликает по кнопке.
 
 ```js
-modules.define('i-bem__dom', function(provide, DOM) {
+modules.define('button', ['i-bem__dom'], function(provide, BEMDOM) {
 
-DOM.decl('button', {
+provide(BEMDOM.decl(this.name, {
     onSetMod: {
         ...
     },
@@ -247,9 +239,7 @@ DOM.decl('button', {
             this.onClick();
         });
     }
-});
-
-provide(DOM);
+}));
 
 });
 ```
@@ -269,7 +259,7 @@ provide(DOM);
 >> <a href="http://bem.github.io/bem-js-tutorial/pure.bundles/012-live-init-many-events/012-live-init-many-events.html">012-live-init-many-events.html</a></pre>
 
 В предыдущих примерах инициализация блоков проходила по возникновению на них
-события  `click`. Но иногда слушать одно-единственное событие недостаточно.
+события `click`. Но иногда слушать одно-единственное событие недостаточно.
 Пример
 [012-live-init-many-events](http://bem.github.io/bem-js-tutorial/pure.bundles/012-live-init-many-events/012-live-init-many-events.html)
 демонстрирует такой случай на кастомизированном checkbox.
@@ -287,9 +277,9 @@ provide(DOM);
 кликает по элементу `label`.
 
 ```js
-modules.define('i-bem__dom', function(provide, DOM) {
+modules.define('checkbox', ['i-bem__dom'], function(provide, BEMDOM) {
 
-DOM.decl('checkbox', {
+provide(BEMDOM.decl(this.name, {
     ...
     _onClick : function() {
         this.setMod('focused', true);
@@ -301,9 +291,7 @@ DOM.decl('checkbox', {
             this._onClick();
         });
     }
-});
-
-provide(DOM);
+}));
 
 });
 ```
@@ -320,9 +308,9 @@ provide(DOM);
 `label` и по событию `change` элемента `control` (это узел `input`).
 
 ```js
-modules.define('i-bem__dom', function(provide, DOM) {
+modules.define('checkbox', ['i-bem__dom'], function(provide, BEMDOM) {
 
-DOM.decl('checkbox', {
+provide(BEMDOM.decl(this.name, {
     ...
     _onClick : function() {
         this.setMod('focused', true);
@@ -340,9 +328,7 @@ DOM.decl('checkbox', {
             this._onChange(e);
         });
     }
-});
-
-provide(DOM);
+}));
 
 });
 ```
@@ -351,9 +337,9 @@ provide(DOM);
 фокус уходит из него.
 
 ```js
-modules.define('i-bem__dom', function(provide, DOM) {
+modules.define('checkbox', ['i-bem__dom'], function(provide, BEMDOM) {
 
-DOM.decl('checkbox', {
+provide(BEMDOM.decl(this.name, {
     ...
 },{
     live: function() {
@@ -369,9 +355,7 @@ DOM.decl('checkbox', {
             this.setMod('focused', e.type == 'focusin'? true : false);
         });
     }
-});
-
-provide(DOM);
+}));
 
 });
 ```
@@ -382,9 +366,9 @@ provide(DOM);
 После добавляения коллбэков на модификаторы, программирование блока закончено.
 
 ```js
-modules.define('i-bem__dom', function(provide, DOM) {
+modules.define('checkbox', ['i-bem__dom'], function(provide, BEMDOM) {
 
-DOM.decl('checkbox', {
+provide(BEMDOM.decl(this.name, {
     onSetMod: {
         'focused' : {
             'true' : function() {
@@ -403,9 +387,7 @@ DOM.decl('checkbox', {
     live: function() {
         ...
     }
-});
-
-provide(DOM);
+}));
 
 });
 ```
@@ -470,7 +452,6 @@ input, или снимет их.
 ```css
 .checkbox_checked
 {
-    background-image: -webkit-linear-gradient(0deg, #333, #333 4px, #555 4px, #555 6px);
     background-image: linear-gradient(0deg, #333, #333 4px, #555 4px, #555 6px);
     background-size: 6px 6px;
 }
@@ -504,7 +485,7 @@ input, или снимет их.
 
 Другим примером может служить
 [блок
-`menu`](https://github.com/varya/bem-js-tutorial/tree/master/desktop.blocks/menu).
+`menu`](https://github.com/bem/bem-js-tutorial/tree/master/desktop.blocks/menu).
 Он представляет список пунктов меню в HTML, один из которых может быть выделен.
 
 ```html
@@ -588,9 +569,9 @@ JavaScript реализация блока
 использует live-инициализацию, зависящую от вложенного блока.
 
 ```js
-modules.define('i-bem__dom', ['jquery'], function(provide, $, DOM) {
+modules.define('map-marks', ['i-bem__dom', 'jquery'], function(provide, BEMDOM, $) {
 
-DOM.decl('map-marks', {
+provide(BEMDOM.decl(this.name, {
     ...
 }, {
     live: function() {
@@ -598,9 +579,7 @@ DOM.decl('map-marks', {
             this._showMap(e, data.current);
         });
     }
-});
-
-provide(DOM);
+}));
 
 });
 ```
@@ -614,9 +593,9 @@ provide(DOM);
 `js_inited`, и запускается соответствующий коллбэк:
 
 ```js
-modules.define('i-bem__dom', ['jquery'], function(provide, $, DOM) {
+modules.define('map-marks', ['i-bem__dom', 'jquery'], function(provide, BEMDOM, $) {
 
-DOM.decl('map-marks', {
+provide(BEMDOM.decl(this.name, {
 
   onSetMod: {
       'js' : {
@@ -633,9 +612,7 @@ DOM.decl('map-marks', {
     live: function() {
         ...
     }
-});
-
-provide(DOM);
+}));
 
 });
 ```
@@ -644,9 +621,9 @@ provide(DOM);
 карте, обращаясь к блоку `map`.
 
 ```js
-modules.define('i-bem__dom', ['jquery'], function(provide, $, DOM) {
+modules.define('map-marks', ['i-bem__dom', 'jquery'], function(provide, BEMDOM, $) {
 
-DOM.decl('map-marks', {
+provide(BEMDOM.decl(this.name, {
 
     ...
 
@@ -661,9 +638,7 @@ DOM.decl('map-marks', {
     live: function() {
         ...
     }
-});
-
-provide(DOM);
+}));
 
 });
 ```

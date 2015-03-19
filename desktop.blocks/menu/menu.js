@@ -1,6 +1,6 @@
-modules.define('i-bem__dom', ['jquery'], function(provide, $, DOM) {
+modules.define('menu', ['i-bem__dom', 'jquery'], function(provide, BEMDOM, $) {
 
-DOM.decl('menu', {
+provide(BEMDOM.decl(this.name, {
 
     onElemSetMod : {
 
@@ -42,8 +42,6 @@ DOM.decl('menu', {
         });
     }
 
-});
-
-provide(DOM);
+}));
 
 });

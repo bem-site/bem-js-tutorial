@@ -3,9 +3,11 @@
     title: 'Live (lazy) initialization on initializing inner block',
     favicon: '/favicon.ico',
     head: [
-        { elem: 'css', url: '_013-live-init-bem-event.css', ie: false },
-        { elem: 'css', url: '_013-live-init-bem-event', ie: true },
+        { elem: 'css', url: '_013-live-init-bem-event.css' },
         { elem: 'meta', attrs: { name: 'description', content: '' }},
+    ],
+    scripts: [
+        { elem: 'js', url: '_013-live-init-bem-event.js' }
     ],
     content:[
         {
@@ -44,7 +46,6 @@
                 style: 'text-align: right; margin-top: 2em;'
             },
             content: 'Idea, CSS and images are taken from <a href="http://demo.marcofolio.net/jquery_dj/">demo.marcofolio.net/jquery_dj</a>'
-        },
-        { elem: 'js', url: '_013-live-init-bem-event.js' }
+        }
     ]
 })

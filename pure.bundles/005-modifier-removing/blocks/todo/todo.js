@@ -1,6 +1,6 @@
-modules.define('i-bem__dom', ['jquery'], function(provide, $, DOM) {
+modules.define('todo', ['i-bem__dom', 'jquery'], function(provide, BEMDOM, $) {
 
-DOM.decl('todo', {
+provide(BEMDOM.decl(this.name, {
     onSetMod: {
         'js' : {
             'inited' : function() {
@@ -10,8 +10,6 @@ DOM.decl('todo', {
             }
         }
     }
-});
-
-provide(DOM);
+}));
 
 });

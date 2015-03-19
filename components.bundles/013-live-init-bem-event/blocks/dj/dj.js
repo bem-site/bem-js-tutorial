@@ -1,6 +1,6 @@
-modules.define('i-bem__dom', function(provide, DOM) {
+modules.define('dj', ['i-bem__dom'], function(provide, BEMDOM) {
 
-DOM.decl('dj', {
+provide(BEMDOM.decl(this.name, {
     onSetMod: {
         'running' : {
             'true' : function() {
@@ -21,12 +21,10 @@ DOM.decl('dj', {
     }
 },{
     live: function() {
-        this.liveInitOnBlockInsideEvent('change', 'checkbox', function(data) {
+        this.liveInitOnBlockInsideEvent({ modName: 'checked', modVal: '*' }, 'checkbox', function(data) {
             this.setMod('running', data.target.hasMod('checked'));
         });
     }
-});
-
-provide(DOM);
+}));
 
 });

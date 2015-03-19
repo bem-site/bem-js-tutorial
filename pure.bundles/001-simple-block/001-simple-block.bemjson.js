@@ -3,15 +3,16 @@
     title: 'A simple JavaSscript empowered BEM block',
     favicon: '/favicon.ico',
     head: [
-        { elem: 'css', url: '_001-simple-block.css', ie: false },
-        { elem: 'css', url: '_001-simple-block', ie: true },
+        { elem: 'css', url: '_001-simple-block.css' },
         { elem: 'meta', attrs: { name: 'description', content: '' }}
+    ],
+    scripts: [
+        { elem: 'js', url: '_001-simple-block.js' }
     ],
     content:[
         {
             block: 'my-block',
             js: true
-        },
-        { elem: 'js', url: '_001-simple-block.js' }
+        }
     ]
 })

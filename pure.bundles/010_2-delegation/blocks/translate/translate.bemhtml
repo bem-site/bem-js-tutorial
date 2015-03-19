@@ -2,12 +2,14 @@ block('translate')(
 
     tag()('span'),
 
-    js()({ prompt: this.ctx.prompt }),
+    js()(function() { return { prompt: this.ctx.prompt }; }),
 
-    content()([
-        this.ctx.content,
-        { elem: 'prompt' }
-    ]),
+    content()(function() {
+        return [
+            this.ctx.content,
+            { elem: 'prompt' }
+        ];
+    }),
 
     elem('prompt')(
 

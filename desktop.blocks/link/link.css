@@ -1,5 +1,5 @@
 .link:hover,
 .link:visited:hover
 {
-    color: #d00 !important; /* Оторвать !important после того, как оторвем .i-global__hover */
+    color: #d00;
 }

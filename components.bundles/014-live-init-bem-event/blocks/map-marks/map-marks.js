@@ -1,6 +1,6 @@
-modules.define('i-bem__dom', ['jquery'], function(provide, $, DOM) {
+modules.define('map-marks', ['i-bem__dom', 'jquery'], function(provide, BEMDOM, $) {
 
-DOM.decl('map-marks', {
+provide(BEMDOM.decl(this.name, {
 
     onSetMod: {
         'js' : {
@@ -21,8 +21,6 @@ DOM.decl('map-marks', {
             this._showMap(e, data.current);
         });
     }
-});
-
-provide(DOM);
+}));
 
 });

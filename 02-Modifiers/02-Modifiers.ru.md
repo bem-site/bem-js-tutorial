@@ -51,9 +51,9 @@
 > рекомендованный способ.
 
 ```js
-modules.define('i-bem__dom', function(provide, DOM) {
+modules.define('call-button', ['i-bem__dom'], function(provide, BEMDOM) {
 
-DOM.decl('call-button', {
+provide(BEMDOM.decl(this.name, {
     onSetMod: {
         'js' : {
             'inited' : function() {
@@ -83,18 +83,16 @@ this.setMod('status', 'off');
 их в коллбэке на установку модификатора. Например, так:
 
 ```js
-modules.define('i-bem__dom', function(provide, DOM) {
+modules.define('call-button', ['i-bem__dom'], function(provide, BEMDOM) {
 
-DOM.decl('call-button', {
+provide(BEMDOM.decl(this.name, {
     onSetMod: {
         'js' : { ... },
         'calling' : function() {
             this.elem('link').text('Calling...');
         }
     }
-});
-
-provide(DOM);
+}));
 
 });
 ```
@@ -106,8 +104,8 @@ provide(DOM);
 параметра передается имя элемента.
 
 Концепция известных состояний блока, выраженных модификаторами, — это очень
-мощный и эффективный способ описания интерфейсных компонент.<br/>
-Всё что относится к определенному состоянию блока, инкапсулировано в нужный
+мощный и эффективный способ описания интерфейсных компонентов.<br/>
+Всё, что относится к определенному состоянию блока, инкапсулировано в нужный
 модификатор. Откуда бы вы ни изменили модификатор блока, блок знает, что
 делать.<br/>
 Действия модификаторов описываются декларативно. Это позволяет разработчику
@@ -146,9 +144,9 @@ provide(DOM);
 Также как и в предыдущем примере, блок `traffic-light` объявляется как DOM-блок.
 
 ```js
-modules.define('i-bem__dom', function(provide, DOM) {
+modules.define('traffic-light', ['i-bem__dom'], function(provide, BEMDOM) {
 
-DOM.decl('traffic-light', {
+provide(BEMDOM.decl(this.name, {
     onSetMod: {
         'js' : {
             'inited' : function() {
@@ -157,9 +155,7 @@ DOM.decl('traffic-light', {
             }
         },
         ...
-});
-
-provide(DOM);
+}));
 
 });
 ```
@@ -173,15 +169,13 @@ provide(DOM);
 модификаторов.
 
 ```js
-modules.define('i-bem__dom', function(provide, DOM) {
+modules.define('traffic-light', ['i-bem__dom'], function(provide, BEMDOM) {
 
-var timer;
-
-DOM.decl('traffic-light', {
+provide(BEMDOM.decl('traffic-light', {
     onSetMod: {
         'js' : { ... },
         'status' : function(modName, modVal, oldModVal) {
-            clearTimeout(timer);
+            clearTimeout(this.timer);
             var nextStatus = {
                 'stop' : 'slow',
                 'slow' : 'go',
@@ -190,15 +184,13 @@ DOM.decl('traffic-light', {
                 _this = this;
             oldModVal && this.setMod(this.elem(oldModVal), 'status', 'off');
             this.setMod(this.elem(modVal), 'status', 'on');
-            timer = window.setTimeout(function(){
+            this.timer = window.setTimeout(function(){
                 _this.setMod('status', nextStatus[modVal]);
             }, 2000);
         }
     },
     ...
-});
-
-provide(DOM);
+}));
 
 });
 ```
@@ -259,12 +251,11 @@ DOM.decl('my-block', {
 В этом примере какая-то функциональность есть только у элемента `go`.
 
 ```js
-modules.define('i-bem__dom', function(provide, DOM) {
+modules.define('traffic-light', ['i-bem__dom'], function(provide, BEMDOM) {
 
-var goSound = new Audio('blocks/traffic-light/__go/traffic-light__go.mp3'),
-    timer;
+var goSound = new Audio('blocks/traffic-light/__go/traffic-light__go.mp3');
 
-DOM.decl('traffic-light', {
+provide(BEMDOM.decl(this.name, {
     onSetMod: { ... },
     onElemSetMod: {
         'go' : {
@@ -278,9 +269,7 @@ DOM.decl('traffic-light', {
             }
         }
     }
-});
-
-provide(DOM);
+}));
 
 });
 ```
@@ -314,9 +303,9 @@ provide(DOM);
 `swicthed_off` в `switched_on` и обратно при помощи метода `toggleMod`.
 
 ```js
-modules.define('i-bem__dom', function(provide, DOM) {
+modules.define('switch', ['i-bem__dom'], function(provide, BEMDOM) {
 
-DOM.decl('switch', {
+provide(BEMDOM.decl(this.name, {
     onSetMod: {
         'js' : {
             'inited' : function() {
@@ -326,9 +315,7 @@ DOM.decl('switch', {
             }
         }
     }
-});
-
-provide(DOM);
+}));
 
 });
 ```
@@ -374,9 +361,9 @@ provide(DOM);
 [todo.js](https://github.com/bem/bem-js-tutorial/blob/master/pure.bundles/005-modifier-removing/blocks/todo/todo.js).
 
 ```js
-modules.define('i-bem__dom', function(provide, DOM) {
+modules.define('todo', ['i-bem__dom'], function(provide, BEMDOM) {
 
-DOM.decl('todo', {
+provide(BEMDOM.decl(this.name, {
     onSetMod: {
         'js' : {
             'inited' : function() {
@@ -386,9 +373,7 @@ DOM.decl('todo', {
             }
         }
     }
-});
-
-provide(DOM);
+}));
 
 });
 ```
@@ -438,9 +423,9 @@ provide(DOM);
 ему модификатор `current` со значением `false`).
 
 ```js
-modules.define('i-bem__dom', ['jquery'], function(provide, $, DOM) {
+modules.define('accordion-menu', ['i-bem__dom', 'jquery'], function(provide, BEMDOM, $) {
 
-DOM.decl('accordion-menu', {
+provide(BEMDOM.decl(this.name, {
 
     onSetMod: {
         'js' : {
@@ -464,9 +449,7 @@ DOM.decl('accordion-menu', {
         }
     }
 
-});
-
-provide(DOM);
+}));
 
 });
 ```
@@ -487,9 +470,9 @@ provide(DOM);
 предотвратит установку модификатора.
 
 ```js
-modules.define('i-bem__dom', ['jquery'], function(provide, $, DOM) {
+modules.define('accordion-menu', ['i-bem__dom', 'jquery'], function(provide, BEMDOM, $) {
 
-DOM.decl('accordion-menu', {
+provide(BEMDOM.decl(this.name, {
     beforeElemSetMod: {
         'item' : {
             'current' : {
@@ -500,9 +483,7 @@ DOM.decl('accordion-menu', {
         }
     },
     ...
-});
-
-provide(DOM);
+}));
 
 });
 ```

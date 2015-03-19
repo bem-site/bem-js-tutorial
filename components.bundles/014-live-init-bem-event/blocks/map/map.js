@@ -1,6 +1,6 @@
-modules.define('i-bem__dom', ['jquery', 'ymaps'], function(provide, $, ymaps, DOM) {
+modules.define('map', ['i-bem__dom', 'jquery', 'ymaps'], function(provide, BEMDOM, $, ymaps) {
 
-DOM.decl('map', {
+provide(BEMDOM.decl(this.name, {
 
     onSetMod: {
         'js' : {
@@ -45,8 +45,6 @@ DOM.decl('map', {
         }
     }
 
-});
-
-provide(DOM);
+}));
 
 });

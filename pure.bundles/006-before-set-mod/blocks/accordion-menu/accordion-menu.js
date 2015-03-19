@@ -1,6 +1,6 @@
-modules.define('i-bem__dom', ['jquery'], function(provide, $, DOM) {
+modules.define('accordion-menu', ['i-bem__dom', 'jquery'], function(provide, BEMDOM, $) {
 
-DOM.decl('accordion-menu', {
+provide(BEMDOM.decl(this.name, {
     beforeElemSetMod: {
         'item' : {
             'current' : {
@@ -30,8 +30,6 @@ DOM.decl('accordion-menu', {
             }
         }
     }
-});
-
-provide(DOM);
+}));
 
 });
