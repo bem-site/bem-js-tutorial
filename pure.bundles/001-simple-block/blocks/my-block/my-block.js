@@ -1,6 +1,6 @@
-modules.define('i-bem__dom', function(provide, DOM) {
+modules.define('my-block', ['i-bem__dom'], function(provide, BEMDOM) {
 
-DOM.decl('my-block', {
+provide(BEMDOM.decl(this.name, {
     onSetMod: {
         'js' : {
             'inited' : function() {
@@ -8,8 +8,6 @@ DOM.decl('my-block', {
             }
         }
     }
-});
-
-provide(DOM);
+}));
 
 });

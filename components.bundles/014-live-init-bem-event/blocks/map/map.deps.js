@@ -1,5 +1,5 @@
 ({
     mustDeps: [
-        { block: 'ymaps' }
+        'ymaps'
     ]
 })

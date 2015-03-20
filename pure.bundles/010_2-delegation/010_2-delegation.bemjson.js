@@ -3,9 +3,11 @@
     title: 'Live (lazy) initialization on DOM event',
     favicon: '/favicon.ico',
     head: [
-        { elem: 'css', url: '_010_2-delegation.css', ie: false },
-        { elem: 'css', url: '_010_2-delegation', ie: true },
+        { elem: 'css', url: '_010_2-delegation.css' },
         { elem: 'meta', attrs: { name: 'description', content: '' }},
+    ],
+    scripts: [
+        { elem: 'js', url: '_010_2-delegation.js' }
     ],
     content:[
         {
@@ -456,7 +458,6 @@
                     ]
                 }
             ]
-        },
-        { elem: 'js', url: '_010_2-delegation.js' }
+        }
     ]
 })

@@ -10,7 +10,7 @@
 Для того чтобы начать писать на БЭМ-JavaScript, нужно подключиь к странице блок
 `i-bem`, его элемент `dom` и все их зависимости. Это произойдет автоматически,
 если полностью повторить в своём проекте структуру из репозитория
-[project-stub](https://github.com/bem/project-stub/tree/bem-core).
+[project-stub](https://github.com/bem/project-stub/).
 
 ### HTML структура
 JavaScript можно написать для любого БЭМ блока. Для этого сначала нужно поместить
@@ -86,9 +86,9 @@ BEMJSON декларация этого примера
 в нем довольно простой код.
 
 ```js
-modules.define('i-bem__dom', function(provide, DOM) {
+modules.define('my-block', ['i-bem__dom'], function(provide, BEMDOM) {
 
-DOM.decl('my-block', {
+provide(BEMDOM.decl(this.name, {
     onSetMod: {
         'js' : {
             'inited' : function() {
@@ -96,9 +96,7 @@ DOM.decl('my-block', {
             }
         }
     }
-});
-
-provide(DOM);
+}));
 
 });
 ```
@@ -111,7 +109,7 @@ ymaps/modules](https://github.com/ymaps/modules). Поэтому первой с
 [Посмотреть можно
 здесь](https://github.com/bem/bem-core/blob/v1/common.blocks/i-bem/__dom/i-bem__dom.js).
 
-Далее внутри вы можете использовать объект `DOM` и его метод `decl` для описания
+Далее внутри вы можете использовать объект `BEMDOM` и его метод `decl` для описания
 вашего блока.
 
 Первый параметр — имя блока.<br/>
@@ -124,7 +122,7 @@ ymaps/modules](https://github.com/ymaps/modules). Поэтому первой с
 назначается соответствующий модификатор. Синтаксис вот такой:
 
 ```js
-DOM.decl('my-block', {
+BEMDOM.decl(this.name, {
     onSetMod: {
         'foo' : function() {
             // Вызывается, если блоку назначается любое значение

@@ -1,6 +1,6 @@
-modules.define('i-bem__dom', function(provide, DOM) {
+modules.define('switch', ['i-bem__dom'], function(provide, BEMDOM) {
 
-DOM.decl('switch', {
+provide(BEMDOM.decl(this.name, {
     onSetMod: {
         'js' : {
             'inited' : function() {
@@ -10,8 +10,6 @@ DOM.decl('switch', {
             }
         }
     }
-});
-
-provide(DOM);
+}));
 
 });

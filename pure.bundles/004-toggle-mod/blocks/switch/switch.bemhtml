@@ -4,22 +4,26 @@ block('switch')(
 
     mix()({ mods: { 'switched' : 'off' }}),
 
-    content()([
-        {
-            elem: 'input',
-            name: this.ctx.name
-        },
-        {
-            elem: 'label',
-            content: '&#xF011;'
-        }
-    ]),
+    content()(function() {
+        return [
+            {
+                elem: 'input',
+                name: this.ctx.name
+            },
+            {
+                elem: 'label',
+                content: '&#xF011;'
+            }
+        ];
+    }),
 
     elem('input')(
         tag()('input'),
-        attrs()({
-            type: 'checkbox',
-            name: this.ctx.name
+        attrs()(function() {
+            return {
+                type: 'checkbox',
+                name: this.ctx.name
+            };
         })
     ),
 

@@ -23,17 +23,11 @@
 .sign:before
 {
     top: 0.15em;
-    -moz-transform:rotate(-45deg);
-    -o-transform:rotate(-45deg);
-    -webkit-transform:rotate(-45deg);
     transform:rotate(-45deg)
 }
 
 .sign:after
 {
     bottom: 0.15em;
-    -moz-transform:rotate(45deg);
-    -o-transform:rotate(45deg);
-    -webkit-transform:rotate(45deg);
     transform:rotate(45deg)
 }

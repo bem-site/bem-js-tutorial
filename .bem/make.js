@@ -1,20 +1,13 @@
-/* jshint node:true */
-/* global MAKE */
+/* global MAKE:false */
 
-//process.env.YENV = 'production';
-//process.env.XJST_ASYNCIFY = 'yes';
+var PATH = require('path');
 
-require('bem-environ/lib/nodes');
+require('bem-tools-autoprefixer').extendMake(MAKE);
 
 MAKE.decl('Arch', {
 
     blocksLevelsRegexp: /^.+?\.blocks/,
-    bundlesLevelsRegexp: /^.+?\.bundles$/,
-
-    libraries: [
-        'bem-core @ 56635d50c20a5a0c2815d99143bb41e316418b17',
-        'bem-components @ a37156b9646b97472776b8ce035ca1736dc7257c'
-    ]
+    bundlesLevelsRegexp: /^.+?\.bundles$/
 
 });
 
@@ -29,20 +22,63 @@ MAKE.decl('BundleNode', {
             'deps.js',
             'bemhtml',
             'browser.js+bemhtml',
+            'stylus',
             'css',
-            'ie.css',
-            'ie7.css',
-            'ie8.css',
-            'ie9.css',
             'html'
         ];
 
     },
 
-    'create-browser.js+bemhtml-optimizer-node': function(tech, sourceNode, bundleNode) {
-        sourceNode.getFiles().forEach(function(f) {
-            this['create-js-optimizer-node'](tech, this.ctx.arch.getNode(f), bundleNode);
-        }, this);
+    getForkedTechs : function() {
+        return this.__base().concat(['browser.js+bemhtml', 'stylus']);
+    },
+
+    getLevelsMap : function() {
+        return {
+            pure : [
+                'libs/bem-core/common.blocks',
+                'libs/bem-core/desktop.blocks',
+                'desktop.blocks'
+            ],
+            components : [
+                'libs/bem-core/common.blocks',
+                'libs/bem-core/desktop.blocks',
+                'libs/bem-components/common.blocks',
+                'libs/bem-components/desktop.blocks',
+                'libs/bem-components/design/common.blocks',
+                'libs/bem-components/design/desktop.blocks',
+                'desktop.blocks'
+            ]
+        };
+    },
+
+     getLevels : function() {
+        var resolve = PATH.resolve.bind(PATH, this.root),
+            buildLevel = this.getLevelPath().split('.')[0],
+            levels = this.getLevelsMap()[buildLevel] || [];
+
+        return levels
+            .map(function(path) { return resolve(path); })
+            .concat(resolve(PATH.dirname(this.getNodePrefix()), 'blocks'));
+    },
+
+    'create-css-node' : function(tech, bundleNode, magicNode) {
+        var source = this.getBundlePath('stylus');
+        if(this.ctx.arch.hasNode(source)) {
+            return this.createAutoprefixerNode(tech, this.ctx.arch.getNode(source), bundleNode, magicNode);
+        }
+    }
+
+});
+
+MAKE.decl('AutoprefixerNode', {
+
+    getBrowsers : function() {
+        return [
+            'last 2 versions',
+            'ie 10',
+            'opera 12.16'
+        ];
     }
 
 });

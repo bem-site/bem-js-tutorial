@@ -8,7 +8,5 @@
             transparent 2px, transparent 3px,
             rgba(0,0,0, .25) 3px, rgba(0,0,0, .05) 4px,
             transparent 4px);
-    background-size:
-        10px 10px;
-
+    background-size: 10px 10px;
 }

@@ -1,8 +1,8 @@
 .page
 {
-    background-image:url("__bg/page__bg.jpg");
+    background-image: url(__bg/page__bg.jpg);
 
-    color: #FFF;
+    color: #fff;
 
     font: 20px/2 Verdana;
     padding: 0 25px;
@@ -10,5 +10,5 @@
 
 a
 {
-    color: #FFFFCC;
+    color: #ffc;
 }

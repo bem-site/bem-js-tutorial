@@ -1,22 +1,18 @@
-block link, (this.mods && this.mods.pseudo), !this.elem {
+block('link').match(function() { return this.mods.pseudo; })(
 
-    tag: (this.ctx.url? 'a' : 'span')
+    js()(true),
 
-    js: true
+    tag()(function() {
+        return this.ctx.url? 'a' : 'span';
+    }),
 
-    attrs, !this.ctx.url: {
-        return {}
-    },
+    attrs().match(function() { return !this.ctx.url; })({}),
 
-    content, !this.ctx._wrap, !this.mods.inner: {
-        apply(
-            this._mode = '',
-            this.ctx = {
-                elem: 'inner',
-                content: this.ctx.content,
-                _wrap: true
-            }
-        );
-    }
-}
+    content().match(function() { return !this.mods.inner; })(function() {
+        return {
+            elem: 'inner',
+            content: applyNext()
+        };
+    })
 
+);
