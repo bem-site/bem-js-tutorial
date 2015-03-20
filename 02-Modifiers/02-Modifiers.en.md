@@ -1,17 +1,9 @@
-# Tutorial on JavaScript in BEM terms
-
-### Links
- * [Core document](../00-Intro/00-Intro.en.md)
- * [Previous chapter. Block structure](../01-Block-structure/01-Block-structure.en.md)
-
-----------------------------------
-
-## Modifiers
+# Modifiers
 In BEM, modifiers express block states. To put a block into a special state we
 set a modifier on it. Then a block runs a callback associated with
 this modifier.
 
-### Setting a modifier on a block and reacting to it
+## Setting a modifier on a block and reacting to it
 
 <pre>├── pure.bundles/
 │   ├── 002-change-modifier/
@@ -69,7 +61,7 @@ provide(BEMDOM.decl(this.name, {
 
 Take into account that here we use a `boolean modifier`, which has no value. But
 as you will see below, modifiers are very often used as key-value pairs. In that
-case, both modifier's name and its value have to be passed to the `setMod`
+case, both modifier name and its value have to be passed to the `setMod`
 helper:
 
 ```js
@@ -98,7 +90,7 @@ provide(BEMDOM.decl(this.name, {
 ```
 
 Here you can run your calculations, or code any functionality of the block. As
-there is access to the block's DOM node and its children, the DOM structure can
+there is access to the block DOM node and its children, the DOM structure can
 also be changed.<br/>
 With the `elem` helper you can select the elements of the block by their names.
 
@@ -110,7 +102,7 @@ Modifiers are described in a declarative manner, which empowers a programmer to 
 the code with further implementations or to redefine it completely, as is shown
 in the tutorial below.
 
-### Setting a modifier on an element
+## Setting a modifier on an element
 
 <pre>├── pure.bundles/
 │   ├── 003-element-modifier/
@@ -269,7 +261,7 @@ provide(BEMDOM.decl(this.name, {
 This makes a browser play a traffic light sound when an element is switched into
 `status_on` and to keep silent when the modifier goes off.
 
-### Toggling a modifier
+## Toggling a modifier
 
 <pre>├── pure.bundles/
 │   ├── 004-toggle-mod/
@@ -317,7 +309,7 @@ provide(BEMDOM.decl(this.name, {
 Indeed, the same goes for elements which an additional first parameter for the
 helper method.
 
-### Deleting a modifier
+## Deleting a modifier
 
 <pre>├── pure.bundles/
 │   ├── 005-modifier-removing/
@@ -388,7 +380,7 @@ here.
 > in the `live` section. Make sure you have learnt it before starting with a
 > real powerful application.
 
-### Before a modifier is set
+## Before a modifier is set
 
 <pre>├── pure.bundles/
 │   ├── 006-before-set-mod/
@@ -483,9 +475,3 @@ provide(BEMDOM.decl(this.name, {
 
 Here it checks if the clicked item is disabled and prevents such an item to be
 `current`.
-
----------------------------------------
-### Links
- * [Core document](../00-Intro/00-Intro.en.md)
- * [Previous chapter. Block structure](../01-Block-structure/01-Block-structure.md)
- * [Next chapter. Live initialization](../03-Live-initialization/03-Live-initialization.md)

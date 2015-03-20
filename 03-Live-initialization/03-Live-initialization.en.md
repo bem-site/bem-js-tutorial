@@ -1,12 +1,4 @@
-# Tutorial on JavaScript in BEM terms
-
-### Links
- * [Core document](../00-Intro/00-Intro.en.md)
- * [Previous chapter. Modifiers](../02-Modifiers/02-Modifiers.en.md)
-
-----------------------------------
-
-## Live initialization
+# Live initialization
 Before a block starts to function the core initializes it. At the end of this
 process the block gets `js_inited` modifier, which you are already familiar
 with.
@@ -23,7 +15,7 @@ initializing block only when a user starts operating on them.
 
 This is the so-called `live initialization` (or `lazy`).
 
-### `live` static method
+## `live` static method
 The instructions to initialize a block lazy can be given in a predefined `live`
 static method.
 
@@ -51,7 +43,7 @@ Here, as it is a function, the core understands that the instances of this block
 should not be initialized before something special happens. This can be that a
 DOM event fires of the block DOM node or on an element.
 
-### Initializing a block on DOM event
+## Initializing a block on DOM event
 
 <pre>├── pure.bundles/
 │   ├── 010-live-init-on-event/
@@ -155,7 +147,7 @@ page.<br/>
 Besides saving browser forces, this way provides some flexibility for
 dynamically changed pages. This you can see with the following example.
 
-### Delegated initialization
+## Delegated initialization
 <pre>
 
 >> <a href="http://bem.github.io/bem-js-tutorial/pure.bundles/010_2-delegation/010_2-delegation.html">010_2-delegation.html</a></pre>
@@ -242,7 +234,7 @@ provide(BEMDOM.decl(this.name, {
 });
 ```
 
-### Live initialization on many events
+## Live initialization on many events
 <pre>├── pure.bundles/
 │   ├── 012-live-init-many-events/
 │   │   ├── blocks/
@@ -452,7 +444,7 @@ be able to change if checked
 as well as saves time for parsing selectors and bringing architectural
 consistency to the code.
 
-### BEM events
+## BEM events
 
 Besides DOM events, `i-bem.js` operates with custom JavaScript events on the
 JavaScript objects corresponding to the blocks. These events are named `BEM
@@ -518,7 +510,7 @@ This event fires on the JavaScript object corresponding to the menu block instan
 With that, any other block subscribed to the `current` BEM event of the menu can
 learn when it changes its current item and react on it.
 
-### Live initialization on BEM a event of an inner block
+## Live initialization on BEM event of an inner block
 
 <pre>├── components.bundles/
 │   ├── 014-live-init-bem-event/
@@ -630,8 +622,3 @@ provide(BEMDOM.decl(this.name, {
 
 });
 ```
-
----------------------------------------
-### Links
- * [Core document](../00-Intro/00-Intro.en.md)
- * [Previous chapter. Modifiers](../02-Modifiers/02-Modifiers.en.md)
