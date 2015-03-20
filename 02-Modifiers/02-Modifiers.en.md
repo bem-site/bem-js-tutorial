@@ -51,9 +51,9 @@ to the block and the `setMod` method serves for it.
 > in the `live` section.
 
 ```js
-modules.define('i-bem__dom', function(provide, DOM) {
+modules.define('call-button', ['i-bem__dom'], function(provide, BEMDOM) {
 
-DOM.decl('call-button', {
+provide(BEMDOM.decl(this.name, {
     onSetMod: {
         'js' : {
             'inited' : function() {
@@ -78,26 +78,25 @@ this.setMod('status', 'on');
 this.setMod('status', 'off');
 ```
 
-The `setMod` method applies a modifier's CSS class to the blocks which makes the
+The `setMod` method applies a modifier CSS class to the blocks which makes the
 block change its appearance. If you need additional changes on a block,
 place them into a function corresponding to the modifier. Like the following:
 
 ```js
-modules.define('i-bem__dom', function(provide, DOM) {
+modules.define('call-button', ['i-bem__dom'], function(provide, BEMDOM) {
 
-DOM.decl('call-button', {
+provide(BEMDOM.decl(this.name, {
     onSetMod: {
         'js' : { ... },
         'calling' : function() {
             this.elem('link').text('Calling...');
         }
     }
-});
-
-provide(DOM);
+}));
 
 });
 ```
+
 Here you can run your calculations, or code any functionality of the block. As
 there is access to the block's DOM node and its children, the DOM structure can
 also be changed.<br/>
@@ -144,9 +143,9 @@ Similar to the previous example, the `traffic-light` block is introduced to the
 `i-bem` core as a DOM-equipped block.
 
 ```js
-modules.define('i-bem__dom', function(provide, DOM) {
+modules.define('traffic-light', ['i-bem__dom'], function(provide, BEMDOM) {
 
-DOM.decl('traffic-light', {
+provide(BEMDOM.decl(this.name, {
     onSetMod: {
         'js' : {
             'inited' : function() {
@@ -155,9 +154,7 @@ DOM.decl('traffic-light', {
             }
         },
         ...
-});
-
-provide(DOM);
+}));
 
 });
 ```
@@ -170,15 +167,13 @@ The `status` modifier is declared with its callback, once for all its values. Th
 is a good way to get rid of copy&paste if the corresponding states work similarly.
 
 ```js
-modules.define('i-bem__dom', function(provide, DOM) {
+modules.define('traffic-light', ['i-bem__dom'], function(provide, BEMDOM) {
 
-var timer;
-
-DOM.decl('traffic-light', {
+provide(BEMDOM.decl('traffic-light', {
     onSetMod: {
         'js' : { ... },
         'status' : function(modName, modVal, oldModVal) {
-            clearTimeout(timer);
+            clearTimeout(this.timer);
             var nextStatus = {
                 'stop' : 'slow',
                 'slow' : 'go',
@@ -187,15 +182,13 @@ DOM.decl('traffic-light', {
                 _this = this;
             oldModVal && this.setMod(this.elem(oldModVal), 'status', 'off');
             this.setMod(this.elem(modVal), 'status', 'on');
-            timer = window.setTimeout(function(){
+            this.timer = window.setTimeout(function(){
                 _this.setMod('status', nextStatus[modVal]);
             }, 2000);
         }
     },
     ...
-});
-
-provide(DOM);
+}));
 
 });
 ```
@@ -251,12 +244,11 @@ DOM.decl('my-block', {
 In this example, only the `go` element is provided with a special functionality.
 
 ```js
-modules.define('i-bem__dom', function(provide, DOM) {
+modules.define('traffic-light', ['i-bem__dom'], function(provide, BEMDOM) {
 
-var goSound = new Audio('blocks/traffic-light/__go/traffic-light__go.mp3'),
-    timer;
+var goSound = new Audio('blocks/traffic-light/__go/traffic-light__go.mp3');
 
-DOM.decl('traffic-light', {
+provide(BEMDOM.decl(this.name, {
     onSetMod: { ... },
     onElemSetMod: {
         'go' : {
@@ -270,12 +262,9 @@ DOM.decl('traffic-light', {
             }
         }
     }
-});
+}));
 
-provide(DOM);
-
-});
-```
+});```
 
 This makes a browser play a traffic light sound when an element is switched into
 `status_on` and to keep silent when the modifier goes off.
@@ -308,9 +297,9 @@ modifier from `switched_off` to `switched_on` and backwards by using the
 `toggleMod` helper.
 
 ```js
-modules.define('i-bem__dom', function(provide, DOM) {
+modules.define('switch', ['i-bem__dom'], function(provide, BEMDOM) {
 
-DOM.decl('switch', {
+provide(BEMDOM.decl(this.name, {
     onSetMod: {
         'js' : {
             'inited' : function() {
@@ -320,9 +309,7 @@ DOM.decl('switch', {
             }
         }
     }
-});
-
-provide(DOM);
+}));
 
 });
 ```
@@ -369,9 +356,9 @@ How the block behaves is described in its [todo.js](https://github.com/bem/bem-j
 file.
 
 ```js
-modules.define('i-bem__dom', function(provide, DOM) {
+modules.define('todo', ['i-bem__dom'], function(provide, BEMDOM) {
 
-DOM.decl('todo', {
+provide(BEMDOM.decl(this.name, {
     onSetMod: {
         'js' : {
             'inited' : function() {
@@ -381,9 +368,7 @@ DOM.decl('todo', {
             }
         }
     }
-});
-
-provide(DOM);
+}));
 
 });
 ```
@@ -433,9 +418,9 @@ ensure that previously selected item is closed (which means its `current`
 modifier is set into `false`).
 
 ```js
-modules.define('i-bem__dom', ['jquery'], function(provide, $, DOM) {
+modules.define('accordion-menu', ['i-bem__dom', 'jquery'], function(provide, BEMDOM, $) {
 
-DOM.decl('accordion-menu', {
+provide(BEMDOM.decl(this.name, {
 
     onSetMod: {
         'js' : {
@@ -459,12 +444,11 @@ DOM.decl('accordion-menu', {
         }
     }
 
-});
-
-provide(DOM);
+}));
 
 });
 ```
+
 > You may also take notice that jQuery is used here to wrap the elements and this
 > provides some changes into the code. The bem-core library is based on a
 > [ymaps/modules](https://github.com/ymaps/modules) module system explained below.
@@ -479,9 +463,9 @@ to do previously. It is also prevents setting a modifier when a callback related
 to the 'before' part returns `false`.
 
 ```js
-modules.define('i-bem__dom', ['jquery'], function(provide, $, DOM) {
+modules.define('accordion-menu', ['i-bem__dom', 'jquery'], function(provide, BEMDOM, $) {
 
-DOM.decl('accordion-menu', {
+provide(BEMDOM.decl(this.name, {
     beforeElemSetMod: {
         'item' : {
             'current' : {
@@ -492,9 +476,7 @@ DOM.decl('accordion-menu', {
         }
     },
     ...
-});
-
-provide(DOM);
+}));
 
 });
 ```

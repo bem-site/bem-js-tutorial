@@ -14,7 +14,7 @@ automatically if you borrow the project structure from the
 
 ### HTML structure
 Any BEM block can be equipped with JavaScript. To do this, you just need to place
-a JavaScript file into your block's directory.
+a JavaScript file into your block directory.
 
 ```
 ├── desktop.blocks/
@@ -106,7 +106,7 @@ module represented as a `dom` element of `i-bem` block from `bem-core` library.
 [Link to its code, if you need
 it](https://github.com/bem/bem-core/blob/v2/common.blocks/i-bem/__dom/i-bem__dom.js).
 
-Inside you can use the `DOM` object and its `decl` method to describe a block.
+Inside you can use the `BEMDOM` object and its `decl` method to describe a block.
 
 The block name is the first parameter.<br/>
 The second is a hash of dynamic
@@ -162,7 +162,7 @@ function(modName, modVal, curModVal) {
 The first modifier any block gets is a `js` modifier with its `inited` value.
 The framework core reads all the `i-bem` marked blocks on a page and then initializes
 them and sets the `js_inited` modifier on each block. Thus, you can
-write a code to be run after the block starts functioning by 
+write a code to be run after the block starts functioning by
 defining a callback to the `js_inited` modifier.
 
 In the example presented above, this code is a `console.log` call with the block's `outerHTML`.
