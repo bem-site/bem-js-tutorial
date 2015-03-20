@@ -10,7 +10,7 @@
 Block `i-bem` and its `dom` element, with all their dependencies, must be included
 into your page's js file if you are going to enjoy BEM. This happens
 automatically if you borrow the project structure from the
-[project-stub repository](https://github.com/bem/project-stub/tree/bem-core).
+[project-stub repository](https://github.com/bem/project-stub/).
 
 ### HTML structure
 Any BEM block can be equipped with JavaScript. To do this, you just need to place
@@ -84,9 +84,9 @@ level with a JavaScript file. The
 file is filled with a simple piece of code.
 
 ```js
-modules.define('i-bem__dom', function(provide, DOM) {
+modules.define('my-block', ['i-bem__dom'], function(provide, BEMDOM) {
 
-DOM.decl('my-block', {
+provide(BEMDOM.decl(this.name, {
     onSetMod: {
         'js' : {
             'inited' : function() {
@@ -94,9 +94,7 @@ DOM.decl('my-block', {
             }
         }
     }
-});
-
-provide(DOM);
+}));
 
 });
 ```
@@ -106,7 +104,7 @@ ymaps/modules](https://github.com/ymaps/modules), so the first line defines whic
 modules to use for the component. In this case it is `i-bem__dom`, a
 module represented as a `dom` element of `i-bem` block from `bem-core` library.
 [Link to its code, if you need
-it](https://github.com/bem/bem-core/blob/v1/common.blocks/i-bem/__dom/i-bem__dom.js).
+it](https://github.com/bem/bem-core/blob/v2/common.blocks/i-bem/__dom/i-bem__dom.js).
 
 Inside you can use the `DOM` object and its `decl` method to describe a block.
 
@@ -119,7 +117,7 @@ of them, an `onSetMod` property in the example. It is used to store callbacks to
 run when a block gets a modifier. The syntax is the following:
 
 ```js
-DOM.decl('my-block', {
+BEMDOM.decl(this.name, {
     onSetMod: {
         'foo' : function() {
             // Runs when a block gets any value of `foo` modifier
