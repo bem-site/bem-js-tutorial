@@ -3,10 +3,19 @@
     title: 'Removing a modifier from an element',
     favicon: '/favicon.ico',
     head: [
-        { elem: 'css', url: '_005-modifier-removing.css', ie: false },
-        { elem: 'css', url: '_005-modifier-removing', ie: true },
+        { elem: 'css', url: '_005-modifier-removing.css' },
         { elem: 'meta', attrs: { name: 'description', content: '' }},
-        '<link  href="http://fonts.googleapis.com/css?family=Reenie+Beanie:regular" rel="stylesheet" type="text/css">'
+        {
+            tag: 'link',
+            attrs: {
+                href: '//fonts.googleapis.com/css?family=Reenie+Beanie:regular',
+                rel: 'stylesheet',
+                type: 'text/css'
+            }
+        }
+    ],
+    scripts: [
+        { elem: 'js', url: '_005-modifier-removing.js' }
     ],
     content:[
         {
@@ -47,7 +56,6 @@
                     text: 'Pick up some BEMHTML and code templates.'
                 }
             ]
-        },
-        { elem: 'js', url: '_005-modifier-removing.js' }
+        }
     ]
 })

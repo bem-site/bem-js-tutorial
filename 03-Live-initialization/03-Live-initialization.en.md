@@ -1,12 +1,4 @@
-# Tutorial on JavaScript in BEM terms
-
-### Links
- * [Core document](../00-Intro/00-Intro.en.md)
- * [Previous chapter. Modifiers](../02-Modifiers/02-Modifiers.en.md)
-
-----------------------------------
-
-## Live initialization
+# Live initialization
 Before a block starts to function the core initializes it. At the end of this
 process the block gets `js_inited` modifier, which you are already familiar
 with.
@@ -23,14 +15,14 @@ initializing block only when a user starts operating on them.
 
 This is the so-called `live initialization` (or `lazy`).
 
-### `live` static method
+## `live` static method
 The instructions to initialize a block lazy can be given in a predefined `live`
 static method.
 
 ```js
-modules.define('i-bem__dom', function(provide, DOM) {
+modules.define('my-block', ['i-bem__dom'], function(provide, BEMDOM) {
 
-DOM.decl('my-block', {
+provide(BEMDOM.decl(this.name, {
     onSetMod: {
         ...
     },
@@ -40,9 +32,7 @@ DOM.decl('my-block', {
         // Here you can code when to initialize
         // this block instances
     }
-});
-
-provide(DOM);
+}));
 
 });
 ```
@@ -53,7 +43,7 @@ Here, as it is a function, the core understands that the instances of this block
 should not be initialized before something special happens. This can be that a
 DOM event fires of the block DOM node or on an element.
 
-### Initializing a block on DOM event
+## Initializing a block on DOM event
 
 <pre>├── pure.bundles/
 │   ├── 010-live-init-on-event/
@@ -99,17 +89,15 @@ file of the block it is said to initialize it only after a `click` launches on
 the block DOM node.
 
 ```js
-modules.define('i-bem__dom', function(provide, DOM) {
+modules.define('translate', ['i-bem__dom'], function(provide, BEMDOM) {
 
-DOM.decl('translate', {
+provide(BEMDOM.decl(this.name, {
     ...
 },{
     live: function() {
         this.liveInitOnEvent('click');
     }
-});
-
-provide(DOM);
+}));
 
 });
 ```
@@ -118,9 +106,9 @@ When clicked, the core applies `js_inited` modifier to the block instance and
 runs block 'constructor', the function set to this modifier.
 
 ```js
-modules.define('i-bem__dom', function(provide, DOM) {
+modules.define('translate', ['i-bem__dom'], function(provide, BEMDOM) {
 
-DOM.decl('translate', {
+provide(BEMDOM.decl(this.name, {
     onSetMod: {
         'js' : {
             'inited' : function() {
@@ -137,15 +125,13 @@ DOM.decl('translate', {
     }
 },{
     ...
-});
-
-provide(DOM);
+}));
 
 });
 ```
 It makes the contained `prompt` element visible by setting on it the `visible`
 modifier into `true`. And this means to take the corresponding translation from
-the block parameters by getting the `this.params['paramName']` value.<br/>
+the block parameters by getting the `this.params.paramName` value.<br/>
 In face, the translation could be placed into the `prompt` at the beginning since
 it was invisible for a user anyway. But just to illustrate how the parameters can
 be taken, its was placed into the `data-bem`.
@@ -161,7 +147,7 @@ page.<br/>
 Besides saving browser forces, this way provides some flexibility for
 dynamically changed pages. This you can see with the following example.
 
-### Delegated initialization
+## Delegated initialization
 <pre>
 
 >> <a href="http://bem.github.io/bem-js-tutorial/pure.bundles/010_2-delegation/010_2-delegation.html">010_2-delegation.html</a></pre>
@@ -201,9 +187,9 @@ it would be madness to initialize all the 100 buttons at once and then listen to
 the clicks on each of them.
 
 ```js
-modules.define('i-bem__dom', function(provide, DOM) {
+modules.define('button', ['i-bem__dom'], function(provide, BEMDOM) {
 
-DOM.decl('button', {
+provide(BEMDOM.decl(this.name, {
     onSetMod: {
         'js' : {
             'inited' : function() {
@@ -216,9 +202,7 @@ DOM.decl('button', {
     live: function() {
         this.liveBindTo('click');
     }
-});
-
-provide(DOM);
+}));
 
 });
 ```
@@ -230,9 +214,9 @@ Unlike the `liveInitOnEvent` the `liveBindTo` method runs its callback not
 just once but every time a user clicks the button.
 
 ```js
-modules.define('i-bem__dom', function(provide, DOM) {
+modules.define('button', ['i-bem__dom'], function(provide, BEMDOM) {
 
-DOM.decl('button', {
+provide(BEMDOM.decl(this.name, {
     onSetMod: {
         ...
     },
@@ -245,14 +229,12 @@ DOM.decl('button', {
             this.onClick();
         });
     }
-});
-
-provide(DOM);
+}));
 
 });
 ```
 
-### Live initialization on many events
+## Live initialization on many events
 <pre>├── pure.bundles/
 │   ├── 012-live-init-many-events/
 │   │   ├── blocks/
@@ -285,9 +267,9 @@ It is obvious an instance of this block has to be initialized when a user clicks
 its `label` element.
 
 ```js
-modules.define('i-bem__dom', function(provide, DOM) {
+modules.define('checkbox', ['i-bem__dom'], function(provide, BEMDOM) {
 
-DOM.decl('checkbox', {
+provide(BEMDOM.decl(this.name, {
     ...
     _onClick : function() {
         this.setMod('focused', true);
@@ -299,9 +281,7 @@ DOM.decl('checkbox', {
             this._onClick();
         });
     }
-});
-
-provide(DOM);
+}));
 
 });
 ```
@@ -318,9 +298,9 @@ you need. Here it happens after a `click` event on the `label` element and also
 after a `change` event on the embedded `control` element, which is native `input`.
 
 ```js
-modules.define('i-bem__dom', function(provide, DOM) {
+modules.define('checkbox', ['i-bem__dom'], function(provide, BEMDOM) {
 
-DOM.decl('checkbox', {
+provide(BEMDOM.decl(this.name, {
     ...
     _onClick : function() {
         this.setMod('focused', true);
@@ -338,9 +318,7 @@ DOM.decl('checkbox', {
             this._onChange(e);
         });
     }
-});
-
-provide(DOM);
+}));
 
 });
 ```
@@ -348,9 +326,9 @@ provide(DOM);
 The block should also be inited when focused in or focused out.
 
 ```js
-modules.define('i-bem__dom', function(provide, DOM) {
+modules.define('checkbox', ['i-bem__dom'], function(provide, BEMDOM) {
 
-DOM.decl('checkbox', {
+provide(BEMDOM.decl(this.name, {
     ...
 },{
     live: function() {
@@ -366,9 +344,7 @@ DOM.decl('checkbox', {
             this.setMod('focused', e.type == 'focusin'? true : false);
         });
     }
-});
-
-provide(DOM);
+}));
 
 });
 ```
@@ -376,12 +352,12 @@ provide(DOM);
 As you can see, it is possible to bind to more than one event with the same
 callback if list their names separated with a space.
 
-Then, with adding modifiers' functionality to the components, it can be finished.
+Then, with adding modifiers functionality to the components, it can be finished.
 
 ```js
-modules.define('i-bem__dom', function(provide, DOM) {
+modules.define('checkbox', ['i-bem__dom'], function(provide, BEMDOM) {
 
-DOM.decl('checkbox', {
+provide(BEMDOM.decl(this.name, {
     onSetMod: {
         'focused' : {
             'true' : function() {
@@ -400,9 +376,7 @@ DOM.decl('checkbox', {
     live: function() {
         ...
     }
-});
-
-provide(DOM);
+}));
 
 });
 ```
@@ -462,7 +436,6 @@ be able to change if checked
 ```css
 .checkbox_checked
 {
-    background-image: -webkit-linear-gradient(0deg, #333, #333 4px, #555 4px, #555 6px);
     background-image: linear-gradient(0deg, #333, #333 4px, #555 4px, #555 6px);
     background-size: 6px 6px;
 }
@@ -471,7 +444,7 @@ be able to change if checked
 as well as saves time for parsing selectors and bringing architectural
 consistency to the code.
 
-### BEM events
+## BEM events
 
 Besides DOM events, `i-bem.js` operates with custom JavaScript events on the
 JavaScript objects corresponding to the blocks. These events are named `BEM
@@ -494,7 +467,7 @@ of the block.
 
 Thus, the `link` block has an API which can be used by other blocks on a page.
 
-Another example is the [`menu` block](https://github.com/varya/bem-js-tutorial/tree/master/desktop.blocks/menu)
+Another example is the [`menu` block](https://github.com/bem/bem-js-tutorial/tree/master/desktop.blocks/menu)
 of this tutorial. It is represets a list of menu items in HTML, one of those can be
 selected at the moment.
 
@@ -537,7 +510,7 @@ This event fires on the JavaScript object corresponding to the menu block instan
 With that, any other block subscribed to the `current` BEM event of the menu can
 learn when it changes its current item and react on it.
 
-### Live initialization on BEM a event of an inner block
+## Live initialization on BEM event of an inner block
 
 <pre>├── components.bundles/
 │   ├── 014-live-init-bem-event/
@@ -577,9 +550,9 @@ The JavaScript implementation of the block [map-marks.js](https://github.com/var
 uses live initialization depending on the inner block.
 
 ```js
-modules.define('i-bem__dom', ['jquery'], function(provide, $, DOM) {
+modules.define('map-marks', ['i-bem__dom', 'jquery'], function(provide, BEMDOM, $) {
 
-DOM.decl('map-marks', {
+provide(BEMDOM.decl(this.name, {
     ...
 }, {
     live: function() {
@@ -587,9 +560,7 @@ DOM.decl('map-marks', {
             this._showMap(e, data.current);
         });
     }
-});
-
-provide(DOM);
+}));
 
 });
 ```
@@ -602,9 +573,9 @@ Once a user clicks a menu item, it becomes current and the menu block emits
 it gets `js_inited` modifier ans the related method runs:
 
 ```js
-modules.define('i-bem__dom', ['jquery'], function(provide, $, DOM) {
+modules.define('map-marks', ['i-bem__dom', 'jquery'], function(provide, BEMDOM, $) {
 
-DOM.decl('map-marks', {
+provide(BEMDOM.decl(this.name, {
 
   onSetMod: {
       'js' : {
@@ -621,9 +592,7 @@ DOM.decl('map-marks', {
     live: function() {
         ...
     }
-});
-
-provide(DOM);
+}));
 
 });
 ```
@@ -632,9 +601,9 @@ Then the callback runs the `_showMap` method of the block instance. This shows a
 mark on a map using the `map` block.
 
 ```js
-modules.define('i-bem__dom', ['jquery'], function(provide, $, DOM) {
+modules.define('map-marks', ['i-bem__dom', 'jquery'], function(provide, BEMDOM, $) {
 
-DOM.decl('map-marks', {
+provide(BEMDOM.decl(this.name, {
 
     ...
 
@@ -649,14 +618,7 @@ DOM.decl('map-marks', {
     live: function() {
         ...
     }
-});
-
-provide(DOM);
+}));
 
 });
 ```
-
----------------------------------------
-### Links
- * [Core document](../00-Intro/00-Intro.en.md)
- * [Previous chapter. Modifiers](../02-Modifiers/02-Modifiers.en.md)

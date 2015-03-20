@@ -3,9 +3,11 @@
     title: 'Live (lazy) initialization on DOM event',
     favicon: '/favicon.ico',
     head: [
-        { elem: 'css', url: '_010-live-init-on-event.css', ie: false },
-        { elem: 'css', url: '_010-live-init-on-event', ie: true },
+        { elem: 'css', url: '_010-live-init-on-event.css' },
         { elem: 'meta', attrs: { name: 'description', content: '' }},
+    ],
+    scripts: [
+        { elem: 'js', url: '_010-live-init-on-event.js' }
     ],
     content:[
         {
@@ -410,7 +412,6 @@
                     ]
                 }
             ]
-        },
-        { elem: 'js', url: '_010-live-init-on-event.js' }
+        }
     ]
 })

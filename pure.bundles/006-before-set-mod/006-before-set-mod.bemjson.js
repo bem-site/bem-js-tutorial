@@ -3,10 +3,20 @@
     title: 'beforeSetMod helper',
     favicon: '/favicon.ico',
     head: [
-        { elem: 'css', url: '_006-before-set-mod.css', ie: false },
-        { elem: 'css', url: '_006-before-set-mod', ie: true },
+        { elem: 'css', url: '_006-before-set-mod.css' },
         { elem: 'meta', attrs: { name: 'description', content: '' }},
-        '<link href="http://fonts.googleapis.com/css?family=Droid+Sans:400,700" rel="stylesheet" type="text/css">'
+        ,
+        {
+            tag: 'link',
+            attrs: {
+                href: '//fonts.googleapis.com/css?family=Droid+Sans:400,700',
+                rel: 'stylesheet',
+                type: 'text/css'
+            }
+        }
+    ],
+    scripts: [
+        { elem: 'js', url: '_006-before-set-mod.js' }
     ],
     content:[
         {
@@ -92,7 +102,6 @@
                     ]
                 }
             ]
-        },
-        { elem: 'js', url: '_006-before-set-mod.js' }
+        }
     ]
 })

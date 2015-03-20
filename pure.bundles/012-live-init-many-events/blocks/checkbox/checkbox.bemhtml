@@ -1,6 +1,6 @@
 block('checkbox')(
 
-    function(){
+    def()(function(){
         var attrs = this.ctx.checkboxAttrs || {};
             this.ctx.mods = this.ctx.mods || {};
         if (attrs.checked) {
@@ -10,7 +10,7 @@ block('checkbox')(
             attrs.checked = 'checked'
         }
         applyNext();
-    },
+    }),
 
     tag()('span'),
 

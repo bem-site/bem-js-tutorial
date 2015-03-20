@@ -1,3 +1,51 @@
-@import url(blocks/map-marks/map-marks.css);
-@import url(blocks/menu/menu.css);
-@import url(../../desktop.blocks/link/link.css);
+/* blocks/map-marks/map-marks.css begin */
+.map-marks {
+  font: 18px/1.5em Tahoma;
+}
+.map-marks__menu {
+  display: inline-block;
+  vertical-align: top;
+  margin-right: 1em;
+}
+.map-marks__map-container {
+  display: inline-block;
+}
+.map-marks__map-container .map {
+  width: 500px;
+  height: 500px;
+}
+/* blocks/map-marks/map-marks.css end */
+/* ../../libs/bem-components/common.blocks/menu/menu.styl begin */
+.menu {
+  overflow-y: auto;
+}
+/* ../../libs/bem-components/common.blocks/menu/menu.styl end */
+/* blocks/menu/menu.css begin */
+.menu {
+  color: #fff;
+  text-align: right;
+}
+.menu__item {
+  margin: 2px;
+  margin-right: 1em;
+}
+.menu__item_state_current {
+  margin-right: 0;
+}
+.menu__item_state_current .menu__item-selector {
+  background: #0062ff;
+  padding-right: 1.5em;
+}
+.menu__item-selector {
+  display: inline-block;
+  background: #333;
+  padding: 0.5em;
+  cursor: pointer;
+}
+/* blocks/menu/menu.css end */
+/* ../../desktop.blocks/link/link.css begin */
+.link:hover,
+.link:visited:hover {
+  color: #d00;
+}
+/* ../../desktop.blocks/link/link.css end */

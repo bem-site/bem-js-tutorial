@@ -1,140 +1,85 @@
 /* blocks/page/page.css begin */
-.page
-{
-    background: #777;
+.page {
+  background: #777;
 }
-
 /* blocks/page/page.css end */
 /* blocks/checkbox/checkbox.css begin */
 /*
  * CSS is taken from http://codepen.io/bbodine1/pen/novBm
  */
-.checkbox
-{
-    display: inline-block;
-    position: relative;
-    width: 80px;
-    height: 30px;
-    background-color: #333;
-    margin: 20px auto;
-
-    -webkit-border-radius: 50px;
-    -moz-border-radius: 50px;
-    border-radius: 50px;
-    position: relative;
-
-    -webkit-box-shadow: inset 0px 1px 1px rgba(0,0,0,0.5), 0px 1px 0px rgba(255,255,255,0.2);
-    -moz-box-shadow: inset 0px 1px 1px rgba(0,0,0,0.5), 0px 1px 0px rgba(255,255,255,0.2);
-    box-shadow: inset 0px 1px 1px rgba(0,0,0,0.5), 0px 1px 0px rgba(255,255,255,0.2);
+.checkbox {
+  display: inline-block;
+  position: relative;
+  width: 80px;
+  height: 30px;
+  background-color: #333;
+  margin: 20px auto;
+  border-radius: 50px;
+  position: relative;
+  box-shadow: inset 0px 1px 1px rgba(0,0,0,0.5), 0px 1px 0px rgba(255,255,255,0.2);
 }
-
 .checkbox:after {
-    content: '';
-    position: absolute;
-    top: 14px;
-    left: 14px;
-    height: 2px;
-    width: 52px;
-
-    -webkit-border-radius: 50px;
-    -moz-border-radius: 50px;
-    border-radius: 50px;
-    background: #111;
-
-    -webkit-box-shadow: inset 0px 1px 1px rgba(0,0,0,0.5), 0px 1px 0px rgba(255,255,255,0.2);
-    -moz-box-shadow: inset 0px 1px 1px rgba(0,0,0,0.5), 0px 1px 0px rgba(255,255,255,0.2);
-    box-shadow: inset 0px 1px 1px rgba(0,0,0,0.5), 0px 1px 0px rgba(255,255,255,0.2);
+  content: '';
+  position: absolute;
+  top: 14px;
+  left: 14px;
+  height: 2px;
+  width: 52px;
+  border-radius: 50px;
+  background: #111;
+  box-shadow: inset 0px 1px 1px rgba(0,0,0,0.5), 0px 1px 0px rgba(255,255,255,0.2);
 }
-
-.checkbox_focused
-{
-    -webkit-box-shadow: 0 0 2px #ffd94f, 0 0 2px #ffd94f, 0 0 3px #ffd94f;
-    -moz-box-shadow:  0 0 2px #ffd94f, 0 0 2px #ffd94f, 0 0 3px #ffd94f;
-    box-shadow: 0 0 2px #ffd94f, 0 0 2px #ffd94f, 0 0 3px #ffd94f;
+.checkbox_focused {
+  box-shadow: 0 0 2px #ffd94f, 0 0 2px #ffd94f, 0 0 3px #ffd94f;
 }
-
-.checkbox__control
-{
-    position: absolute;
-    z-index: 4;
-    top: 0;
-
-    margin: 0;
-    padding: 0;
-
-    opacity: 0;
-    outline: 0;
-
-    border: 0;
-    background: none;
+.checkbox__control {
+  position: absolute;
+  z-index: 4;
+  top: 0;
+  margin: 0;
+  padding: 0;
+  opacity: 0;
+  outline: 0;
+  border: 0;
+  background: none;
 }
-
-.checkbox__label
-{
-    display: block;
-    width: 22px;
-    height: 22px;
-
-    -webkit-border-radius: 50px;
-    -moz-border-radius: 50px;
-    border-radius: 50px;
-
-    -webkit-transition: all .4s ease;
-    -moz-transition: all .4s ease;
-    -o-transition: all .4s ease;
-    -ms-transition: all .4s ease;
-    transition: all .4s ease;
-    cursor: pointer;
-    position: absolute;
-    top: 4px;
-    z-index: 1;
-    left: 4px;
-
-    -webkit-box-shadow: 0px 2px 5px 0px rgba(0,0,0,0.3);
-    -moz-box-shadow: 0px 2px 5px 0px rgba(0,0,0,0.3);
-    box-shadow: 0px 2px 5px 0px rgba(0,0,0,0.3);
-    background: #fcfff4;
-
-    background: -webkit-linear-gradient(top, #fcfff4 0%, #dfe5d7 40%, #b3bead 100%);
-    background: -moz-linear-gradient(top, #fcfff4 0%, #dfe5d7 40%, #b3bead 100%);
-    background: -o-linear-gradient(top, #fcfff4 0%, #dfe5d7 40%, #b3bead 100%);
-    background: -ms-linear-gradient(top, #fcfff4 0%, #dfe5d7 40%, #b3bead 100%);
-    background: linear-gradient(top, #fcfff4 0%, #dfe5d7 40%, #b3bead 100%);
-    filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#fcfff4', endColorstr='#b3bead',GradientType=0 );
+.checkbox__label {
+  display: block;
+  width: 22px;
+  height: 22px;
+  border-radius: 50px;
+  -webkit-transition: all 0.4s ease;
+  transition: all 0.4s ease;
+  cursor: pointer;
+  position: absolute;
+  top: 4px;
+  z-index: 1;
+  left: 4px;
+  box-shadow: 0px 2px 5px 0px rgba(0,0,0,0.3);
+  background: #fcfff4;
+  background: -webkit-linear-gradient(top, #fcfff4 0%, #dfe5d7 40%, #b3bead 100%);
+  background: linear-gradient(top, #fcfff4 0%, #dfe5d7 40%, #b3bead 100%);
 }
-
-.checkbox__label:after
-{
-    content: '';
-    position: absolute;
-    width: 10px;
-    height: 10px;
-
-    -webkit-border-radius: 50px;
-    -moz-border-radius: 50px;
-    border-radius: 50px;
-    background: #333;
-    left: 6px;
-    top: 6px;
-
-    -webkit-box-shadow: inset 0px 1px 1px rgba(0,0,0,1), 0px 1px 0px rgba(255,255,255,0.9);
-    -moz-box-shadow: inset 0px 1px 1px rgba(0,0,0,1), 0px 1px 0px rgba(255,255,255,0.9);
-    box-shadow: inset 0px 1px 1px rgba(0,0,0,1), 0px 1px 0px rgba(255,255,255,0.9);
+.checkbox__label:after {
+  content: '';
+  position: absolute;
+  width: 10px;
+  height: 10px;
+  border-radius: 50px;
+  background: #333;
+  left: 6px;
+  top: 6px;
+  box-shadow: inset 0px 1px 1px #000, 0px 1px 0px rgba(255,255,255,0.9);
 }
-
-.checkbox_checked
-{
-    background-image: -webkit-linear-gradient(0deg, #333, #333 4px, #555 4px, #555 6px);
-    background-image: linear-gradient(0deg, #333, #333 4px, #555 4px, #555 6px);
-    background-size: 6px 6px;
+.checkbox_checked {
+  background-image: -webkit-linear-gradient(90deg, #333, #333 4px, #555 4px, #555 6px);
+  background-image: linear-gradient(0deg, #333, #333 4px, #555 4px, #555 6px);
+  background-size: 6px 6px;
 }
-
 .checkbox_checked .checkbox__label {
-    left: 54px;
+  left: 54px;
 }
-
 .checkbox_checked .checkbox__label:after {
-    background: #00bf00;
+  background: #00bf00;
 }
-
 /* blocks/checkbox/checkbox.css end */

@@ -1,20 +1,20 @@
-modules.define('i-bem__dom', function(provide, DOM) {
+modules.define('traffic-light', ['i-bem__dom'], function(provide, BEMDOM) {
 
-var goSound = new Audio('blocks/traffic-light/__go/traffic-light__go.mp3'),
-    timer;
+var goSound = new Audio('blocks/traffic-light/__go/traffic-light__go.mp3');
 
-DOM.decl('traffic-light', {
+provide(BEMDOM.decl(this.name, {
     onSetMod: {
         'js' : {
             'inited' : function() {
-                this.bindTo(this.elem('reset'), 'click', function(){
-                    this.setMod('status', 'stop');
-                });
-                this.setMod('status', 'stop');
+                this
+                    .bindTo(this.elem('reset'), 'click', function(){
+                        this.setMod('status', 'stop');
+                    })
+                    .setMod('status', 'stop');
             }
         },
         'status' : function(modName, modVal, oldModVal) {
-            clearTimeout(timer);
+            clearTimeout(this.timer);
             var nextStatus = {
                 'stop' : 'slow',
                 'slow' : 'go',
@@ -23,7 +23,7 @@ DOM.decl('traffic-light', {
                 _this = this;
             oldModVal && this.setMod(this.elem(oldModVal), 'status', 'off');
             this.setMod(this.elem(modVal), 'status', 'on');
-            timer = window.setTimeout(function(){
+            this.timer = window.setTimeout(function(){
                 _this.setMod('status', nextStatus[modVal]);
             }, 2000);
         }
@@ -40,8 +40,6 @@ DOM.decl('traffic-light', {
             }
         }
     }
-});
-
-provide(DOM);
+}));
 
 });

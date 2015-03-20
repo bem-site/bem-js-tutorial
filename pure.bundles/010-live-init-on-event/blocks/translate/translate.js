@@ -1,6 +1,6 @@
-modules.define('i-bem__dom', function(provide, DOM) {
+modules.define('translate', ['i-bem__dom'], function(provide, BEMDOM) {
 
-DOM.decl('translate', {
+provide(BEMDOM.decl(this.name, {
     onSetMod: {
         'js' : {
             'inited' : function() {
@@ -11,7 +11,7 @@ DOM.decl('translate', {
     onElemSetMod: {
         'prompt': {
             'visible': function(elem) {
-                elem.text(this.params['prompt']);
+                elem.text(this.params.prompt);
             }
         }
     }
@@ -19,8 +19,6 @@ DOM.decl('translate', {
     live: function() {
         this.liveInitOnEvent('click');
     }
-});
-
-provide(DOM);
+}));
 
 });

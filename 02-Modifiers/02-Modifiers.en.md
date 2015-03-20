@@ -1,17 +1,9 @@
-# Tutorial on JavaScript in BEM terms
-
-### Links
- * [Core document](../00-Intro/00-Intro.en.md)
- * [Previous chapter. Block structure](../01-Block-structure/01-Block-structure.en.md)
-
-----------------------------------
-
-## Modifiers
+# Modifiers
 In BEM, modifiers express block states. To put a block into a special state we
 set a modifier on it. Then a block runs a callback associated with
 this modifier.
 
-### Setting a modifier on a block and reacting to it
+## Setting a modifier on a block and reacting to it
 
 <pre>├── pure.bundles/
 │   ├── 002-change-modifier/
@@ -51,9 +43,9 @@ to the block and the `setMod` method serves for it.
 > in the `live` section.
 
 ```js
-modules.define('i-bem__dom', function(provide, DOM) {
+modules.define('call-button', ['i-bem__dom'], function(provide, BEMDOM) {
 
-DOM.decl('call-button', {
+provide(BEMDOM.decl(this.name, {
     onSetMod: {
         'js' : {
             'inited' : function() {
@@ -69,7 +61,7 @@ DOM.decl('call-button', {
 
 Take into account that here we use a `boolean modifier`, which has no value. But
 as you will see below, modifiers are very often used as key-value pairs. In that
-case, both modifier's name and its value have to be passed to the `setMod`
+case, both modifier name and its value have to be passed to the `setMod`
 helper:
 
 ```js
@@ -78,28 +70,27 @@ this.setMod('status', 'on');
 this.setMod('status', 'off');
 ```
 
-The `setMod` method applies a modifier's CSS class to the blocks which makes the
+The `setMod` method applies a modifier CSS class to the blocks which makes the
 block change its appearance. If you need additional changes on a block,
 place them into a function corresponding to the modifier. Like the following:
 
 ```js
-modules.define('i-bem__dom', function(provide, DOM) {
+modules.define('call-button', ['i-bem__dom'], function(provide, BEMDOM) {
 
-DOM.decl('call-button', {
+provide(BEMDOM.decl(this.name, {
     onSetMod: {
         'js' : { ... },
         'calling' : function() {
             this.elem('link').text('Calling...');
         }
     }
-});
-
-provide(DOM);
+}));
 
 });
 ```
+
 Here you can run your calculations, or code any functionality of the block. As
-there is access to the block's DOM node and its children, the DOM structure can
+there is access to the block DOM node and its children, the DOM structure can
 also be changed.<br/>
 With the `elem` helper you can select the elements of the block by their names.
 
@@ -111,7 +102,7 @@ Modifiers are described in a declarative manner, which empowers a programmer to 
 the code with further implementations or to redefine it completely, as is shown
 in the tutorial below.
 
-### Setting a modifier on an element
+## Setting a modifier on an element
 
 <pre>├── pure.bundles/
 │   ├── 003-element-modifier/
@@ -144,9 +135,9 @@ Similar to the previous example, the `traffic-light` block is introduced to the
 `i-bem` core as a DOM-equipped block.
 
 ```js
-modules.define('i-bem__dom', function(provide, DOM) {
+modules.define('traffic-light', ['i-bem__dom'], function(provide, BEMDOM) {
 
-DOM.decl('traffic-light', {
+provide(BEMDOM.decl(this.name, {
     onSetMod: {
         'js' : {
             'inited' : function() {
@@ -155,9 +146,7 @@ DOM.decl('traffic-light', {
             }
         },
         ...
-});
-
-provide(DOM);
+}));
 
 });
 ```
@@ -170,15 +159,13 @@ The `status` modifier is declared with its callback, once for all its values. Th
 is a good way to get rid of copy&paste if the corresponding states work similarly.
 
 ```js
-modules.define('i-bem__dom', function(provide, DOM) {
+modules.define('traffic-light', ['i-bem__dom'], function(provide, BEMDOM) {
 
-var timer;
-
-DOM.decl('traffic-light', {
+provide(BEMDOM.decl('traffic-light', {
     onSetMod: {
         'js' : { ... },
         'status' : function(modName, modVal, oldModVal) {
-            clearTimeout(timer);
+            clearTimeout(this.timer);
             var nextStatus = {
                 'stop' : 'slow',
                 'slow' : 'go',
@@ -187,15 +174,13 @@ DOM.decl('traffic-light', {
                 _this = this;
             oldModVal && this.setMod(this.elem(oldModVal), 'status', 'off');
             this.setMod(this.elem(modVal), 'status', 'on');
-            timer = window.setTimeout(function(){
+            this.timer = window.setTimeout(function(){
                 _this.setMod('status', nextStatus[modVal]);
             }, 2000);
         }
     },
     ...
-});
-
-provide(DOM);
+}));
 
 });
 ```
@@ -251,12 +236,11 @@ DOM.decl('my-block', {
 In this example, only the `go` element is provided with a special functionality.
 
 ```js
-modules.define('i-bem__dom', function(provide, DOM) {
+modules.define('traffic-light', ['i-bem__dom'], function(provide, BEMDOM) {
 
-var goSound = new Audio('blocks/traffic-light/__go/traffic-light__go.mp3'),
-    timer;
+var goSound = new Audio('blocks/traffic-light/__go/traffic-light__go.mp3');
 
-DOM.decl('traffic-light', {
+provide(BEMDOM.decl(this.name, {
     onSetMod: { ... },
     onElemSetMod: {
         'go' : {
@@ -270,17 +254,14 @@ DOM.decl('traffic-light', {
             }
         }
     }
-});
+}));
 
-provide(DOM);
-
-});
-```
+});```
 
 This makes a browser play a traffic light sound when an element is switched into
 `status_on` and to keep silent when the modifier goes off.
 
-### Toggling a modifier
+## Toggling a modifier
 
 <pre>├── pure.bundles/
 │   ├── 004-toggle-mod/
@@ -308,9 +289,9 @@ modifier from `switched_off` to `switched_on` and backwards by using the
 `toggleMod` helper.
 
 ```js
-modules.define('i-bem__dom', function(provide, DOM) {
+modules.define('switch', ['i-bem__dom'], function(provide, BEMDOM) {
 
-DOM.decl('switch', {
+provide(BEMDOM.decl(this.name, {
     onSetMod: {
         'js' : {
             'inited' : function() {
@@ -320,9 +301,7 @@ DOM.decl('switch', {
             }
         }
     }
-});
-
-provide(DOM);
+}));
 
 });
 ```
@@ -330,7 +309,7 @@ provide(DOM);
 Indeed, the same goes for elements which an additional first parameter for the
 helper method.
 
-### Deleting a modifier
+## Deleting a modifier
 
 <pre>├── pure.bundles/
 │   ├── 005-modifier-removing/
@@ -369,9 +348,9 @@ How the block behaves is described in its [todo.js](https://github.com/bem/bem-j
 file.
 
 ```js
-modules.define('i-bem__dom', function(provide, DOM) {
+modules.define('todo', ['i-bem__dom'], function(provide, BEMDOM) {
 
-DOM.decl('todo', {
+provide(BEMDOM.decl(this.name, {
     onSetMod: {
         'js' : {
             'inited' : function() {
@@ -381,9 +360,7 @@ DOM.decl('todo', {
             }
         }
     }
-});
-
-provide(DOM);
+}));
 
 });
 ```
@@ -403,7 +380,7 @@ here.
 > in the `live` section. Make sure you have learnt it before starting with a
 > real powerful application.
 
-### Before a modifier is set
+## Before a modifier is set
 
 <pre>├── pure.bundles/
 │   ├── 006-before-set-mod/
@@ -433,9 +410,9 @@ ensure that previously selected item is closed (which means its `current`
 modifier is set into `false`).
 
 ```js
-modules.define('i-bem__dom', ['jquery'], function(provide, $, DOM) {
+modules.define('accordion-menu', ['i-bem__dom', 'jquery'], function(provide, BEMDOM, $) {
 
-DOM.decl('accordion-menu', {
+provide(BEMDOM.decl(this.name, {
 
     onSetMod: {
         'js' : {
@@ -459,12 +436,11 @@ DOM.decl('accordion-menu', {
         }
     }
 
-});
-
-provide(DOM);
+}));
 
 });
 ```
+
 > You may also take notice that jQuery is used here to wrap the elements and this
 > provides some changes into the code. The bem-core library is based on a
 > [ymaps/modules](https://github.com/ymaps/modules) module system explained below.
@@ -479,9 +455,9 @@ to do previously. It is also prevents setting a modifier when a callback related
 to the 'before' part returns `false`.
 
 ```js
-modules.define('i-bem__dom', ['jquery'], function(provide, $, DOM) {
+modules.define('accordion-menu', ['i-bem__dom', 'jquery'], function(provide, BEMDOM, $) {
 
-DOM.decl('accordion-menu', {
+provide(BEMDOM.decl(this.name, {
     beforeElemSetMod: {
         'item' : {
             'current' : {
@@ -492,18 +468,10 @@ DOM.decl('accordion-menu', {
         }
     },
     ...
-});
-
-provide(DOM);
+}));
 
 });
 ```
 
 Here it checks if the clicked item is disabled and prevents such an item to be
 `current`.
-
----------------------------------------
-### Links
- * [Core document](../00-Intro/00-Intro.en.md)
- * [Previous chapter. Block structure](../01-Block-structure/01-Block-structure.md)
- * [Next chapter. Live initialization](../03-Live-initialization/03-Live-initialization.md)

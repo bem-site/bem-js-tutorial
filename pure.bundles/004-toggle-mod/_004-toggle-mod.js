@@ -7,12 +7,13 @@
  * http://www.opensource.org/licenses/mit-license.php
  * http://www.gnu.org/licenses/gpl.html
  *
- * @version 0.0.12
+ * @version 0.1.0
  */
 
 (function(global) {
 
 var undef,
+
     DECL_STATES = {
         NOT_RESOLVED : 'NOT_RESOLVED',
         IN_RESOLVING : 'IN_RESOLVING',
@@ -30,7 +31,6 @@ var undef,
             },
 
             modulesStorage = {},
-            declsToCalc = [],
             waitForNextTick = false,
             pendingRequires = [],
 
@@ -47,52 +47,54 @@ var undef,
                 }
 
                 var module = modulesStorage[name];
-                if(module) {
-                    if(!curOptions.allowMultipleDeclarations) {
-                        throwMultipleDeclarationDetected(name);
-                        return;
-                    }
-                }
-                else {
+                if(!module) {
                     module = modulesStorage[name] = {
                         name : name,
                         decl : undef
                     };
                 }
 
-                declsToCalc.push(module.decl = {
-                    name          : name,
-                    fn            : declFn,
-                    state         : DECL_STATES.NOT_RESOLVED,
-                    deps          : deps,
-                    prevDecl      : module.decl,
-                    dependOnDecls : [],
-                    dependents    : [],
-                    exports       : undef
-                });
+                module.decl = {
+                    name       : name,
+                    prev       : module.decl,
+                    fn         : declFn,
+                    state      : DECL_STATES.NOT_RESOLVED,
+                    deps       : deps,
+                    dependents : [],
+                    exports    : undef
+                };
             },
 
             /**
              * Requires modules
-             * @param {String[]} modules
+             * @param {String|String[]} modules
              * @param {Function} cb
+             * @param {Function} [errorCb]
              */
-            require = function(modules, cb) {
+            require = function(modules, cb, errorCb) {
+                if(typeof modules === 'string') {
+                    modules = [modules];
+                }
+
                 if(!waitForNextTick) {
                     waitForNextTick = true;
                     nextTick(onNextTick);
                 }
 
                 pendingRequires.push({
-                    modules : modules,
-                    cb      : cb
+                    deps : modules,
+                    cb   : function(exports, error) {
+                        error?
+                            (errorCb || onError)(error) :
+                            cb.apply(global, exports);
+                    }
                 });
             },
 
             /**
              * Returns state of module
              * @param {String} name
-             * @returns {String} state, possible values NOT_DEFINED, NOT_RESOLVED, IN_RESOLVING, RESOLVED
+             * @returns {String} state, possible values are NOT_DEFINED, NOT_RESOLVED, IN_RESOLVING, RESOLVED
              */
             getState = function(name) {
                 var module = modulesStorage[name];
@@ -124,123 +126,128 @@ var undef,
 
             onNextTick = function() {
                 waitForNextTick = false;
-                calcDeclDeps();
                 applyRequires();
-            },
-
-            calcDeclDeps = function() {
-                var i = 0, decl, j, dep, dependOnDecls;
-                while(decl = declsToCalc[i++]) {
-                    j = 0;
-                    dependOnDecls = decl.dependOnDecls;
-                    while(dep = decl.deps[j++]) {
-                        if(!isDefined(dep)) {
-                            throwModuleNotFound(dep, decl);
-                            break;
-                        }
-                        dependOnDecls.push(modulesStorage[dep].decl);
-                    }
-
-                    if(decl.prevDecl) {
-                        dependOnDecls.push(decl.prevDecl);
-                        decl.prevDecl = undef;
-                    }
-                }
-
-                declsToCalc = [];
             },
 
             applyRequires = function() {
                 var requiresToProcess = pendingRequires,
-                    require, i = 0, j, dep, dependOnDecls, applyCb;
+                    i = 0, require;
 
                 pendingRequires = [];
 
                 while(require = requiresToProcess[i++]) {
-                    j = 0; dependOnDecls = []; applyCb = true;
-                    while(dep = require.modules[j++]) {
-                        if(!isDefined(dep)) {
-                            throwModuleNotFound(dep);
-                            applyCb = false;
-                            break;
-                        }
-
-                        dependOnDecls.push(modulesStorage[dep].decl);
-                    }
-                    applyCb && applyRequire(dependOnDecls, require.cb);
+                    requireDeps(null, require.deps, [], require.cb);
                 }
             },
 
-            applyRequire = function(dependOnDecls, cb) {
-                requireDecls(
-                    dependOnDecls,
-                    function(exports) {
-                        cb.apply(global, exports);
-                    },
-                    []);
-            },
+            requireDeps = function(fromDecl, deps, path, cb) {
+                var unresolvedDepsCnt = deps.length;
+                if(!unresolvedDepsCnt) {
+                    cb([]);
+                }
 
-            requireDecls = function(decls, cb, path) {
-                var unresolvedDeclCnt = decls.length;
+                var decls = [],
+                    i = 0, len = unresolvedDepsCnt,
+                    dep, decl;
 
-                if(unresolvedDeclCnt) {
-                    var onDeclResolved,
-                        i = 0, decl;
-
-                    while(decl = decls[i++]) {
-                        if(decl.state === DECL_STATES.RESOLVED) {
-                            --unresolvedDeclCnt;
+                while(i < len) {
+                    dep = deps[i++];
+                    if(typeof dep === 'string') {
+                        if(!modulesStorage[dep]) {
+                            cb(null, buildModuleNotFoundError(dep, fromDecl));
+                            return;
                         }
-                        else {
-                            if(curOptions.trackCircularDependencies && isDependenceCircular(decl, path)) {
-                                throwCircularDependenceDetected(decl, path);
+
+                        decl = modulesStorage[dep].decl;
+                    }
+                    else {
+                        decl = dep;
+                    }
+
+                    if(decl.state === DECL_STATES.IN_RESOLVING &&
+                            curOptions.trackCircularDependencies &&
+                            isDependenceCircular(decl, path)) {
+                        cb(null, buildCircularDependenceError(decl, path));
+                        return;
+                    }
+
+                    decls.push(decl);
+
+                    startDeclResolving(
+                        decl,
+                        path,
+                        function(_, error) {
+                            if(error) {
+                                cb(null, error);
+                                return;
                             }
 
-                            decl.state === DECL_STATES.NOT_RESOLVED && startDeclResolving(decl, path);
-
-                            decl.state === DECL_STATES.RESOLVED? // decl resolved synchronously
-                                --unresolvedDeclCnt :
-                                decl.dependents.push(onDeclResolved || (onDeclResolved = function() {
-                                    --unresolvedDeclCnt || onDeclsResolved(decls, cb);
-                                }));
-                        }
-                    }
+                            if(!--unresolvedDepsCnt) {
+                                var exports = [],
+                                    i = 0, decl;
+                                while(decl = decls[i++]) {
+                                    exports.push(decl.exports);
+                                }
+                                cb(exports);
+                            }
+                        });
                 }
-
-                unresolvedDeclCnt || onDeclsResolved(decls, cb);
             },
 
-            onDeclsResolved = function(decls, cb) {
-                var exports = [],
-                    i = 0, decl;
-                while(decl = decls[i++]) {
-                    exports.push(decl.exports);
+            startDeclResolving = function(decl, path, cb) {
+                if(decl.state === DECL_STATES.RESOLVED) {
+                    cb(decl.exports);
+                    return;
                 }
-                cb(exports);
-            },
+                else {
+                    decl.dependents.push(cb);
+                }
 
-            startDeclResolving = function(decl, path) {
+                if(decl.state === DECL_STATES.IN_RESOLVING) {
+                    return;
+                }
+
+                if(decl.prev && !curOptions.allowMultipleDeclarations) {
+                    provideError(decl, buildMultipleDeclarationError(decl));
+                    return;
+                }
+
                 curOptions.trackCircularDependencies && (path = path.slice()).push(decl);
+
+                var isProvided = false,
+                    deps = decl.prev? decl.deps.concat([decl.prev]) : decl.deps;
+
                 decl.state = DECL_STATES.IN_RESOLVING;
-                var isProvided = false;
-                requireDecls(
-                    decl.dependOnDecls,
-                    function(depDeclsExports) {
+                requireDeps(
+                    decl,
+                    deps,
+                    path,
+                    function(depDeclsExports, error) {
+                        if(error) {
+                            provideError(decl, error);
+                            return;
+                        }
+
+                        depDeclsExports.unshift(function(exports, error) {
+                            if(isProvided) {
+                                cb(null, buildDeclAreadyProvidedError(decl));
+                                return;
+                            }
+
+                            isProvided = true;
+                            error?
+                                provideError(decl, error) :
+                                provideDecl(decl, exports);
+                        });
+
                         decl.fn.apply(
                             {
                                 name   : decl.name,
                                 deps   : decl.deps,
                                 global : global
                             },
-                            [function(exports) {
-                                isProvided?
-                                    throwDeclAlreadyProvided(decl) :
-                                    isProvided = true;
-                                provideDecl(decl, exports);
-                                return exports;
-                            }].concat(depDeclsExports));
-                    },
-                    path);
+                            depDeclsExports);
+                    });
             },
 
             provideDecl = function(decl, exports) {
@@ -249,10 +256,21 @@ var undef,
 
                 var i = 0, dependent;
                 while(dependent = decl.dependents[i++]) {
-                    dependent(decl.exports);
+                    dependent(exports);
                 }
 
                 decl.dependents = undef;
+            },
+
+            provideError = function(decl, error) {
+                decl.state = DECL_STATES.NOT_RESOLVED;
+
+                var i = 0, dependent;
+                while(dependent = decl.dependents[i++]) {
+                    dependent(null, error);
+                }
+
+                decl.dependents = [];
             };
 
         return {
@@ -265,6 +283,37 @@ var undef,
         };
     },
 
+    onError = function(e) {
+        nextTick(function() {
+            throw e;
+        });
+    },
+
+    buildModuleNotFoundError = function(name, decl) {
+        return Error(decl?
+            'Module "' + decl.name + '": can\'t resolve dependence "' + name + '"' :
+            'Required module "' + name + '" can\'t be resolved');
+    },
+
+    buildCircularDependenceError = function(decl, path) {
+        var strPath = [],
+            i = 0, pathDecl;
+        while(pathDecl = path[i++]) {
+            strPath.push(pathDecl.name);
+        }
+        strPath.push(decl.name);
+
+        return Error('Circular dependence has been detected: "' + strPath.join(' -> ') + '"');
+    },
+
+    buildDeclAreadyProvidedError = function(decl) {
+        return Error('Declaration of module "' + decl.name + '" has already been provided');
+    },
+
+    buildMultipleDeclarationError = function(decl) {
+        return Error('Multiple declarations of module "' + decl.name + '" have been detected');
+    },
+
     isDependenceCircular = function(decl, path) {
         var i = 0, pathDecl;
         while(pathDecl = path[i++]) {
@@ -273,38 +322,6 @@ var undef,
             }
         }
         return false;
-    },
-
-    throwException = function(e) {
-        nextTick(function() {
-            throw e;
-        });
-    },
-
-    throwModuleNotFound = function(name, decl) {
-        throwException(Error(
-            decl?
-                'Module "' + decl.name + '": can\'t resolve dependence "' + name + '"' :
-                'Can\'t resolve required module "' + name + '"'));
-    },
-
-    throwCircularDependenceDetected = function(decl, path) {
-        var strPath = [],
-            i = 0, pathDecl;
-        while(pathDecl = path[i++]) {
-            strPath.push(pathDecl.name);
-        }
-        strPath.push(decl.name);
-
-        throwException(Error('Circular dependence detected "' + strPath.join(' -> ') + '"'));
-    },
-
-    throwDeclAlreadyProvided = function(decl) {
-        throwException(Error('Declaration of module "' + decl.name + '" already provided'));
-    },
-
-    throwMultipleDeclarationDetected = function(name) {
-        throwException(Error('Multiple declaration of module "' + name + '" detected'));
     },
 
     nextTick = (function() {
@@ -403,27 +420,46 @@ else {
 
 modules.define(
     'i-bem',
-    ['inherit', 'identify', 'next-tick', 'objects', 'functions', 'events', 'events__channels'],
-    function(provide, inherit, identify, nextTick, objects, functions, events, channels) {
+    [
+        'i-bem__internal',
+        'inherit',
+        'identify',
+        'next-tick',
+        'objects',
+        'functions',
+        'events'
+    ],
+    function(
+        provide,
+        INTERNAL,
+        inherit,
+        identify,
+        nextTick,
+        objects,
+        functions,
+        events) {
 
 var undef,
-/**
- * Storage for block init functions
- * @private
- * @type Array
- */
+
+    MOD_DELIM = INTERNAL.MOD_DELIM,
+    ELEM_DELIM = INTERNAL.ELEM_DELIM,
+
+    /**
+     * Storage for block init functions
+     * @private
+     * @type Array
+     */
     initFns = [],
 
-/**
- * Storage for block declarations (hash by block name)
- * @private
- * @type Object
- */
+    /**
+     * Storage for block declarations (hash by block name)
+     * @private
+     * @type Object
+     */
     blocks = {};
 
 /**
  * Builds the name of the handler method for setting a modifier
- * @private
  * @param {String} prefix
  * @param {String} modName Modifier name
  * @param {String} modVal Modifier value
@@ -440,8 +476,6 @@ function buildModFnName(prefix, modName, modVal, elemName) {
 
 /**
  * Transforms a hash of modifier handlers to methods
- * @static
- * @private
  * @param {String} prefix
  * @param {Object} modFns
  * @param {Object} props
@@ -456,13 +490,7 @@ function modFnsToProps(prefix, modFns, props, elemName) {
             if(modFns.hasOwnProperty(modName)) {
                 modFn = modFns[modName];
                 if(functions.isFunction(modFn)) {
-                    props[buildModFnName(prefix, modName, modName === 'js'? 'inited' : '*', elemName)] = modFn;
-                    /** @deprecated: above code has fallback, replace
-                     *  modName === 'js'? 'inited': '*'
-                     *  with
-                     *  '*'
-                     *  in next version
-                     */
+                    props[buildModFnName(prefix, modName, '*', elemName)] = modFn;
                 } else {
                     for(modVal in modFn) {
                         if(modFn.hasOwnProperty(modVal)) {
@@ -524,10 +552,15 @@ function convertModHandlersToMethods(props) {
     }
 }
 
+/**
+ * @class BEM
+ * @description Base block for creating BEM blocks
+ * @augments events:Emitter
+ * @exports
+ */
 var BEM = inherit(events.Emitter, /** @lends BEM.prototype */ {
     /**
-     * @class Base block for creating BEM blocks
-     * @constructs
+     * @constructor
      * @private
      * @param {Object} mods Block modifiers
      * @param {Object} params Block parameters
@@ -536,22 +569,22 @@ var BEM = inherit(events.Emitter, /** @lends BEM.prototype */ {
     __constructor : function(mods, params, initImmediately) {
         /**
          * Cache of block modifiers
+         * @member {Object}
          * @private
-         * @type Object
          */
         this._modCache = mods || {};
 
         /**
          * Current modifiers in the stack
+         * @member {Object}
          * @private
-         * @type Object
          */
         this._processingMods = {};
 
         /**
-         * The block's parameters, taking into account the defaults
-         * @protected
-         * @type Object
+         * Block parameters, taking into account the defaults
+         * @member {Object}
+         * @readonly
          */
         this.params = objects.extend(this.getDefaultParams(), params);
 
@@ -565,9 +598,38 @@ var BEM = inherit(events.Emitter, /** @lends BEM.prototype */ {
      * @private
      */
     _init : function() {
-        return this
-            .setMod('js', 'inited')
-            .emit('init');
+        return this.setMod('js', 'inited');
+    },
+
+    /**
+     * Adds an event handler
+     * @param {String|Object} e Event type
+     * @param {Object} [data] Additional data that the handler gets as e.data
+     * @param {Function} fn Handler
+     * @param {Object} [ctx] Handler context
+     * @returns {BEM} this
+     */
+    on : function(e, data, fn, ctx) {
+        if(typeof e === 'object' && (functions.isFunction(data) || functions.isFunction(fn))) { // mod change event
+            e = this.__self._buildModEventName(e);
+        }
+
+        return this.__base.apply(this, arguments);
+    },
+
+    /**
+     * Removes event handler or handlers
+     * @param {String|Object} [e] Event type
+     * @param {Function} [fn] Handler
+     * @param {Object} [ctx] Handler context
+     * @returns {BEM} this
+     */
+    un : function(e, fn, ctx) {
+        if(typeof e === 'object' && functions.isFunction(fn)) { // mod change event
+            e = this.__self._buildModEventName(e);
+        }
+
+        return this.__base.apply(this, arguments);
     },
 
     /**
@@ -575,22 +637,33 @@ var BEM = inherit(events.Emitter, /** @lends BEM.prototype */ {
      * @protected
      * @param {String} e Event name
      * @param {Object} [data] Additional information
-     * @returns {BEM}
+     * @returns {BEM} this
      */
     emit : function(e, data) {
-        this
-            .__base(e = this._buildEvent(e), data)
-            .hasMod('js', 'inited') &&
-                this.__self.emit(e, data);
+        var isModJsEvent = false;
+        if(typeof e === 'object' && !(e instanceof events.Event)) {
+            isModJsEvent = e.modName === 'js';
+            e = this.__self._buildModEventName(e);
+        }
+
+        if(isModJsEvent || this.hasMod('js', 'inited')) {
+            this.__base(e = this._buildEvent(e), data);
+            this._ctxEmit(e, data);
+        }
 
         return this;
     },
 
-    /** @deprecated use emit */
-    trigger : function() {
-        return this.emit.apply(this, arguments);
+    _ctxEmit : function(e, data) {
+        this.__self.emit(e, data);
     },
 
+    /**
+     * Builds event
+     * @private
+     * @param {String|events:Event} e
+     * @returns {events:Event}
+     */
     _buildEvent : function(e) {
         typeof e === 'string'?
             e = new events.Event(e, this) :
@@ -601,10 +674,9 @@ var BEM = inherit(events.Emitter, /** @lends BEM.prototype */ {
 
     /**
      * Checks whether a block or nested element has a modifier
-     * @protected
      * @param {Object} [elem] Nested element
      * @param {String} modName Modifier name
-     * @param {String} [modVal] Modifier value
+     * @param {String|Boolean} [modVal] Modifier value. If defined and not of type String or Boolean, it is casted to String
      * @returns {Boolean}
      */
     hasMod : function(elem, modName, modVal) {
@@ -627,13 +699,17 @@ var BEM = inherit(events.Emitter, /** @lends BEM.prototype */ {
             }
         }
 
+        var typeModVal = typeof modVal;
+        typeModVal === 'string' ||
+            typeModVal === 'boolean' ||
+            typeModVal === 'undefined' || (modVal = modVal.toString());
+
         var res = this.getMod(elem, modName) === modVal;
         return invert? !res : res;
     },
 
     /**
      * Returns the value of the modifier of the block/nested element
-     * @protected
      * @param {Object} [elem] Nested element
      * @param {String} modName Modifier name
      * @returns {String} Modifier value
@@ -656,7 +732,7 @@ var BEM = inherit(events.Emitter, /** @lends BEM.prototype */ {
      * @private
      * @param {String} modName Modifier name
      * @param {Object} elem Nested element
-     * @param {Object} [elem] Nested element name
+     * @param {Object} [elemName] Nested element name
      * @returns {String} Modifier value
      */
     _getElemMod : function(modName, elem, elemName) {
@@ -665,9 +741,8 @@ var BEM = inherit(events.Emitter, /** @lends BEM.prototype */ {
 
     /**
      * Returns values of modifiers of the block/nested element
-     * @protected
      * @param {Object} [elem] Nested element
-     * @param {String} [modName1, ..., modNameN] Modifier names
+     * @param {String} [...modNames] Modifier names
      * @returns {Object} Hash of modifier values
      */
     getMods : function(elem) {
@@ -688,11 +763,10 @@ var BEM = inherit(events.Emitter, /** @lends BEM.prototype */ {
 
     /**
      * Sets the modifier for a block/nested element
-     * @protected
      * @param {Object} [elem] Nested element
      * @param {String} modName Modifier name
-     * @param {String} modVal Modifier value
-     * @returns {BEM}
+     * @param {String|Boolean} [modVal=true] Modifier value. If not of type String or Boolean, it is casted to String
+     * @returns {BEM} this
      */
     setMod : function(elem, modName, modVal) {
         if(typeof modVal === 'undefined') {
@@ -708,7 +782,11 @@ var BEM = inherit(events.Emitter, /** @lends BEM.prototype */ {
         }
 
         if(!elem || elem[0]) {
-            modVal === false && (modVal = '');
+            if(modVal === false) {
+                modVal = '';
+            } else if(typeof modVal !== 'boolean') {
+                modVal = modVal.toString();
+            }
 
             var modId = (elem && elem[0]? identify(elem[0]) : '') + '_' + modName;
 
@@ -746,12 +824,13 @@ var BEM = inherit(events.Emitter, /** @lends BEM.prototype */ {
                 if(!needSetMod) break;
 
                 if(prefix === 'before') {
-                    this._onSetMod(modName, modVal, curModVal, elem, elemName);
                     elem || (this._modCache[modName] = modVal); // cache only block mods
+                    this._onSetMod(modName, modVal, curModVal, elem, elemName);
                 }
             }
 
             this._processingMods[modId] = null;
+            needSetMod && this._emitModChangeEvents(modName, modVal, curModVal, elem, elemName);
         }
 
         return this;
@@ -768,17 +847,24 @@ var BEM = inherit(events.Emitter, /** @lends BEM.prototype */ {
      */
     _onSetMod : function(modName, modVal, oldModVal, elem, elemName) {},
 
+    _emitModChangeEvents : function(modName, modVal, oldModVal, elem, elemName) {
+        var eventData = { modName : modName, modVal : modVal, oldModVal : oldModVal };
+        elem && (eventData.elem = elem);
+        this
+            .emit({ modName : modName, modVal : '*', elem : elemName }, eventData)
+            .emit({ modName : modName, modVal : modVal, elem : elemName }, eventData);
+    },
+
     /**
      * Sets a modifier for a block/nested element, depending on conditions.
      * If the condition parameter is passed: when true, modVal1 is set; when false, modVal2 is set.
      * If the condition parameter is not passed: modVal1 is set if modVal2 was set, or vice versa.
-     * @protected
      * @param {Object} [elem] Nested element
      * @param {String} modName Modifier name
      * @param {String} modVal1 First modifier value
      * @param {String} [modVal2] Second modifier value
      * @param {Boolean} [condition] Condition
-     * @returns {BEM}
+     * @returns {BEM} this
      */
     toggleMod : function(elem, modName, modVal1, modVal2, condition) {
         if(typeof elem === 'string') { // if this is a block
@@ -817,7 +903,7 @@ var BEM = inherit(events.Emitter, /** @lends BEM.prototype */ {
      * @protected
      * @param {Object} [elem] Nested element
      * @param {String} modName Modifier name
-     * @returns {BEM}
+     * @returns {BEM} this
      */
     delMod : function(elem, modName) {
         if(!modName) {
@@ -868,6 +954,7 @@ var BEM = inherit(events.Emitter, /** @lends BEM.prototype */ {
 
     /**
      * Returns a block's default parameters
+     * @protected
      * @returns {Object}
      */
     getDefaultParams : function() {
@@ -883,9 +970,10 @@ var BEM = inherit(events.Emitter, /** @lends BEM.prototype */ {
     },
 
     /**
-     * Executes given callback on next turn evenloop in block's context
+     * Executes given callback on next turn eventloop in block's context
+     * @protected
      * @param {Function} fn callback
-     * @returns {this}
+     * @returns {BEM} this
      */
     nextTick : function(fn) {
         var _this = this;
@@ -893,24 +981,6 @@ var BEM = inherit(events.Emitter, /** @lends BEM.prototype */ {
             _this.hasMod('js', 'inited') && fn.call(_this);
         });
         return this;
-    },
-
-    /** @deprecated use onSetMod js '' */
-    destruct : function() {},
-
-    /** @deprecated use module "next-tick" instead */
-    afterCurrentEvent : function(fn, ctx) {
-        this.__self.afterCurrentEvent(this.changeThis(fn, ctx));
-    },
-
-    /** @deprecated use module "events__channels" instead */
-    channel : function() {
-        return this.__self.channel.apply(null, arguments);
-    },
-
-    /** @deprecated use native bind */
-    changeThis : function(fn, ctx) {
-        return fn.bind(ctx || this);
     }
 }, /** @lends BEM */{
 
@@ -918,16 +988,12 @@ var BEM = inherit(events.Emitter, /** @lends BEM.prototype */ {
 
     /**
      * Storage for block declarations (hash by block name)
-     * @static
-     * @protected
      * @type Object
      */
     blocks : blocks,
 
     /**
      * Declares blocks and creates a block class
-     * @static
-     * @protected
      * @param {String|Object} decl Block name (simple syntax) or description
      * @param {String} decl.block|decl.name Block name
      * @param {String} [decl.baseBlock] Name of the parent block
@@ -936,16 +1002,33 @@ var BEM = inherit(events.Emitter, /** @lends BEM.prototype */ {
      * @param {String|Array} [decl.modVal] Modifier value
      * @param {Object} [props] Methods
      * @param {Object} [staticProps] Static methods
+     * @returns {Function}
      */
     decl : function(decl, props, staticProps) {
+        // string as block
         typeof decl === 'string' && (decl = { block : decl });
+        // inherit from itself
+        if(arguments.length <= 2 &&
+                typeof decl === 'object' &&
+                (!decl || (typeof decl.block !== 'string' && typeof decl.modName !== 'string'))) {
+            staticProps = props;
+            props = decl;
+            decl = {};
+        }
+        typeof decl.block === 'undefined' && (decl.block = this.getName());
 
-        if(decl.baseBlock && !blocks[decl.baseBlock])
-            throw('baseBlock "' + decl.baseBlock + '" for "' + decl.block + '" is undefined');
+        var baseBlock;
+        if(typeof decl.baseBlock === 'undefined') {
+            baseBlock = blocks[decl.block] || this;
+        } else if(typeof decl.baseBlock === 'string') {
+            baseBlock = blocks[decl.baseBlock];
+            if(!baseBlock)
+                throw('baseBlock "' + decl.baseBlock + '" for "' + decl.block + '" is undefined');
+        } else {
+            baseBlock = decl.baseBlock;
+        }
 
         convertModHandlersToMethods(props || (props = {}));
-
-        var baseBlock = blocks[decl.baseBlock || decl.block] || this;
 
         if(decl.modName) {
             var checkMod = buildCheckMod(decl.modName, decl.modVal);
@@ -985,10 +1068,13 @@ var BEM = inherit(events.Emitter, /** @lends BEM.prototype */ {
             });
         }
 
-        decl.block === baseBlock._name?
+        if(decl.block === baseBlock.getName()) {
             // makes a new "live" if the old one was already executed
-            (block = inherit.self(baseBlocks, props, staticProps))._processLive(true) :
+            (block = inherit.self(baseBlocks, props, staticProps))._processLive(true);
+        } else {
             (block = blocks[decl.block] = inherit(baseBlocks, props, staticProps))._name = decl.block;
+            delete block._liveInitable;
+        }
 
         return block;
     },
@@ -1010,7 +1096,6 @@ var BEM = inherit(events.Emitter, /** @lends BEM.prototype */ {
 
     /**
      * Factory method for creating an instance of the block named
-     * @static
      * @param {String|Object} block Block name or description
      * @param {Object} [params] Block parameters
      * @returns {BEM}
@@ -1023,8 +1108,6 @@ var BEM = inherit(events.Emitter, /** @lends BEM.prototype */ {
 
     /**
      * Returns the name of the current block
-     * @static
-     * @protected
      * @returns {String}
      */
     getName : function() {
@@ -1032,11 +1115,47 @@ var BEM = inherit(events.Emitter, /** @lends BEM.prototype */ {
     },
 
     /**
+     * Adds an event handler
+     * @param {String|Object} e Event type
+     * @param {Object} [data] Additional data that the handler gets as e.data
+     * @param {Function} fn Handler
+     * @param {Object} [ctx] Handler context
+     * @returns {Function} this
+     */
+    on : function(e, data, fn, ctx) {
+        if(typeof e === 'object' && (functions.isFunction(data) || functions.isFunction(fn))) { // mod change event
+            e = this._buildModEventName(e);
+        }
+
+        return this.__base.apply(this, arguments);
+    },
+
+    /**
+     * Removes event handler or handlers
+     * @param {String|Object} [e] Event type
+     * @param {Function} [fn] Handler
+     * @param {Object} [ctx] Handler context
+     * @returns {Function} this
+     */
+    un : function(e, fn, ctx) {
+        if(typeof e === 'object' && functions.isFunction(fn)) { // mod change event
+            e = this._buildModEventName(e);
+        }
+
+        return this.__base.apply(this, arguments);
+    },
+
+    _buildModEventName : function(modEvent) {
+        var res = MOD_DELIM + modEvent.modName + MOD_DELIM + (modEvent.modVal === false? '' : modEvent.modVal);
+        modEvent.elem && (res = ELEM_DELIM + modEvent.elem + res);
+        return res;
+    },
+
+    /**
      * Retrieves the name of an element nested in a block
-     * @static
      * @private
      * @param {Object} elem Nested element
-     * @returns {String|undef}
+     * @returns {String|undefined}
      */
     _extractElemNameFrom : function(elem) {},
 
@@ -1055,40 +1174,155 @@ var BEM = inherit(events.Emitter, /** @lends BEM.prototype */ {
                 i += 2;
             }
         }
-    },
-
-    /** @deprecated use native bind */
-    changeThis : function(fn, ctx) {
-        return fn.bind(ctx || this);
-    },
-
-    /** @deprecated use module "events__channels" instead */
-    channel : function() {
-        return channels.apply(null, arguments);
-    },
-
-    /** @deprecated use module "next-tick" instead */
-    afterCurrentEvent : function(fn, ctx) {
-        nextTick(ctx? fn.bind(ctx) : fn);
     }
 });
 
 provide(BEM);
 
 });
+
 /* ../../libs/bem-core/common.blocks/i-bem/i-bem.vanilla.js end */
+;
+/* ../../libs/bem-core/common.blocks/i-bem/__internal/i-bem__internal.vanilla.js begin */
+/**
+ * @module i-bem__internal
+ */
+
+modules.define('i-bem__internal', function(provide) {
+
+var undef,
+    /**
+     * Separator for modifiers and their values
+     * @const
+     * @type String
+     */
+    MOD_DELIM = '_',
+
+    /**
+     * Separator between names of a block and a nested element
+     * @const
+     * @type String
+     */
+    ELEM_DELIM = '__',
+
+    /**
+     * Pattern for acceptable element and modifier names
+     * @const
+     * @type String
+     */
+    NAME_PATTERN = '[a-zA-Z0-9-]+';
+
+function isSimple(obj) {
+    var typeOf = typeof obj;
+    return typeOf === 'string' || typeOf === 'number' || typeOf === 'boolean';
+}
+
+function buildModPostfix(modName, modVal) {
+    var res = '';
+    /* jshint eqnull: true */
+    if(modVal != null && modVal !== false) {
+        res += MOD_DELIM + modName;
+        modVal !== true && (res += MOD_DELIM + modVal);
+    }
+    return res;
+}
+
+function buildBlockClass(name, modName, modVal) {
+    return name + buildModPostfix(modName, modVal);
+}
+
+function buildElemClass(block, name, modName, modVal) {
+    return buildBlockClass(block, undef, undef) +
+        ELEM_DELIM + name +
+        buildModPostfix(modName, modVal);
+}
+
+provide(/** @exports */{
+    NAME_PATTERN : NAME_PATTERN,
+
+    MOD_DELIM : MOD_DELIM,
+    ELEM_DELIM : ELEM_DELIM,
+
+    buildModPostfix : buildModPostfix,
+
+    /**
+     * Builds the class of a block or element with a modifier
+     * @param {String} block Block name
+     * @param {String} [elem] Element name
+     * @param {String} [modName] Modifier name
+     * @param {String|Number} [modVal] Modifier value
+     * @returns {String} Class
+     */
+    buildClass : function(block, elem, modName, modVal) {
+        if(isSimple(modName)) {
+            if(!isSimple(modVal)) {
+                modVal = modName;
+                modName = elem;
+                elem = undef;
+            }
+        } else if(typeof modName !== 'undefined') {
+            modName = undef;
+        } else if(elem && typeof elem !== 'string') {
+            elem = undef;
+        }
+
+        if(!(elem || modName)) { // optimization for simple case
+            return block;
+        }
+
+        return elem?
+            buildElemClass(block, elem, modName, modVal) :
+            buildBlockClass(block, modName, modVal);
+    },
+
+    /**
+     * Builds full classes for a buffer or element with modifiers
+     * @param {String} block Block name
+     * @param {String} [elem] Element name
+     * @param {Object} [mods] Modifiers
+     * @returns {String} Class
+     */
+    buildClasses : function(block, elem, mods) {
+        if(elem && typeof elem !== 'string') {
+            mods = elem;
+            elem = undef;
+        }
+
+        var res = elem?
+            buildElemClass(block, elem, undef, undef) :
+            buildBlockClass(block, undef, undef);
+
+        if(mods) {
+            for(var modName in mods) {
+                if(mods.hasOwnProperty(modName) && mods[modName]) {
+                    res += ' ' + (elem?
+                        buildElemClass(block, elem, modName, mods[modName]) :
+                        buildBlockClass(block, modName, mods[modName]));
+                }
+            }
+        }
+
+        return res;
+    }
+});
+
+});
+
+/* ../../libs/bem-core/common.blocks/i-bem/__internal/i-bem__internal.vanilla.js end */
 ;
 /* ../../libs/bem-core/common.blocks/inherit/inherit.vanilla.js begin */
 /**
  * @module inherit
- * @version 2.1.0
+ * @version 2.2.1
  * @author Filatov Dmitry <dfilatov@yandex-team.ru>
+ * @description This module provides some syntax sugar for "class" declarations, constructors, mixins, "super" calls and static members.
  */
 
-modules.define('inherit', function(provide) {
+(function(global) {
 
 var hasIntrospection = (function(){'_';}).toString().indexOf('_') > -1,
     emptyBase = function() {},
+    hasOwnProperty = Object.prototype.hasOwnProperty,
     objCreate = Object.create || function(ptp) {
         var inheritance = function() {};
         inheritance.prototype = ptp;
@@ -1097,13 +1331,13 @@ var hasIntrospection = (function(){'_';}).toString().indexOf('_') > -1,
     objKeys = Object.keys || function(obj) {
         var res = [];
         for(var i in obj) {
-            obj.hasOwnProperty(i) && res.push(i);
+            hasOwnProperty.call(obj, i) && res.push(i);
         }
         return res;
     },
     extend = function(o1, o2) {
         for(var i in o2) {
-            o2.hasOwnProperty(i) && (o1[i] = o2[i]);
+            hasOwnProperty.call(o2, i) && (o1[i] = o2[i]);
         }
 
         return o1;
@@ -1149,7 +1383,11 @@ function override(base, res, add) {
         if(isFunction(prop) &&
                 (!hasIntrospection || prop.toString().indexOf('.__base') > -1)) {
             res[name] = (function(name, prop) {
-                var baseMethod = base[name] || noOp;
+                var baseMethod = base[name]?
+                        base[name] :
+                        name === '__constructor'? // case of inheritance from plane function
+                            res.__self.__parent :
+                            noOp;
                 return function() {
                     var baseSaved = this.__base;
                     this.__base = baseMethod;
@@ -1178,7 +1416,15 @@ function applyMixins(mixins, res) {
     return res || mixins[0];
 }
 
-var inherit = function() {
+/**
+* Creates class
+* @exports
+* @param {Function|Array} [baseClass|baseClassAndMixins] class (or class and mixins) to inherit from
+* @param {Object} prototypeFields
+* @param {Object} [staticFields]
+* @returns {Function} class
+*/
+function inherit() {
     var args = arguments,
         withMixins = isArray(args[0]),
         hasBase = withMixins || isFunction(args[0]),
@@ -1189,7 +1435,11 @@ var inherit = function() {
             function() {
                 return this.__constructor.apply(this, arguments);
             } :
-            function() {};
+            hasBase?
+                function() {
+                    return base.apply(this, arguments);
+                } :
+                function() {};
 
     if(!hasBase) {
         res.prototype = props;
@@ -1198,6 +1448,8 @@ var inherit = function() {
     }
 
     extend(res, base);
+
+    res.__parent = base;
 
     var basePtp = base.prototype,
         resPtp = res.prototype = objCreate(basePtp);
@@ -1208,7 +1460,7 @@ var inherit = function() {
     staticProps && override(base, res, staticProps);
 
     return res;
-};
+}
 
 inherit.self = function() {
     var args = arguments,
@@ -1220,20 +1472,39 @@ inherit.self = function() {
 
     props && override(basePtp, basePtp, props);
     staticProps && override(base, base, staticProps);
-    
+
     return base;
 };
 
-provide(inherit);
+var defineAsGlobal = true;
+if(typeof exports === 'object') {
+    module.exports = inherit;
+    defineAsGlobal = false;
+}
 
-});
+if(typeof modules === 'object') {
+    modules.define('inherit', function(provide) {
+        provide(inherit);
+    });
+    defineAsGlobal = false;
+}
+
+if(typeof define === 'function') {
+    define(function(require, exports, module) {
+        module.exports = inherit;
+    });
+    defineAsGlobal = false;
+}
+
+defineAsGlobal && (global.inherit = inherit);
+
+})(this);
+
 /* ../../libs/bem-core/common.blocks/inherit/inherit.vanilla.js end */
 ;
 /* ../../libs/bem-core/common.blocks/identify/identify.vanilla.js begin */
 /**
  * @module identify
- * @version 1.0.0
- * @author Filatov Dmitry <dfilatov@yandex-team.ru>
  */
 
 modules.define('identify', function(provide) {
@@ -1244,35 +1515,42 @@ var counter = 0,
         return 'uniq' + (++counter);
     };
 
-/**
- * Makes unique ID
- * @param {Object} obj Object that needs to be identified
- * @param {Boolean} [onlyGet=false] Return a unique value only if it had already been assigned before
- * @returns {String} ID
- */
-provide(function(obj, onlyGet) {
-    if(!obj) {
-        return get();
+provide(
+    /**
+     * Makes unique ID
+     * @exports
+     * @param {Object} obj Object that needs to be identified
+     * @param {Boolean} [onlyGet=false] Return a unique value only if it had already been assigned before
+     * @returns {String} ID
+     */
+    function(obj, onlyGet) {
+        if(!obj) return get();
+
+        var key = 'uniqueID' in obj? 'uniqueID' : expando; // Use when possible native uniqueID for elements in IE
+
+        return onlyGet || key in obj?
+            obj[key] :
+            obj[key] = get();
     }
-
-    var key = 'uniqueID' in obj? 'uniqueID' : expando; // Use when possible. native uniqueID for elements in IE
-
-    return onlyGet || key in obj?
-        obj[key] :
-        obj[key] = get();
-});
+);
 
 });
+
 /* ../../libs/bem-core/common.blocks/identify/identify.vanilla.js end */
 ;
 /* ../../libs/bem-core/common.blocks/next-tick/next-tick.vanilla.js begin */
 /**
  * @module next-tick
- * @version 1.0.1
- * @author Filatov Dmitry <dfilatov@yandex-team.ru>
  */
 
 modules.define('next-tick', function(provide) {
+
+/**
+ * Executes given function on next tick.
+ * @exports
+ * @type Function
+ * @param {Function} fn
+ */
 
 var global = this.global,
     fns = [],
@@ -1358,21 +1636,22 @@ var global = this.global,
 /* ../../libs/bem-core/common.blocks/objects/objects.vanilla.js begin */
 /**
  * @module objects
+ * @description A set of helpers to work with JavaScript objects
  */
 
 modules.define('objects', function(provide) {
 
 var hasOwnProp = Object.prototype.hasOwnProperty;
 
-provide({
+provide(/** @exports */{
     /**
      * Extends a given target by
      * @param {Object} target object to extend
-     * @param {...Object} source
+     * @param {Object} source
      * @returns {Object}
      */
     extend : function(target, source) {
-        typeof target !== 'object' && (target = {});
+        (typeof target !== 'object' || target === null) && (target = {});
 
         for(var i = 1, len = arguments.length; i < len; i++) {
             var obj = arguments[i];
@@ -1417,18 +1696,20 @@ provide({
 });
 
 });
+
 /* ../../libs/bem-core/common.blocks/objects/objects.vanilla.js end */
 ;
 /* ../../libs/bem-core/common.blocks/functions/functions.vanilla.js begin */
 /**
  * @module functions
+ * @description A set of helpers to work with JavaScript functions
  */
 
 modules.define('functions', function(provide) {
 
 var toStr = Object.prototype.toString;
 
-provide({
+provide(/** @exports */{
     /**
      * Checks whether a given object is function
      * @param {*} obj
@@ -1439,19 +1720,18 @@ provide({
     },
 
     /**
-     * @type {Function}
+     * Empty function
      */
     noop : function() {}
 });
 
 });
+
 /* ../../libs/bem-core/common.blocks/functions/functions.vanilla.js end */
 ;
 /* ../../libs/bem-core/common.blocks/events/events.vanilla.js begin */
 /**
  * @module events
- * @version 1.0.4
- * @author Filatov Dmitry <dfilatov@yandex-team.ru>
  */
 
 modules.define(
@@ -1467,36 +1747,78 @@ var undef,
 
     /**
      * @class Event
-     * @alias events:Event
+     * @exports events:Event
      */
     Event = inherit(/** @lends Event.prototype */{
+        /**
+         * @constructor
+         * @param {String} type
+         * @param {Object} target
+         */
         __constructor : function(type, target) {
+            /**
+             * Type
+             * @member {String} Event
+             */
             this.type = type;
+
+            /**
+             * Target
+             * @member {String} Event
+             */
             this.target = target;
+
+            /**
+             * Result
+             * @member {*}
+             */
             this.result = undef;
+
+            /**
+             * Data
+             * @member {*}
+             */
             this.data = undef;
 
             this._isDefaultPrevented = false;
             this._isPropagationStopped = false;
         },
 
+        /**
+         * Prevents default action
+         */
         preventDefault : function() {
             this._isDefaultPrevented = true;
         },
 
+        /**
+         * Returns whether is default action prevented
+         * @returns {Boolean}
+         */
         isDefaultPrevented : function() {
             return this._isDefaultPrevented;
         },
 
+        /**
+         * Stops propagation
+         */
         stopPropagation : function() {
             this._isPropagationStopped = true;
         },
 
+        /**
+         * Returns whether is propagation stopped
+         * @returns {Boolean}
+         */
         isPropagationStopped : function() {
             return this._isPropagationStopped;
         }
     }),
 
+    /**
+     * @lends Emitter
+     * @lends Emitter.prototype
+     */
     EmitterProps = {
         /**
          * Adds an event handler
@@ -1504,7 +1826,7 @@ var undef,
          * @param {Object} [data] Additional data that the handler gets as e.data
          * @param {Function} fn Handler
          * @param {Object} [ctx] Handler context
-         * @returns {this}
+         * @returns {Emitter} this
          */
         on : function(e, data, fn, ctx, _special) {
             if(typeof e === 'string') {
@@ -1550,7 +1872,7 @@ var undef,
          * @param {Object} [data] Additional data that the handler gets as e.data
          * @param {Function} fn Handler
          * @param {Object} [ctx] Handler context
-         * @returns {this}
+         * @returns {Emitter} this
          */
         once : function(e, data, fn, ctx) {
             return this.on(e, data, fn, ctx, { once : true });
@@ -1561,7 +1883,7 @@ var undef,
          * @param {String} [e] Event type
          * @param {Function} [fn] Handler
          * @param {Object} [ctx] Handler context
-         * @returns {this}
+         * @returns {Emitter} this
          */
         un : function(e, fn, ctx) {
             if(typeof e === 'string' || typeof e === 'undefined') {
@@ -1615,9 +1937,9 @@ var undef,
 
         /**
          * Fires event handlers
-         * @param {String|Event} e Event
+         * @param {String|events:Event} e Event
          * @param {Object} [data] Additional data
-         * @returns {this}
+         * @returns {Emitter} this
          */
         emit : function(e, data) {
             var storage = this[storageExpando],
@@ -1663,22 +1985,13 @@ var undef,
 
             return this;
         }
-    };
-
-/** @deprecated use emit */
-EmitterProps.trigger = EmitterProps.emit;
-
-/** @deprecated use once */
-EmitterProps.onFirst = EmitterProps.once;
-
-/**
- * @class Emitter
- * @alias events:Emitter
- */
-var Emitter = inherit(
-        /** @lends Emitter.prototype */
+    },
+    /**
+     * @class Emitter
+     * @exports events:Emitter
+     */
+    Emitter = inherit(
         EmitterProps,
-        /** @lends Emitter */
         EmitterProps);
 
 provide({
@@ -1687,228 +2000,8 @@ provide({
 });
 
 });
+
 /* ../../libs/bem-core/common.blocks/events/events.vanilla.js end */
-;
-/* ../../libs/bem-core/common.blocks/events/__channels/events__channels.vanilla.js begin */
-/**
- * @module events__channels
- */
-
-modules.define('events__channels', ['events'], function(provide, events) {
-
-var undef,
-
-/**
- * Communication channels storage
- * @type Object
- */
-    channels = {};
-
-/**
- * Returns/destroys a named communication channel
- * @param {String} [id='default'] Channel ID
- * @param {Boolean} [drop=false] Destroy the channel
- * @returns {events.Emitter|undefined} Communication channel
- */
-provide(function(id, drop) {
-    if(typeof id === 'boolean') {
-        drop = id;
-        id = undef;
-    }
-
-    id || (id = 'default');
-
-    if(drop) {
-        if(channels[id]) {
-            channels[id].un();
-            delete channels[id];
-        }
-        return;
-    }
-
-    return channels[id] || (channels[id] = new events.Emitter());
-});
-
-});
-/* ../../libs/bem-core/common.blocks/events/__channels/events__channels.vanilla.js end */
-;
-/* ../../libs/bem-core/common.blocks/ecma/__object/ecma__object.js begin */
-/**
- * Возвращает массив свойств объекта
- * @param {Object} obj объект
- * @returns {Array}
- */
-Object.keys || (Object.keys = function(obj) {
-    var res = [];
-
-    for(var i in obj) obj.hasOwnProperty(i) &&
-        res.push(i);
-
-    return res;
-});
-/* ../../libs/bem-core/common.blocks/ecma/__object/ecma__object.js end */
-;
-/* ../../libs/bem-core/common.blocks/ecma/__array/ecma__array.js begin */
-(function() {
-
-var ptp = Array.prototype,
-    toStr = Object.prototype.toString,
-    methods = {
-        /**
-         * Finds the index of an element in an array
-         * @param {Object} item
-         * @param {Number} [fromIdx] Starting from index (length - 1 - fromIdx, if fromIdx < 0)
-         * @returns {Number} Element index or -1, if not found
-         */
-        indexOf : function(item, fromIdx) {
-            fromIdx = +(fromIdx || 0);
-
-            var t = this, len = t.length;
-
-            if(len > 0 && fromIdx < len) {
-                fromIdx = fromIdx < 0? Math.ceil(fromIdx) : Math.floor(fromIdx);
-                fromIdx < -len && (fromIdx = 0);
-                fromIdx < 0 && (fromIdx = fromIdx + len);
-
-                while(fromIdx < len) {
-                    if(fromIdx in t && t[fromIdx] === item)
-                        return fromIdx;
-                    ++fromIdx;
-                }
-            }
-
-            return -1;
-        },
-
-        /**
-         * Calls the callback for each element
-         * @param {Function} callback Called for each element
-         * @param {Object} [ctx=null] Callback context
-         */
-        forEach : function(callback, ctx) {
-            var i = -1, t = this, len = t.length;
-            while(++i < len) i in t &&
-                (ctx? callback.call(ctx, t[i], i, t) : callback(t[i], i, t));
-        },
-
-        /**
-         * Creates array B from array A so that B[i] = callback(A[i])
-         * @param {Function} callback Called for each element
-         * @param {Object} [ctx=null] Callback context
-         * @returns {Array}
-         */
-        map : function(callback, ctx) {
-            var i = -1, t = this, len = t.length,
-                res = new Array(len);
-
-            while(++i < len) i in t &&
-                (res[i] = ctx? callback.call(ctx, t[i], i, t) : callback(t[i], i, t));
-
-            return res;
-        },
-
-        /**
-         * Creates an array containing only the elements from the source array that the callback returns true for. 
-         * @param {Function} callback Called for each element
-         * @param {Object} [ctx] Callback context
-         * @returns {Array}
-         */
-        filter : function(callback, ctx) {
-            var i = -1, t = this, len = t.length,
-                res = [];
-
-            while(++i < len) i in t &&
-                (ctx? callback.call(ctx, t[i], i, t) : callback(t[i], i, t)) && res.push(t[i]);
-
-            return res;
-        },
-
-        /**
-         * Wraps the array using an accumulator
-         * @param {Function} callback Called for each element
-         * @param {Object} [initialVal] Initial value of the accumulator
-         * @returns {Object} Accumulator
-         */
-        reduce : function(callback, initialVal) {
-            var i = -1, t = this, len = t.length,
-                res;
-
-            if(arguments.length < 2) {
-                while(++i < len) {
-                    if(i in t) {
-                        res = t[i];
-                        break;
-                    }
-                }
-            } else {
-                res = initialVal;
-            }
-
-            while(++i < len) i in t &&
-                (res = callback(res, t[i], i, t));
-
-            return res;
-        },
-
-        /**
-         * Checks whether at least one element in the array meets the condition in the callback
-         * @param {Function} callback
-         * @param {Object} [ctx=this] Callback context
-         * @returns {Boolean}
-         */
-        some : function(callback, ctx) {
-            var i = -1, t = this, len = t.length;
-
-            while(++i < len)
-                if(i in t && (ctx? callback.call(ctx, t[i], i, t) : callback(t[i], i, t)))
-                    return true;
-
-            return false;
-        },
-
-        /**
-         * Checks whether every element in the array meets the condition in the callback
-         * @param {Function} callback
-         * @param {Object} [ctx=this] Context of the callback call
-         * @returns {Boolean}
-         */
-        every : function(callback, ctx) {
-            var i = -1, t = this, len = t.length;
-
-            while(++i < len)
-                if(i in t && !(ctx? callback.call(ctx, t[i], i, t) : callback(t[i], i, t)))
-                    return false;
-
-            return true;
-        }
-    };
-
-for(var name in methods)
-    ptp[name] || (ptp[name] = methods[name]);
-
-Array.isArray || (Array.isArray = function(obj) {
-    return toStr.call(obj) === '[object Array]';
-});
-
-})();
-/* ../../libs/bem-core/common.blocks/ecma/__array/ecma__array.js end */
-;
-/* ../../libs/bem-core/common.blocks/ecma/__function/ecma__function.js begin */
-(function() {
-
-var slice = Array.prototype.slice;
-
-Function.prototype.bind || (Function.prototype.bind = function(ctx) {
-    var fn = this,
-        args = slice.call(arguments, 1);
-
-    return function() {
-        return fn.apply(ctx, args.concat(slice.call(arguments)));
-    };
-});
-
-})();
-/* ../../libs/bem-core/common.blocks/ecma/__function/ecma__function.js end */
 ;
 /* ../../libs/bem-core/common.blocks/i-bem/__dom/i-bem__dom.js begin */
 /**
@@ -1924,40 +2017,40 @@ var undef,
     win = $(window),
     doc = $(document),
 
-/**
- * Storage for DOM elements by unique key
- * @private
- * @type Object
- */
+    /**
+     * Storage for DOM elements by unique key
+     * @type Object
+     */
     uniqIdToDomElems = {},
 
-/**
- * Storage for blocks by unique key
- * @static
- * @private
- * @type Object
- */
+    /**
+     * Storage for blocks by unique key
+     * @type Object
+     */
     uniqIdToBlock = {},
 
-/**
- * Storage for block parameters
- * @private
- * @type Object
- */
+    /**
+     * Storage for DOM element's parent nodes
+     * @type Object
+     */
+    domNodesToParents = {},
+
+    /**
+     * Storage for block parameters
+     * @type Object
+     */
     domElemToParams = {},
 
-/**
- * Storage for liveCtx event handlers
- * @private
- * @type Object
- */
+    /**
+     * Storage for liveCtx event handlers
+     * @type Object
+     */
     liveEventCtxStorage = {},
 
-/**
- * Storage for liveClass event handlers
- * @private
- * @type Object
- */
+    /**
+     * Storage for liveClass event handlers
+     * @type Object
+     */
     liveClassEventStorage = {},
 
     blocks = BEM.blocks,
@@ -1976,58 +2069,50 @@ var undef,
         '(?:' + MOD_DELIM + '(' + NAME_PATTERN + '))?$'),
 
     buildModPostfix = INTERNAL.buildModPostfix,
-    buildClass = INTERNAL.buildClass;
+    buildClass = INTERNAL.buildClass,
+
+    reverse = Array.prototype.reverse;
 
 /**
  * Initializes blocks on a DOM element
- * @private
  * @param {jQuery} domElem DOM element
  * @param {String} uniqInitId ID of the "initialization wave"
  */
-function init(domElem, uniqInitId) {
+function initBlocks(domElem, uniqInitId) {
     var domNode = domElem[0],
         params = getParams(domNode),
-        blockName, blockParams;
+        blockName;
 
-    for(blockName in params) {
-        if(params.hasOwnProperty(blockName)) {
-            blockParams = params[blockName];
-            processParams(blockParams, domNode, blockName, uniqInitId);
-            var block = uniqIdToBlock[blockParams.uniqId];
-            if(block) {
-                if(block.domElem.index(domNode) < 0) {
-                    block.domElem = block.domElem.add(domElem);
-                    objects.extend(block.params, blockParams);
-                }
-            } else {
-                initBlock(blockName, domElem, blockParams);
-            }
-        }
-    }
+    for(blockName in params)
+        initBlock(
+            blockName,
+            domElem,
+            processParams(params[blockName], blockName, uniqInitId));
 }
 
 /**
  * Initializes a specific block on a DOM element, or returns the existing block if it was already created
- * @private
  * @param {String} blockName Block name
  * @param {jQuery} domElem DOM element
  * @param {Object} [params] Initialization parameters
- * @param {Boolean} [forceLive] Force live initialization
+ * @param {Boolean} [forceLive=false] Force live initialization
  * @param {Function} [callback] Handler to call after complete initialization
  */
 function initBlock(blockName, domElem, params, forceLive, callback) {
-    if(typeof params === 'boolean') {
-        callback = forceLive;
-        forceLive = params;
-        params = undef;
-    }
-
     var domNode = domElem[0];
-    params = processParams(params || getParams(domNode)[blockName], domNode, blockName);
 
-    var uniqId = params.uniqId;
-    if(uniqIdToBlock[uniqId]) {
-        return uniqIdToBlock[uniqId]._init();
+    params || (params = processParams(getBlockParams(domNode, blockName), blockName));
+
+    var uniqId = params.uniqId,
+        block = uniqIdToBlock[uniqId];
+
+    if(block) {
+        if(block.domElem.index(domNode) < 0) {
+            block.domElem = block.domElem.add(domElem);
+            objects.extend(block.params, params);
+        }
+
+        return block;
     }
 
     uniqIdToDomElems[uniqId] = uniqIdToDomElems[uniqId]?
@@ -2043,7 +2128,8 @@ function initBlock(blockName, domElem, params, forceLive, callback) {
     if(!(blockClass._liveInitable = !!blockClass._processLive()) || forceLive || params.live === false) {
         forceLive && domElem.addClass(BEM_CLASS); // add css class for preventing memory leaks in further destructing
 
-        var block = new blockClass(uniqIdToDomElems[uniqId], params, !!forceLive);
+        block = new blockClass(uniqIdToDomElems[uniqId], params, !!forceLive);
+
         delete uniqIdToDomElems[uniqId];
         callback && callback.apply(block, Array.prototype.slice.call(arguments, 4));
         return block;
@@ -2052,27 +2138,21 @@ function initBlock(blockName, domElem, params, forceLive, callback) {
 
 /**
  * Processes and adds necessary block parameters
- * @private
  * @param {Object} params Initialization parameters
- * @param {HTMLElement} domNode DOM node
  * @param {String} blockName Block name
  * @param {String} [uniqInitId] ID of the "initialization wave"
  */
-function processParams(params, domNode, blockName, uniqInitId) {
-    (params || (params = {})).uniqId ||
-        (params.uniqId = (params.id? blockName + '-id-' + params.id : identify()) + (uniqInitId || identify()));
-
-    var domUniqId = identify(domNode),
-        domParams = domElemToParams[domUniqId] || (domElemToParams[domUniqId] = {});
-
-    domParams[blockName] || (domParams[blockName] = params);
+function processParams(params, blockName, uniqInitId) {
+    params.uniqId ||
+        (params.uniqId = (params.id?
+            blockName + '-id-' + params.id :
+            identify()) + (uniqInitId || identify()));
 
     return params;
 }
 
 /**
  * Helper for searching for a DOM element using a selector inside the context, including the context itself
- * @private
  * @param {jQuery} ctx Context
  * @param {String} selector CSS selector
  * @param {Boolean} [excludeSelf=false] Exclude context from search
@@ -2087,19 +2167,29 @@ function findDomElem(ctx, selector, excludeSelf) {
 
 /**
  * Returns parameters of a block's DOM element
- * @private
  * @param {HTMLElement} domNode DOM node
  * @returns {Object}
  */
-function getParams(domNode) {
+function getParams(domNode, blockName) {
     var uniqId = identify(domNode);
     return domElemToParams[uniqId] ||
-       (domElemToParams[uniqId] = extractParams(domNode));
+        (domElemToParams[uniqId] = extractParams(domNode));
+}
+
+/**
+ * Returns parameters of a block extracted from DOM node
+ * @param {HTMLElement} domNode DOM node
+ * @param {String} blockName
+ * @returns {Object}
+ */
+
+function getBlockParams(domNode, blockName) {
+    var params = getParams(domNode);
+    return params[blockName] || (params[blockName] = {});
 }
 
 /**
  * Retrieves block parameters from a DOM element
- * @private
  * @param {HTMLElement} domNode DOM node
  * @returns {Object}
  */
@@ -2110,20 +2200,47 @@ function extractParams(domNode) {
 
 /**
  * Uncouple DOM node from the block. If this is the last node, then destroys the block.
- * @private
- * @param {DOM} block block
+ * @param {BEMDOM} block block
  * @param {HTMLElement} domNode DOM node
  */
 function removeDomNodeFromBlock(block, domNode) {
     block.domElem.length === 1?
-        block._destruct(true) :
+        block._destruct() :
         block.domElem = block.domElem.not(domNode);
 }
 
-var DOM = BEM.decl('i-bem__dom',/** @lends DOM.prototype */{
+/**
+ * Fills DOM node's parent nodes to the storage
+ * @param {jQuery} domElem
+ */
+function storeDomNodeParents(domElem) {
+    domElem.each(function() {
+        domNodesToParents[identify(this)] = this.parentNode;
+    });
+}
+
+/**
+ * Returns jQuery collection for provided HTML
+ * @param {jQuery|String} html
+ * @returns {jQuery}
+ */
+function getJqueryCollection(html) {
+    return $(typeof html === 'string'? $.parseHTML(html, null, true) : html);
+}
+
+var DOM;
+
+$(function() {
+
+/**
+ * @class BEMDOM
+ * @description Base block for creating BEM blocks that have DOM representation
+ * @exports
+ */
+
+DOM = BEM.decl('i-bem__dom',/** @lends BEMDOM.prototype */{
     /**
-     * @class Base block for creating BEM blocks that have DOM representation
-     * @constructs
+     * @constructor
      * @private
      * @param {jQuery} domElem DOM element that the block is created on
      * @param {Object} params Block parameters
@@ -2131,37 +2248,37 @@ var DOM = BEM.decl('i-bem__dom',/** @lends DOM.prototype */{
      */
     __constructor : function(domElem, params, initImmediately) {
         /**
-         * Block's DOM elements
-         * @protected
-         * @type jQuery
+         * DOM elements of block
+         * @member {jQuery}
+         * @readonly
          */
         this.domElem = domElem;
 
         /**
          * Cache for names of events on DOM elements
+         * @member {Object}
          * @private
-         * @type Object
          */
         this._eventNameCache = {};
 
         /**
          * Cache for elements
+         * @member {Object}
          * @private
-         * @type Object
          */
         this._elemCache = {};
 
         /**
-         * Unique block ID
+         * @member {String} Unique block ID
          * @private
-         * @type String
          */
-        uniqIdToBlock[this._uniqId = params.uniqId || identify(this)] = this;
+        this._uniqId = params.uniqId;
+
+        uniqIdToBlock[this._uniqId] = this;
 
         /**
-         * Flag for whether it's necessary to unbind from the document and window when destroying the block
+         * @member {Boolean} Flag for whether it's necessary to unbind from the document and window when destroying the block
          * @private
-         * @type Boolean
          */
         this._needSpecialUnbind = false;
 
@@ -2170,10 +2287,9 @@ var DOM = BEM.decl('i-bem__dom',/** @lends DOM.prototype */{
 
     /**
      * Finds blocks inside the current block or its elements (including context)
-     * @protected
      * @param {String|jQuery} [elem] Block element
      * @param {String|Object} block Name or description (block,modName,modVal) of the block to find
-     * @returns {BEM[]}
+     * @returns {BEMDOM[]}
      */
     findBlocksInside : function(elem, block) {
         return this._findBlocks('find', elem, block);
@@ -2181,10 +2297,9 @@ var DOM = BEM.decl('i-bem__dom',/** @lends DOM.prototype */{
 
     /**
      * Finds the first block inside the current block or its elements (including context)
-     * @protected
      * @param {String|jQuery} [elem] Block element
      * @param {String|Object} block Name or description (block,modName,modVal) of the block to find
-     * @returns {BEM}
+     * @returns {BEMDOM}
      */
     findBlockInside : function(elem, block) {
         return this._findBlocks('find', elem, block, true);
@@ -2192,10 +2307,9 @@ var DOM = BEM.decl('i-bem__dom',/** @lends DOM.prototype */{
 
     /**
      * Finds blocks outside the current block or its elements (including context)
-     * @protected
      * @param {String|jQuery} [elem] Block element
      * @param {String|Object} block Name or description (block,modName,modVal) of the block to find
-     * @returns {BEM[]}
+     * @returns {BEMDOM[]}
      */
     findBlocksOutside : function(elem, block) {
         return this._findBlocks('parents', elem, block);
@@ -2203,10 +2317,9 @@ var DOM = BEM.decl('i-bem__dom',/** @lends DOM.prototype */{
 
     /**
      * Finds the first block outside the current block or its elements (including context)
-     * @protected
      * @param {String|jQuery} [elem] Block element
      * @param {String|Object} block Name or description (block,modName,modVal) of the block to find
-     * @returns {BEM}
+     * @returns {BEMDOM}
      */
     findBlockOutside : function(elem, block) {
         return this._findBlocks('closest', elem, block)[0] || null;
@@ -2214,10 +2327,9 @@ var DOM = BEM.decl('i-bem__dom',/** @lends DOM.prototype */{
 
     /**
      * Finds blocks on DOM elements of the current block or its elements
-     * @protected
      * @param {String|jQuery} [elem] Block element
      * @param {String|Object} block Name or description (block,modName,modVal) of the block to find
-     * @returns {BEM[]}
+     * @returns {BEMDOM[]}
      */
     findBlocksOn : function(elem, block) {
         return this._findBlocks('', elem, block);
@@ -2225,10 +2337,9 @@ var DOM = BEM.decl('i-bem__dom',/** @lends DOM.prototype */{
 
     /**
      * Finds the first block on DOM elements of the current block or its elements
-     * @protected
      * @param {String|jQuery} [elem] Block element
      * @param {String|Object} block Name or description (block,modName,modVal) of the block to find
-     * @returns {BEM}
+     * @returns {BEMDOM}
      */
     findBlockOn : function(elem, block) {
         return this._findBlocks('', elem, block, true);
@@ -2255,14 +2366,14 @@ var DOM = BEM.decl('i-bem__dom',/** @lends DOM.prototype */{
         select && (domElems = domElems.add(ctxElem[select](selector)));
 
         if(onlyFirst) {
-            return domElems[0]? initBlock(blockName, domElems.eq(0), true) : null;
+            return domElems[0]? initBlock(blockName, domElems.eq(0), undef, true)._init() : null;
         }
 
         var res = [],
             uniqIds = {};
 
         domElems.each(function(i, domElem) {
-            var block = initBlock(blockName, $(domElem), true);
+            var block = initBlock(blockName, $(domElem), undef, true)._init();
             if(!uniqIds[block._uniqId]) {
                 uniqIds[block._uniqId] = true;
                 res.push(block);
@@ -2277,16 +2388,23 @@ var DOM = BEM.decl('i-bem__dom',/** @lends DOM.prototype */{
      * @protected
      * @param {jQuery} domElem DOM element where the event will be listened for
      * @param {String|Object} event Event name or event object
+     * @param {Object} [data] Additional event data
      * @param {Function} fn Handler function, which will be executed in the block's context
-     * @returns {BEM}
+     * @returns {BEMDOM} this
      */
-    bindToDomElem : function(domElem, event, fn) {
+    bindToDomElem : function(domElem, event, data, fn) {
+        if(functions.isFunction(data)) {
+            fn = data;
+            data = undef;
+        }
+
         fn?
             domElem.bind(
                 this._buildEventName(event),
+                data,
                 $.proxy(fn, this)) :
             objects.each(event, function(fn, event) {
-                this.bindToDomElem(domElem, event, fn);
+                this.bindToDomElem(domElem, event, data, fn);
             }, this);
 
         return this;
@@ -2295,70 +2413,98 @@ var DOM = BEM.decl('i-bem__dom',/** @lends DOM.prototype */{
     /**
      * Adds an event handler to the document
      * @protected
-     * @param {String} event Event name
+     * @param {String|Object} event Event name or event object
+     * @param {Object} [data] Additional event data
      * @param {Function} fn Handler function, which will be executed in the block's context
-     * @returns {BEM}
+     * @returns {BEMDOM} this
      */
-    bindToDoc : function(event, fn) {
+    bindToDoc : function(event, data, fn) {
         this._needSpecialUnbind = true;
-        return this.bindToDomElem(doc, event, fn);
+        return this.bindToDomElem(doc, event, data, fn);
     },
 
     /**
      * Adds an event handler to the window
      * @protected
-     * @param {String} event Event name
+     * @param {String|Object} event Event name or event object
+     * @param {Object} [data] Additional event data
      * @param {Function} fn Handler function, which will be executed in the block's context
-     * @returns {BEM}
+     * @returns {BEMDOM} this
      */
-    bindToWin : function(event, fn) {
+    bindToWin : function(event, data, fn) {
         this._needSpecialUnbind = true;
-        return this.bindToDomElem(win, event, fn);
+        return this.bindToDomElem(win, event, data, fn);
     },
 
     /**
      * Adds an event handler to the block's main DOM elements or its nested elements
      * @protected
      * @param {jQuery|String} [elem] Element
-     * @param {String} event Event name
+     * @param {String|Object} event Event name or event object
+     * @param {Object} [data] Additional event data
      * @param {Function} fn Handler function, which will be executed in the block's context
-     * @returns {BEM}
+     * @returns {BEMDOM} this
      */
-    bindTo : function(elem, event, fn) {
-        if(!event || functions.isFunction(event)) { // if there is no element
-            fn = event;
+    bindTo : function(elem, event, data, fn) {
+        var len = arguments.length;
+        if(len === 3) {
+            if(functions.isFunction(data)) {
+                fn = data;
+                if(typeof event === 'object') {
+                    data = event;
+                    event = elem;
+                    elem = this.domElem;
+                }
+            }
+        } else if(len === 2) {
+            if(functions.isFunction(event)) {
+                fn = event;
+                event = elem;
+                elem = this.domElem;
+            } else if(!(typeof elem === 'string' || elem instanceof $)) {
+                data = event;
+                event = elem;
+                elem = this.domElem;
+            }
+        } else if(len === 1) {
             event = elem;
             elem = this.domElem;
-        } else if(typeof elem === 'string') {
-            elem = this.elem(elem);
         }
 
-        return this.bindToDomElem(elem, event, fn);
+        typeof elem === 'string' && (elem = this.elem(elem));
+
+        return this.bindToDomElem(elem, event, data, fn);
     },
 
     /**
      * Removes event handlers from any DOM element
      * @protected
      * @param {jQuery} domElem DOM element where the event was being listened for
-     * @param {String} event Event name
+     * @param {String|Object} event Event name or event object
      * @param {Function} [fn] Handler function
-     * @returns {BEM}
+     * @returns {BEMDOM} this
      */
     unbindFromDomElem : function(domElem, event, fn) {
-        event = this._buildEventName(event);
+        if(typeof event === 'string') {
+            event = this._buildEventName(event);
+            fn?
+                domElem.unbind(event, fn) :
+                domElem.unbind(event);
+        } else {
+            objects.each(event, function(fn, event) {
+                this.unbindFromDomElem(domElem, event, fn);
+            }, this);
+        }
 
-        fn?
-            domElem.unbind(event, fn) :
-            domElem.unbind(event);
         return this;
     },
 
     /**
      * Removes event handler from document
      * @protected
-     * @param {String} event Event name
+     * @param {String|Object} event Event name or event object
      * @param {Function} [fn] Handler function
-     * @returns {BEM}
+     * @returns {BEMDOM} this
      */
     unbindFromDoc : function(event, fn) {
         return this.unbindFromDomElem(doc, event, fn);
@@ -2367,9 +2513,9 @@ var DOM = BEM.decl('i-bem__dom',/** @lends DOM.prototype */{
     /**
      * Removes event handler from window
      * @protected
-     * @param {String} event Event name
+     * @param {String|Object} event Event name or event object
      * @param {Function} [fn] Handler function
-     * @returns {BEM}
+     * @returns {BEMDOM} this
      */
     unbindFromWin : function(event, fn) {
         return this.unbindFromDomElem(win, event, fn);
@@ -2379,9 +2525,9 @@ var DOM = BEM.decl('i-bem__dom',/** @lends DOM.prototype */{
      * Removes event handlers from the block's main DOM elements or its nested elements
      * @protected
      * @param {jQuery|String} [elem] Nested element
-     * @param {String} event Event name
+     * @param {String|Object} event Event name or event object
      * @param {Function} [fn] Handler function
-     * @returns {BEM}
+     * @returns {BEMDOM} this
      */
     unbindFrom : function(elem, event, fn) {
         var argLen = arguments.length;
@@ -2435,29 +2581,15 @@ var DOM = BEM.decl('i-bem__dom',/** @lends DOM.prototype */{
         }).join('') + uniq;
     },
 
-    /**
-     * Triggers block event handlers and live event handlers
-     * @protected
-     * @param {String} e Event name
-     * @param {Object} [data] Additional information
-     * @returns {BEM}
-     */
-    emit : function(e, data) {
-        this
-            .__base(e = this._buildEvent(e), data)
-            .domElem && this._ctxEmit(e, data);
-
-        return this;
-    },
-
     _ctxEmit : function(e, data) {
+        this.__base.apply(this, arguments);
+
         var _this = this,
             storage = liveEventCtxStorage[_this.__self._buildCtxEventName(e.type)],
             ctxIds = {};
 
-        storage && _this.domElem.each(function() {
-            var ctx = this,
-                counter = storage.counter;
+        storage && _this.domElem.each(function(_, ctx) {
+            var counter = storage.counter;
             while(ctx && counter) {
                 var ctxId = identify(ctx, true);
                 if(ctxId) {
@@ -2474,18 +2606,17 @@ var DOM = BEM.decl('i-bem__dom',/** @lends DOM.prototype */{
                     }
                     ctxIds[ctxId] = true;
                 }
-                ctx = ctx.parentNode;
+                ctx = ctx.parentNode || domNodesToParents[ctxId];
             }
         });
     },
 
     /**
      * Sets a modifier for a block/nested element
-     * @protected
      * @param {jQuery} [elem] Nested element
      * @param {String} modName Modifier name
      * @param {String} modVal Modifier value
-     * @returns {BEM}
+     * @returns {BEMDOM} this
      */
     setMod : function(elem, modName, modVal) {
         if(elem && typeof modVal !== 'undefined' && elem.length > 1) {
@@ -2559,38 +2690,37 @@ var DOM = BEM.decl('i-bem__dom',/** @lends DOM.prototype */{
      * @param {String} [elemName] Element name
      */
     _onSetMod : function(modName, modVal, oldModVal, elem, elemName) {
-        if(!elem && modName === 'js' && modVal === '') {
-            return;
+        if(modName !== 'js' || modVal !== '') {
+            var _self = this.__self,
+                classPrefix = _self._buildModClassPrefix(modName, elemName),
+                classRE = _self._buildModValRE(modName, elemName),
+                needDel = modVal === '' || modVal === false;
+
+            (elem || this.domElem).each(function() {
+                var className = this.className,
+                    modClassName = classPrefix;
+
+                modVal !== true && (modClassName += MOD_DELIM + modVal);
+
+                (oldModVal === true?
+                    classRE.test(className) :
+                    className.indexOf(classPrefix + MOD_DELIM) > -1)?
+                        this.className = className.replace(
+                            classRE,
+                            (needDel? '' : '$1' + modClassName)) :
+                        needDel || $(this).addClass(modClassName);
+            });
+
+            elemName && this
+                .dropElemCache(elemName, modName, oldModVal)
+                .dropElemCache(elemName, modName, modVal);
         }
 
-        var _self = this.__self,
-            classPrefix = _self._buildModClassPrefix(modName, elemName),
-            classRE = _self._buildModValRE(modName, elemName),
-            needDel = modVal === '' || modVal === false;
-
-        (elem || this.domElem).each(function() {
-            var className = this.className,
-                modClassName = classPrefix;
-
-            modVal !== true && (modClassName += MOD_DELIM + modVal);
-
-            (oldModVal === true?
-                classRE.test(className) :
-                className.indexOf(classPrefix + MOD_DELIM) > -1)?
-                    this.className = className.replace(
-                        classRE,
-                        (needDel? '' : '$1' + modClassName)) :
-                    needDel || $(this).addClass(modClassName);
-        });
-
-        elemName && this
-            .dropElemCache(elemName, modName, oldModVal)
-            .dropElemCache(elemName, modName, modVal);
+        this.__base.apply(this, arguments);
     },
 
     /**
      * Finds elements nested in a block
-     * @protected
      * @param {jQuery} [ctx=this.domElem] Element where search is being performed
      * @param {String} names Nested element name (or names separated by spaces)
      * @param {String} [modName] Modifier name
@@ -2637,10 +2767,10 @@ var DOM = BEM.decl('i-bem__dom',/** @lends DOM.prototype */{
 
     /**
      * Finds elements nested in a block
-     * @protected
+     * @private
      * @param {String} name Nested element name
      * @param {String} [modName] Modifier name
-     * @param {String} [modVal] Modifier value
+     * @param {String|Boolean} [modVal] Modifier value
      * @returns {jQuery} DOM elements
      */
     _elem : function(name, modName, modVal) {
@@ -2657,13 +2787,16 @@ var DOM = BEM.decl('i-bem__dom',/** @lends DOM.prototype */{
 
     /**
      * Lazy search for elements nested in a block (caches results)
-     * @protected
      * @param {String} names Nested element name (or names separated by spaces)
      * @param {String} [modName] Modifier name
-     * @param {String} [modVal] Modifier value
+     * @param {String|Boolean} [modVal=true] Modifier value
      * @returns {jQuery} DOM elements
      */
     elem : function(names, modName, modVal) {
+        if(arguments.length === 2) {
+            modVal = true;
+        }
+
         if(modName && typeof modName !== 'string') {
             modName.__bemElemName = names;
             return modName;
@@ -2696,7 +2829,7 @@ var DOM = BEM.decl('i-bem__dom',/** @lends DOM.prototype */{
      * @param {String} [names] Nested element name (or names separated by spaces)
      * @param {String} [modName] Modifier name
      * @param {String} [modVal] Modifier value
-     * @returns {BEM}
+     * @returns {BEMDOM} this
      */
     dropElemCache : function(names, modName, modVal) {
         if(names) {
@@ -2773,8 +2906,6 @@ var DOM = BEM.decl('i-bem__dom',/** @lends DOM.prototype */{
      * @private
      */
     _destruct : function() {
-        this.destruct();
-        /** @deprecated: above code has fallback, remove it in next version */
         var _this = this,
             _self = _this.__self;
 
@@ -2785,26 +2916,22 @@ var DOM = BEM.decl('i-bem__dom',/** @lends DOM.prototype */{
         delete uniqIdToBlock[_this.un()._uniqId];
     }
 
-}, /** @lends DOM */{
+}, /** @lends BEMDOM */{
 
     /**
      * Scope
-     * Will be set on onDomReady to `<body>`
-     * @protected
      * @type jQuery
      */
-    scope : null,
+    scope : $('body'),
 
     /**
      * Document shortcut
-     * @protected
      * @type jQuery
      */
     doc : doc,
 
     /**
      * Window shortcut
-     * @protected
      * @type jQuery
      */
     win : win,
@@ -2821,9 +2948,17 @@ var DOM = BEM.decl('i-bem__dom',/** @lends DOM.prototype */{
         if('live' in this) {
             var noLive = typeof res === 'undefined';
 
-            if(noLive ^ heedLive) {
+            if(noLive ^ heedLive) { // should be opposite to each other
                 res = this.live() !== false;
-                this.live = functions.noop;
+
+                var blockName = this.getName(),
+                    origLive = this.live;
+
+                this.live = function() {
+                    return this.getName() === blockName?
+                        res :
+                        origLive.apply(this, arguments);
+                };
             }
         }
 
@@ -2832,16 +2967,17 @@ var DOM = BEM.decl('i-bem__dom',/** @lends DOM.prototype */{
 
     /**
      * Initializes blocks on a fragment of the DOM tree
-     * @static
-     * @param {jQuery} [ctx=scope] Root DOM node
+     * @param {jQuery|String} [ctx=scope] Root DOM node
      * @returns {jQuery} ctx Initialization context
      */
     init : function(ctx) {
-        ctx || (ctx = DOM.scope);
+        if(typeof ctx === 'string') {
+            ctx = $(ctx);
+        } else if(!ctx) ctx = DOM.scope;
 
         var uniqInitId = identify();
         findDomElem(ctx, BEM_SELECTOR).each(function() {
-            init($(this), uniqInitId);
+            initBlocks($(this), uniqInitId);
         });
 
         this._runInitFns();
@@ -2851,12 +2987,20 @@ var DOM = BEM.decl('i-bem__dom',/** @lends DOM.prototype */{
 
     /**
      * Destroys blocks on a fragment of the DOM tree
-     * @static
      * @param {jQuery} ctx Root DOM node
      * @param {Boolean} [excludeSelf=false] Exclude the main domElem
      */
     destruct : function(ctx, excludeSelf) {
-        findDomElem(ctx, BEM_SELECTOR, excludeSelf).each(function(i, domNode) {
+        var _ctx;
+        if(excludeSelf) {
+            storeDomNodeParents(_ctx = ctx.children());
+            ctx.empty();
+        } else {
+            storeDomNodeParents(_ctx = ctx);
+            ctx.remove();
+        }
+
+        reverse.call(findDomElem(_ctx, BEM_SELECTOR)).each(function(_, domNode) {
             var params = getParams(domNode);
             objects.each(params, function(blockParams) {
                 if(blockParams.uniqId) {
@@ -2869,80 +3013,82 @@ var DOM = BEM.decl('i-bem__dom',/** @lends DOM.prototype */{
             delete domElemToParams[identify(domNode)];
         });
 
-        excludeSelf? ctx.empty() : ctx.remove();
+        // flush parent nodes storage that has been filled above
+        domNodesToParents = {};
     },
 
     /**
      * Replaces a fragment of the DOM tree inside the context, destroying old blocks and intializing new ones
-     * @static
      * @param {jQuery} ctx Root DOM node
      * @param {jQuery|String} content New content
+     * @returns {jQuery} Updated root DOM node
      */
     update : function(ctx, content) {
         this.destruct(ctx, true);
-        this.init(ctx.html(content));
+        return this.init(ctx.html(content));
     },
 
     /**
      * Changes a fragment of the DOM tree including the context and initializes blocks.
-     * @static
      * @param {jQuery} ctx Root DOM node
      * @param {jQuery|String} content Content to be added
+     * @returns {jQuery} New content
      */
     replace : function(ctx, content) {
         var prev = ctx.prev(),
             parent = ctx.parent();
 
+        content = getJqueryCollection(content);
+
         this.destruct(ctx);
 
-        this.init(prev.length?
-            $(content).insertAfter(prev) :
-            $(content).prependTo(parent));
+        return this.init(prev.length?
+            content.insertAfter(prev) :
+            content.prependTo(parent));
     },
 
     /**
      * Adds a fragment of the DOM tree at the end of the context and initializes blocks
-     * @static
      * @param {jQuery} ctx Root DOM node
      * @param {jQuery|String} content Content to be added
+     * @returns {jQuery} New content
      */
     append : function(ctx, content) {
-        this.init($(content).appendTo(ctx));
+        return this.init(getJqueryCollection(content).appendTo(ctx));
     },
 
     /**
      * Adds a fragment of the DOM tree at the beginning of the context and initializes blocks
-     * @static
      * @param {jQuery} ctx Root DOM node
      * @param {jQuery|String} content Content to be added
+     * @returns {jQuery} New content
      */
     prepend : function(ctx, content) {
-        this.init($(content).prependTo(ctx));
+        return this.init(getJqueryCollection(content).prependTo(ctx));
     },
 
     /**
      * Adds a fragment of the DOM tree before the context and initializes blocks
-     * @static
      * @param {jQuery} ctx Contextual DOM node
      * @param {jQuery|String} content Content to be added
+     * @returns {jQuery} New content
      */
     before : function(ctx, content) {
-        this.init($(content).insertBefore(ctx));
+        return this.init(getJqueryCollection(content).insertBefore(ctx));
     },
 
     /**
      * Adds a fragment of the DOM tree after the context and initializes blocks
-     * @static
      * @param {jQuery} ctx Contextual DOM node
      * @param {jQuery|String} content Content to be added
+     * @returns {jQuery} New content
      */
     after : function(ctx, content) {
-        this.init($(content).insertAfter(ctx));
+        return this.init(getJqueryCollection(content).insertAfter(ctx));
     },
 
     /**
      * Builds a full name for a live event
-     * @static
      * @private
      * @param {String} e Event name
      * @returns {String}
@@ -2962,7 +3108,7 @@ var DOM = BEM.decl('i-bem__dom',/** @lends DOM.prototype */{
 
             if(!storage) {
                 storage = liveClassEventStorage[e] = {};
-                DOM.scope.bind(e, this._liveClassTrigger.bind(this));
+                DOM.scope.bind(e, $.proxy(this._liveClassTrigger, this));
             }
 
             storage = storage[className] || (storage[className] = { uniqIds : {}, fns : [] });
@@ -3003,7 +3149,7 @@ var DOM = BEM.decl('i-bem__dom',/** @lends DOM.prototype */{
         if(storage) {
             var node = e.target, classNames = [];
             for(var className in storage) {
-                storage.hasOwnProperty(className) && classNames.push(className);
+                classNames.push(className);
             }
             do {
                 var nodeClassName = ' ' + node.className + ' ', i = 0;
@@ -3030,6 +3176,7 @@ var DOM = BEM.decl('i-bem__dom',/** @lends DOM.prototype */{
             var args = [
                     _this._name,
                     $(this).closest(_this.buildSelector()),
+                    undef,
                     true
                 ],
                 block = initBlock.apply(null, invokeOnInit? args.concat([callback, e]) : args);
@@ -3041,7 +3188,6 @@ var DOM = BEM.decl('i-bem__dom',/** @lends DOM.prototype */{
 
     /**
      * Helper for live initialization for an event on DOM elements of a block or its elements
-     * @static
      * @protected
      * @param {String} [elemName] Element name or names (separated by spaces)
      * @param {String} event Event name
@@ -3053,7 +3199,6 @@ var DOM = BEM.decl('i-bem__dom',/** @lends DOM.prototype */{
 
     /**
      * Helper for subscribing to live events on DOM elements of a block or its elements
-     * @static
      * @protected
      * @param {String|Object} [to] Description (object with modName, modVal, elem) or name of the element or elements (space-separated)
      * @param {String} event Event name
@@ -3090,14 +3235,20 @@ var DOM = BEM.decl('i-bem__dom',/** @lends DOM.prototype */{
 
     /**
      * Helper for unsubscribing from live events on DOM elements of a block or its elements
-     * @static
      * @protected
      * @param {String} [elem] Name of the element or elements (space-separated)
      * @param {String} event Event name
      * @param {Function} [callback] Handler
      */
     liveUnbindFrom : function(elem, event, callback) {
-        if(elem.indexOf(' ') > 1) {
+
+        if(!event || functions.isFunction(event)) {
+            callback = event;
+            event = elem;
+            elem = undef;
+        }
+
+        if(elem && elem.indexOf(' ') > 1) {
             elem.split(' ').forEach(function(elem) {
                 this._liveClassUnbind(
                     this.buildClass(elem),
@@ -3115,7 +3266,6 @@ var DOM = BEM.decl('i-bem__dom',/** @lends DOM.prototype */{
 
     /**
      * Helper for live initialization when a different block is initialized
-     * @static
      * @private
      * @param {String} event Event name
      * @param {String} blockName Name of the block that should trigger a reaction when initialized
@@ -3137,7 +3287,6 @@ var DOM = BEM.decl('i-bem__dom',/** @lends DOM.prototype */{
 
     /**
      * Helper for live initialization for a different block's event on the current block's DOM element
-     * @static
      * @protected
      * @param {String} event Event name
      * @param {String} blockName Name of the block that should trigger a reaction when initialized
@@ -3149,7 +3298,6 @@ var DOM = BEM.decl('i-bem__dom',/** @lends DOM.prototype */{
 
     /**
      * Helper for live initialization for a different block's event inside the current block
-     * @static
      * @protected
      * @param {String} event Event name
      * @param {String} blockName Name of the block that should trigger a reaction when initialized
@@ -3161,8 +3309,6 @@ var DOM = BEM.decl('i-bem__dom',/** @lends DOM.prototype */{
 
     /**
      * Adds a live event handler to a block, based on a specified element where the event will be listened for
-     * @static
-     * @protected
      * @param {jQuery} [ctx] The element in which the event will be listened for
      * @param {String} e Event name
      * @param {Object} [data] Additional information that the handler gets as e.data
@@ -3170,71 +3316,74 @@ var DOM = BEM.decl('i-bem__dom',/** @lends DOM.prototype */{
      * @param {Object} [fnCtx] Handler's context
      */
     on : function(ctx, e, data, fn, fnCtx) {
-        return ctx.jquery?
+        return typeof ctx === 'object' && ctx.jquery?
             this._liveCtxBind(ctx, e, data, fn, fnCtx) :
             this.__base(ctx, e, data, fn);
     },
 
     /**
      * Removes the live event handler from a block, based on a specified element where the event was being listened for
-     * @static
-     * @protected
      * @param {jQuery} [ctx] The element in which the event was being listened for
      * @param {String} e Event name
      * @param {Function} [fn] Handler
      * @param {Object} [fnCtx] Handler context
      */
     un : function(ctx, e, fn, fnCtx) {
-        return ctx.jquery?
+        return typeof ctx === 'object' && ctx.jquery?
             this._liveCtxUnbind(ctx, e, fn, fnCtx) :
             this.__base(ctx, e, fn);
     },
 
     /**
      * Adds a live event handler to a block, based on a specified element where the event will be listened for
-     * @static
      * @private
      * @param {jQuery} ctx The element in which the event will be listened for
      * @param {String} e  Event name
      * @param {Object} [data] Additional information that the handler gets as e.data
      * @param {Function} fn Handler
      * @param {Object} [fnCtx] Handler context
+     * @returns {BEMDOM} this
      */
     _liveCtxBind : function(ctx, e, data, fn, fnCtx) {
-        if(typeof e === 'string') {
-            if(functions.isFunction(data)) {
-                fnCtx = fn;
-                fn = data;
-                data = undef;
-            }
-
-            if(e.indexOf(' ') > -1) {
-                e.split(' ').forEach(function(e) {
-                    this._liveCtxBind(ctx, e, data, fn, fnCtx);
-                }, this);
+        if(typeof e === 'object') {
+            if(functions.isFunction(data) || functions.isFunction(fn)) { // mod change event
+                e = this._buildModEventName(e);
             } else {
-                var ctxE = this._buildCtxEventName(e),
-                    storage = liveEventCtxStorage[ctxE] ||
-                        (liveEventCtxStorage[ctxE] = { counter : 0, ctxs : {} });
-
-                ctx.each(function() {
-                    var ctxId = identify(this),
-                        ctxStorage = storage.ctxs[ctxId];
-                    if(!ctxStorage) {
-                        ctxStorage = storage.ctxs[ctxId] = {};
-                        ++storage.counter;
-                    }
-                    ctxStorage[identify(fn) + (fnCtx? identify(fnCtx) : '')] = {
-                        fn : fn,
-                        data : data,
-                        ctx : fnCtx
-                    };
-                });
+                objects.each(e, function(fn, e) {
+                    this._liveCtxBind(ctx, e, fn, data);
+                }, this);
+                return this;
             }
-        } else {
-            objects.each(e, function(fn, e) {
-                this._liveCtxBind(ctx, e, fn, data);
+        }
+
+        if(functions.isFunction(data)) {
+            fnCtx = fn;
+            fn = data;
+            data = undef;
+        }
+
+        if(e.indexOf(' ') > -1) {
+            e.split(' ').forEach(function(e) {
+                this._liveCtxBind(ctx, e, data, fn, fnCtx);
             }, this);
+        } else {
+            var ctxE = this._buildCtxEventName(e),
+                storage = liveEventCtxStorage[ctxE] ||
+                    (liveEventCtxStorage[ctxE] = { counter : 0, ctxs : {} });
+
+            ctx.each(function() {
+                var ctxId = identify(this),
+                    ctxStorage = storage.ctxs[ctxId];
+                if(!ctxStorage) {
+                    ctxStorage = storage.ctxs[ctxId] = {};
+                    ++storage.counter;
+                }
+                ctxStorage[identify(fn) + (fnCtx? identify(fnCtx) : '')] = {
+                    fn : fn,
+                    data : data,
+                    ctx : fnCtx
+                };
+            });
         }
 
         return this;
@@ -3242,14 +3391,17 @@ var DOM = BEM.decl('i-bem__dom',/** @lends DOM.prototype */{
 
     /**
      * Removes a live event handler from a block, based on a specified element where the event was being listened for
-     * @static
      * @private
      * @param {jQuery} ctx The element in which the event was being listened for
-     * @param {String} e Event name
+     * @param {String|Object} e Event name
      * @param {Function} [fn] Handler
      * @param {Object} [fnCtx] Handler context
      */
     _liveCtxUnbind : function(ctx, e, fn, fnCtx) {
+        if(typeof e === 'object' && functions.isFunction(fn)) { // mod change event
+            e = this._buildModEventName(e);
+        }
+
         var storage = liveEventCtxStorage[e = this._buildCtxEventName(e)];
 
         if(storage) {
@@ -3272,7 +3424,6 @@ var DOM = BEM.decl('i-bem__dom',/** @lends DOM.prototype */{
 
     /**
      * Retrieves the name of an element nested in a block
-     * @static
      * @private
      * @param {jQuery} elem Nested element
      * @returns {String|undef}
@@ -3285,13 +3436,7 @@ var DOM = BEM.decl('i-bem__dom',/** @lends DOM.prototype */{
     },
 
     /**
-     * @deprecated use elemParams
-     */
-    extractParams : extractParams,
-
-    /**
      * Builds a prefix for the CSS class of a DOM element or nested element of the block, based on modifier name
-     * @static
      * @private
      * @param {String} modName Modifier name
      * @param {jQuery|String} [elem] Element
@@ -3307,7 +3452,6 @@ var DOM = BEM.decl('i-bem__dom',/** @lends DOM.prototype */{
 
     /**
      * Builds a regular expression for extracting modifier values from a DOM element or nested element of a block
-     * @static
      * @private
      * @param {String} modName Modifier name
      * @param {jQuery|String} [elem] Element
@@ -3324,7 +3468,6 @@ var DOM = BEM.decl('i-bem__dom',/** @lends DOM.prototype */{
 
     /**
      * Builds a regular expression for extracting names of elements nested in a block
-     * @static
      * @private
      * @returns {RegExp}
      */
@@ -3359,28 +3502,39 @@ var DOM = BEM.decl('i-bem__dom',/** @lends DOM.prototype */{
  * Returns a block on a DOM element and initializes it if necessary
  * @param {String} blockName Block name
  * @param {Object} params Block parameters
- * @returns {BEM}
+ * @returns {BEMDOM}
  */
 $.fn.bem = function(blockName, params) {
-    return initBlock(blockName, this, params, true);
+    return initBlock(blockName, this, params, true)._init();
 };
-
-/**
- * Set default scope after DOM ready
- */
-$(function() {
-    DOM.scope = $('body');
-});
 
 provide(DOM);
 
 });
+
+});
+
+(function() {
+
+var origDefine = modules.define;
+
+modules.define = function(name, deps, decl) {
+    origDefine.apply(modules, arguments);
+
+    name !== 'i-bem__dom_init' && arguments.length > 2 && ~deps.indexOf('i-bem__dom') &&
+        modules.define('i-bem__dom_init', [name], function(provide, _, prev) {
+            provide(prev);
+        });
+};
+
+})();
 
 /* ../../libs/bem-core/common.blocks/i-bem/__dom/i-bem__dom.js end */
 ;
 /* ../../libs/bem-core/common.blocks/jquery/jquery.js begin */
 /**
  * @module jquery
+ * @description Provide jQuery (load if it does not exist).
  */
 
 modules.define(
@@ -3390,22 +3544,25 @@ modules.define(
 
 /* global jQuery */
 
-function doProvide() {
-    provide(jQuery.noConflict(true));
+function doProvide(preserveGlobal) {
+    /**
+     * @exports
+     * @type Function
+     */
+    provide(preserveGlobal? jQuery : jQuery.noConflict(true));
 }
 
 typeof jQuery !== 'undefined'?
-    doProvide() :
+    doProvide(true) :
     loader(cfg.url, doProvide);
-
 });
+
 /* ../../libs/bem-core/common.blocks/jquery/jquery.js end */
 ;
 /* ../../libs/bem-core/common.blocks/loader/_type/loader_type_js.js begin */
 /**
  * @module loader_type_js
- * @version 1.0.0
- * @author Filatov Dmitry <dfilatov@yandex-team.ru>
+ * @description Load JS from external URL.
  */
 
 modules.define('loader_type_js', function(provide) {
@@ -3413,47 +3570,69 @@ modules.define('loader_type_js', function(provide) {
 var loading = {},
     loaded = {},
     head = document.getElementsByTagName('head')[0],
-    onLoad = function(path) {
-        loaded[path] = true;
+    runCallbacks = function(path, type) {
         var cbs = loading[path], cb, i = 0;
         delete loading[path];
         while(cb = cbs[i++]) {
-            cb();
+            cb[type] && cb[type]();
         }
+    },
+    onSuccess = function(path) {
+        loaded[path] = true;
+        runCallbacks(path, 'success');
+    },
+    onError = function(path) {
+        runCallbacks(path, 'error');
     };
 
-provide(function(path, cb) {
-    if(loaded[path]) {
-        cb();
-        return;
+provide(
+    /**
+     * @exports
+     * @param {String} path resource link
+     * @param {Function} success to be called if the script succeeds
+     * @param {Function} error to be called if the script fails
+     */
+    function(path, success, error) {
+        if(loaded[path]) {
+            success();
+            return;
+        }
+
+        if(loading[path]) {
+            loading[path].push({ success : success, error : error });
+            return;
+        }
+
+        loading[path] = [{ success : success, error : error }];
+
+        var script = document.createElement('script');
+        script.type = 'text/javascript';
+        script.charset = 'utf-8';
+        script.src = (location.protocol === 'file:' && !path.indexOf('//')? 'http:' : '') + path;
+
+        if('onload' in script) {
+            script.onload = function() {
+                script.onload = script.onerror = null;
+                onSuccess(path);
+            };
+
+            script.onerror = function() {
+                script.onload = script.onerror = null;
+                onError(path);
+            };
+        } else {
+            script.onreadystatechange = function() {
+                var readyState = this.readyState;
+                if(readyState === 'loaded' || readyState === 'complete') {
+                    script.onreadystatechange = null;
+                    onSuccess(path);
+                }
+            };
+        }
+
+        head.insertBefore(script, head.lastChild);
     }
-
-    if(loading[path]) {
-        loading[path].push(cb);
-        return;
-    }
-
-    loading[path] = [cb];
-
-    var script = document.createElement('script');
-    script.type = 'text/javascript';
-    script.charset = 'utf-8';
-    script.src = (location.protocol === 'file:' && !path.indexOf('//')? 'http:' : '') + path;
-    script.onreadystatechange === null?
-        script.onreadystatechange = function() {
-            var readyState = this.readyState;
-            if(readyState === 'loaded' || readyState === 'complete') {
-                script.onreadystatechange = null;
-                onLoad(path);
-            }
-        } :
-        script.onload = script.onerror = function() {
-            script.onload = script.onerror = null;
-            onLoad(path);
-        };
-
-    head.insertBefore(script, head.lastChild);
-});
+);
 
 });
 
@@ -3462,25 +3641,98 @@ provide(function(path, cb) {
 /* ../../libs/bem-core/common.blocks/jquery/__config/jquery__config.js begin */
 /**
  * @module jquery__config
+ * @description Configuration for jQuery
  */
 
 modules.define('jquery__config', function(provide) {
 
-provide({
-    url : '//yandex.st/jquery/2.0.3/jquery.min.js'
+provide(/** @exports */{
+    /**
+     * URL for loading jQuery if it does not exist
+     */
+    url : '//yastatic.net/jquery/2.1.3/jquery.min.js'
 });
 
 });
+
 /* ../../libs/bem-core/common.blocks/jquery/__config/jquery__config.js end */
+;
+/* ../../libs/bem-core/desktop.blocks/jquery/__config/jquery__config.js begin */
+/**
+ * @module jquery__config
+ * @description Configuration for jQuery
+ */
+
+modules.define(
+    'jquery__config',
+    ['ua', 'objects'],
+    function(provide, ua, objects, base) {
+
+provide(
+    ua.msie && parseInt(ua.version, 10) < 9?
+        objects.extend(
+            base,
+            {
+                url : '//yastatic.net/jquery/1.11.2/jquery.min.js'
+            }) :
+        base);
+
+});
+
+/* ../../libs/bem-core/desktop.blocks/jquery/__config/jquery__config.js end */
+;
+/* ../../libs/bem-core/desktop.blocks/ua/ua.js begin */
+/**
+ * @module ua
+ * @description Detect some user agent features (works like jQuery.browser in jQuery 1.8)
+ * @see http://code.jquery.com/jquery-migrate-1.1.1.js
+ */
+
+modules.define('ua', function(provide) {
+
+var ua = navigator.userAgent.toLowerCase(),
+    match = /(chrome)[ \/]([\w.]+)/.exec(ua) ||
+        /(webkit)[ \/]([\w.]+)/.exec(ua) ||
+        /(opera)(?:.*version|)[ \/]([\w.]+)/.exec(ua) ||
+        /(msie) ([\w.]+)/.exec(ua) ||
+        ua.indexOf('compatible') < 0 && /(mozilla)(?:.*? rv:([\w.]+)|)/.exec(ua) ||
+        [],
+    matched = {
+        browser : match[1] || '',
+        version : match[2] || '0'
+    },
+    browser = {};
+
+if(matched.browser) {
+    browser[matched.browser] = true;
+    browser.version = matched.version;
+}
+
+if(browser.chrome) {
+    browser.webkit = true;
+} else if(browser.webkit) {
+    browser.safari = true;
+}
+
+/**
+ * @exports
+ * @type Object
+ */
+provide(browser);
+
+});
+
+/* ../../libs/bem-core/desktop.blocks/ua/ua.js end */
 ;
 /* ../../libs/bem-core/common.blocks/dom/dom.js begin */
 /**
  * @module dom
+ * @description some DOM utils
  */
 
 modules.define('dom', ['jquery'], function(provide, $) {
 
-provide({
+provide(/** @exports */{
     /**
      * Checks whether a DOM elem is in a context
      * @param {jQuery} ctx DOM elem where check is being performed
@@ -3513,7 +3765,7 @@ provide({
 
     /**
      * Checks whether a DOM element contains focus
-     * @param domElem
+     * @param {jQuery} domElem
      * @returns {Boolean}
      */
     containsFocus : function(domElem) {
@@ -3529,6 +3781,7 @@ provide({
         var domNode = domElem[0];
 
         if(!domNode) return false;
+        if(domNode.hasAttribute('tabindex')) return true;
 
         switch(domNode.tagName.toLowerCase()) {
             case 'iframe':
@@ -3542,10 +3795,9 @@ provide({
 
             case 'a':
                 return !!domNode.href;
-
-            default:
-                return domNode.hasAttribute('tabindex');
         }
+
+        return false;
     },
 
     /**
@@ -3573,245 +3825,51 @@ provide({
 });
 
 });
+
 /* ../../libs/bem-core/common.blocks/dom/dom.js end */
 ;
-/* ../../libs/bem-core/common.blocks/i-bem/__internal/i-bem__internal.vanilla.js begin */
+/* ../../libs/bem-core/common.blocks/i-bem/__dom/_init/i-bem__dom_init.js begin */
 /**
- * @module i-bem__internal
+ * @module i-bem__dom_init
  */
 
-modules.define('i-bem__internal', function(provide) {
+modules.define('i-bem__dom_init', ['i-bem__dom'], function(provide, BEMDOM) {
 
-var undef,
-/**
- * Separator for modifiers and their values
- * @const
- * @type String
- */
-    MOD_DELIM = '_',
-
-/**
- * Separator between names of a block and a nested element
- * @const
- * @type String
- */
-    ELEM_DELIM = '__',
-
-/**
- * Pattern for acceptable element and modifier names
- * @const
- * @type String
- */
-    NAME_PATTERN = '[a-zA-Z0-9-]+';
-
-function isSimple(obj) {
-    var typeOf = typeof obj;
-    return typeOf === 'string' || typeOf === 'number' || typeOf === 'boolean';
-}
-
-function buildModPostfix(modName, modVal) {
-    var res = '';
-    /* jshint eqnull: true */
-    if(modVal != null && modVal !== false) {
-        res += MOD_DELIM + modName;
-        modVal !== true && (res += MOD_DELIM + modVal);
-    }
-    return res;
-}
-
-function buildBlockClass(name, modName, modVal) {
-    return name + buildModPostfix(modName, modVal);
-}
-
-function buildElemClass(block, name, modName, modVal) {
-    return buildBlockClass(block, undef, undef) +
-        ELEM_DELIM + name +
-        buildModPostfix(modName, modVal);
-}
-
-provide({
-    NAME_PATTERN : NAME_PATTERN,
-
-    MOD_DELIM : MOD_DELIM,
-    ELEM_DELIM : ELEM_DELIM,
-
-    buildModPostfix : buildModPostfix,
-
+provide(
     /**
-     * Builds the class of a block or element with a modifier
-     * @private
-     * @param {String} block Block name
-     * @param {String} [elem] Element name
-     * @param {String} [modName] Modifier name
-     * @param {String|Number} [modVal] Modifier value
-     * @returns {String} Class
+     * Initializes blocks on a fragment of the DOM tree
+     * @exports
+     * @param {jQuery} [ctx=scope] Root DOM node
+     * @returns {jQuery} ctx Initialization context
      */
-    buildClass : function(block, elem, modName, modVal) {
-        if(isSimple(modName)) {
-            if(!isSimple(modVal)) {
-                modVal = modName;
-                modName = elem;
-                elem = undef;
-            }
-        } else if(typeof modName !== 'undefined') {
-            modName = undef;
-        } else if(elem && typeof elem !== 'string') {
-            elem = undef;
-        }
-
-        if(!(elem || modName)) { // optimization for simple case
-            return block;
-        }
-
-        return elem?
-            buildElemClass(block, elem, modName, modVal) :
-            buildBlockClass(block, modName, modVal);
-    },
-
-    /**
-     * Builds full classes for a buffer or element with modifiers
-     * @private
-     * @param {String} block Block name
-     * @param {String} [elem] Element name
-     * @param {Object} [mods] Modifiers
-     * @returns {String} Class
-     */
-    buildClasses : function(block, elem, mods) {
-        if(elem && typeof elem !== 'string') {
-            mods = elem;
-            elem = undef;
-        }
-
-        var res = elem?
-            buildElemClass(block, elem, undef, undef) :
-            buildBlockClass(block, undef, undef);
-
-        if(mods) {
-            for(var modName in mods) {
-                if(mods.hasOwnProperty(modName) && mods[modName]) {
-                    res += ' ' + (elem?
-                        buildElemClass(block, elem, modName, mods[modName]) :
-                        buildBlockClass(block, modName, mods[modName]));
-                }
-            }
-        }
-
-        return res;
-    }
+    function(ctx) {
+        return BEMDOM.init(ctx);
+    });
 });
 
-});
-/* ../../libs/bem-core/common.blocks/i-bem/__internal/i-bem__internal.vanilla.js end */
-;
-/* ../../libs/bem-core/common.blocks/ecma/__string/ecma__string.js begin */
-(function() {
-
-String.prototype.trim || (String.prototype.trim = function() {
-    var str = this.replace(/^\s\s*/, ''),
-        ws = /\s/,
-        i = str.length;
-
-    while(ws.test(str.charAt(--i)));
-
-    return str.slice(0, i + 1);
-});
-
-})();
-/* ../../libs/bem-core/common.blocks/ecma/__string/ecma__string.js end */
-;
-/* ../../libs/bem-core/common.blocks/ecma/__json/ecma__json.js begin */
-(function(undefined) {
-
-if(window.JSON) return;
-
-var _toString = Object.prototype.toString,
-    escapable = /[\\\"\x00-\x1f\x7f-\x9f\u00ad\u0600-\u0604\u070f\u17b4\u17b5\u200c-\u200f\u2028-\u202f\u2060-\u206f\ufeff\ufff0-\uffff]/g,
-    meta = {
-        '\b' : '\\b',
-        '\t' : '\\t',
-        '\n' : '\\n',
-        '\f' : '\\f',
-        '\r' : '\\r',
-        '"' : '\\"',
-        '\\' : '\\\\'
-    },
-    stringify;
-
-window.JSON = {
-    stringify : stringify = function(val) {
-        if(val === null) {
-            return 'null';
-        }
-        if(typeof val === 'undefined') {
-            return undefined;
-        }
-        var res, i, strVal;
-        switch(_toString.call(val)) {
-            case '[object String]':
-                escapable.lastIndex = 0;
-                return '"' +
-                    (escapable.test(val)?
-                        val.replace(escapable, function(a) {
-                            var c = meta[a];
-                            return typeof c === 'string'? c : '\\u' + ('0000' + a.charCodeAt(0).toString(16)).slice(-4);
-                        }) :
-                        val) +
-                    '"';
-
-            case '[object Number]':
-            case '[object Boolean]':
-                return '' + val;
-
-            case '[object Array]':
-                res = '['; i = 0;
-                var len = val.length;
-                while(i < len) {
-                    strVal = stringify(val[i]);
-                    res += (i++? ',' : '') + (typeof strVal === 'undefined'? 'null' : strVal);
-                }
-                return res + ']';
-
-            case '[object Object]':
-                if(_toString.call(val.toJSON) === '[object Function]') {
-                    return stringify(val.toJSON());
-                }
-                res = '{'; i = 0;
-                for(var key in val) {
-                    if(val.hasOwnProperty(key)) {
-                        strVal = stringify(val[key]);
-                        typeof strVal !== 'undefined' && (res += (i++? ',' : '') + '"' + key + '":' + strVal);
-                    }
-                }
-                return res + '}';
-
-            default:
-                return undefined;
-        }
-    },
-
-    parse : function(str) {
-        /*jshint -W061 */
-        return Function('return ' + str)();
-    }
-};
-})();
-/* ../../libs/bem-core/common.blocks/ecma/__json/ecma__json.js end */
+/* ../../libs/bem-core/common.blocks/i-bem/__dom/_init/i-bem__dom_init.js end */
 ;
 /* ../../libs/bem-core/common.blocks/i-bem/__dom/_init/i-bem__dom_init_auto.js begin */
-/* дефолтная инициализация */
-modules.require(['i-bem__dom', 'jquery'], function(DOM, $) {
+/**
+ * Auto initialization on DOM ready
+ */
+
+modules.require(
+    ['i-bem__dom_init', 'jquery', 'next-tick'],
+    function(init, $, nextTick) {
 
 $(function() {
-    DOM.init();
+    nextTick(init);
 });
 
 });
+
 /* ../../libs/bem-core/common.blocks/i-bem/__dom/_init/i-bem__dom_init_auto.js end */
 ;
 /* blocks/switch/switch.js begin */
-modules.define('i-bem__dom', function(provide, DOM) {
+modules.define('switch', ['i-bem__dom'], function(provide, BEMDOM) {
 
-DOM.decl('switch', {
+provide(BEMDOM.decl(this.name, {
     onSetMod: {
         'js' : {
             'inited' : function() {
@@ -3821,9 +3879,7 @@ DOM.decl('switch', {
             }
         }
     }
-});
-
-provide(DOM);
+}));
 
 });
 

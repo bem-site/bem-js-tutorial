@@ -1,6 +1,6 @@
-modules.define('i-bem__dom', ['jquery'], function(provide, $, DOM) {
+modules.define('player', ['i-bem__dom', 'jquery'], function(provide, BEMDOM, $) {
 
-DOM.decl('player', {
+provide(BEMDOM.decl(this.name, {
     rotate: function() {
         var player = this;
 
@@ -15,8 +15,6 @@ DOM.decl('player', {
     }
 },{
     live: true
-});
-
-provide(DOM);
+}));
 
 });

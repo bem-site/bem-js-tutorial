@@ -1,18 +1,10 @@
-# Туториал по JavaScript в терминах БЭМ
-
-### Ссылки
- * [Содержание](../00-Intro/00-Intro.ru.md)
- * [Ранее. Модификаторы](../02-Modifiers/02-Modifiers.ru.md)
-
-----------------------------------
-
-## Живая (ленивая) инициализация
+# Живая (ленивая) инициализация
 
 Перед началом работы блок инициализируется ядром. В конце этого процесса блок
 получает модификатор `js_inited`, о котором вы уже знаете.
 
 В процессе инициализации возникает JavaScript-объект, соответствующий экземпляру
-блока. Затем запускается коллбэк модификатора `js_inited` со всеми инициирующими
+блока. Затем запускается callback модификатора `js_inited` со всеми инициирующими
 действиями.
 
 В предыдущих примерах все блоки инициализировались по `domReady`. Хотя на
@@ -22,16 +14,16 @@
 браузера, проинициализировав компонент только когда пользователь начал с ним
 работать.
 
-Это называется "живая" или "ленивая" инициализация.
+Это называется «живая» или «ленивая» инициализация.
 
-### Статический метод `live`
+## Статический метод `live`
 
 Инструкции по ленивой инициализации блока даются в статическом методе `live`.
 
 ```js
-modules.define('i-bem__dom', function(provide, DOM) {
+modules.define('my-block', ['i-bem__dom'], function(provide, BEMDOM) {
 
-DOM.decl('my-block', {
+provide(BEMDOM.decl(this.name, {
     onSetMod: {
         ...
     },
@@ -41,9 +33,7 @@ DOM.decl('my-block', {
         // Здесь можно сказать, когда инициализировать
         // экземпляр блока
     }
-});
-
-provide(DOM);
+}));
 
 });
 ```
@@ -54,7 +44,7 @@ provide(DOM);
 инициализировать, а нужно подождать возникновения специальных условий. Это может
 быть, например, DOM-событие на блоке или элементе.
 
-### Инициализация блока по DOM событию
+## Инициализация блока по DOM-событию
 
 <pre>├── pure.bundles/
 │   ├── 010-live-init-on-event/
@@ -72,7 +62,7 @@ provide(DOM);
 На странице
 [010-live-init-on-event.html](http://bem.github.io/bem-js-tutorial/pure.bundles/010-live-init-on-event/010-live-init-on-event.html)
 вы можете увидеть историю, написанную на голландском языке. На самом деле текст
-разделен на множество маленьких кусочков, по фразам. Каждая фраза завернута в
+разделен на множество маленьких кусочков по фразам. Каждая фраза завернута в
 блок `translate`.
 
 Если пользователь, читающий текст, не понимает его значения, он может увидеть
@@ -89,39 +79,37 @@ provide(DOM);
 
 Как видно из HTML-структуры, блок `translate` содержит фразу на голландском
 языке, а ее русский перевод хранится как параметр блока в атрибуте `data-bem`.
-Также есть элемент `prompt`, которого не видно пока он не понадобится.
+Также есть элемент `prompt`, которого не видно, пока он не понадобится.
 
 Обратите внимание, что у блока нет класса `translate_js_inited`, он не
 появляется даже при полной загрузке страницы. Это означает, что и
 JavaScript-объект, соответствующий экземпляру блока, пока не создан.<br/>
 В файле
 [translate.js](https://github.com/bem/bem-js-tutorial/blob/master/pure.bundles/010-live-init-on-event/blocks/translate/translate.js)
-сказано, что блок нужно инициализироват тогда, когда на его DOM-узле случится
+сказано, что блок нужно инициализировать тогда, когда на его DOM-узле случится
 событие `click`.
 
 ```js
-modules.define('i-bem__dom', function(provide, DOM) {
+modules.define('translate', ['i-bem__dom'], function(provide, BEMDOM) {
 
-DOM.decl('translate', {
+provide(BEMDOM.decl(this.name, {
     ...
 },{
     live: function() {
         this.liveInitOnEvent('click');
     }
-});
-
-provide(DOM);
+}));
 
 });
 ```
 
 По клику ядро устанавливает для блока модификатор `js_inited` и запускает
-"конструктор" — функцию, проассоциированную с этим модификатором.
+«конструктор» — функцию, проассоциированную с этим модификатором.
 
 ```js
-modules.define('i-bem__dom', function(provide, DOM) {
+modules.define('translate', ['i-bem__dom'], function(provide, BEMDOM) {
 
-DOM.decl('translate', {
+provide(BEMDOM.decl(this.name, {
     onSetMod: {
         'js' : {
             'inited' : function() {
@@ -138,41 +126,39 @@ DOM.decl('translate', {
     }
 },{
     ...
-});
-
-provide(DOM);
+}));
 
 });
 ```
 
 Вложенному элементу `prompt` назначается модификатор `visible` со значением
-`true`, что делает его видимым на страницы. Также это означает, что из
-параметров блока берется перевод — свойство `this.patams['prompt']` — и
+`true`, что делает его видимым на странице. Также это означает, что из
+параметров блока берется перевод — свойство `this.params.prompt` — и
 вставляется внутрь элемента.<br/>
-На самом деле, текст перевода можно было и раньше вставить в элемент, ведь он не
+На самом деле текст перевода можно было и раньше вставить в элемент, ведь он не
 был виден пользователю. Но для демонстрации того, как получать параметры из
 `data-bem`, выбран этот вариант.
 
-Возвращаясь к живой инициализации, вы можете увидеть, что на странице со
-множеством блоков, ядро инициализирует только те, на которых произошло слушаемое
-событие. Это экономит память, и страница работает быстрее.
+Возвращаясь к живой инициализации вы можете увидеть, что на странице со
+множеством блоков ядро инициализирует только те, на которых произошло слушаемое
+событие. Это экономит память и страница работает быстрее.
 
 В основе лежит 
-[делегация событий](http://davidwalsh.name/event-delegate). То есть, несмотря на
+[делегирование событий](http://davidwalsh.name/event-delegate). То есть, несмотря на
 то, что блоков много, есть всего один обработчик события `click` на объекте
 `document`.<br/>
 Это не только выгодно с точки зрения производительности, но и добавляет гибкости
 для программирования динамически изменяемых страниц. В этом вы можете убедиться
 на следующем примере.
 
-### Делегированная инициализация
+## Делегированная инициализация
 <pre>
 
 >> <a href="http://bem.github.io/bem-js-tutorial/pure.bundles/010_2-delegation/010_2-delegation.html">010_2-delegation.html</a></pre>
 
 В этом примере используется блок `translate` — тот же самый, что и в предыдущем.
-Но кроме этого там есть страшный JavaScript, он срабатывает, если пользователь
-нажал на розовую кнопку и жинамически вставляет в страницу несколько новых
+Но кроме этого там есть страшный JavaScript. Он срабатывает, если пользователь
+нажал на розовую кнопку и динамически вставляет в страницу несколько новых
 блоков `translate`. Если после этого вы кликните на некоторые фразы свежей
 шутки, то увидите, что эти блоки работают абсолютно так же, как и те, что
 присутствовали на странице с самого начала.
@@ -181,7 +167,7 @@ provide(DOM);
 пользователь кликает по блокам, событие поднимается наверх до `document`, и ядро
 инициализирует блок, следуя инструкциям в секции `live`.
 
-### Обработчики live событий
+## Обработчики live событий
 <pre>├── pure.bundles/
 │   ├── 011-live-bind-to/
 │   │   ├── blocks/
@@ -197,16 +183,16 @@ provide(DOM);
 
 Следующий пример — [страница со 100 BonBon
 кнопками](http://bem.github.io/bem-js-tutorial/pure.bundles/011-live-bind-to/011-live-bind-to.html)
-— показывает, что реашировать на live события можно всегда,
+— показывает, что реагировать на live события можно всегда,
 а не только при инициализации.
 
 У представленного на странице блока `button` есть live инициализация. Было бы
 неразумно инициализировать их все сразу, и на каждом слушать событие click.
 
 ```js
-modules.define('i-bem__dom', function(provide, DOM) {
+modules.define('button', ['i-bem__dom'], function(provide, BEMDOM) {
 
-DOM.decl('button', {
+provide(BEMDOM.decl(this.name, {
     onSetMod: {
         'js' : {
             'inited' : function() {
@@ -219,22 +205,20 @@ DOM.decl('button', {
     live: function() {
         this.liveBindTo('click');
     }
-});
-
-provide(DOM);
+}));
 
 });
 ```
 
 Также как и в предыдущем примере (где использовался `liveInitOnEvent`), этот код
-инициализирует блок и запускает коллбэк модификатора `js_inited`. Но разница
-состоит в том, что `liveBindTo` говорит запускать коллбэк не только при
+инициализирует блок и запускает callback модификатора `js_inited`. Но разница
+состоит в том, что `liveBindTo` говорит запускать callback не только при
 инициализации, а каждый раз когда пользователь кликает по кнопке.
 
 ```js
-modules.define('i-bem__dom', function(provide, DOM) {
+modules.define('button', ['i-bem__dom'], function(provide, BEMDOM) {
 
-DOM.decl('button', {
+provide(BEMDOM.decl(this.name, {
     onSetMod: {
         ...
     },
@@ -247,14 +231,12 @@ DOM.decl('button', {
             this.onClick();
         });
     }
-});
-
-provide(DOM);
+}));
 
 });
 ```
 
-### Инициализация по нескольким событиям
+## Инициализация по нескольким событиям
 <pre>├── pure.bundles/
 │   ├── 012-live-init-many-events/
 │   │   ├── blocks/
@@ -269,7 +251,7 @@ provide(DOM);
 >> <a href="http://bem.github.io/bem-js-tutorial/pure.bundles/012-live-init-many-events/012-live-init-many-events.html">012-live-init-many-events.html</a></pre>
 
 В предыдущих примерах инициализация блоков проходила по возникновению на них
-события  `click`. Но иногда слушать одно-единственное событие недостаточно.
+события `click`. Но иногда слушать одно-единственное событие недостаточно.
 Пример
 [012-live-init-many-events](http://bem.github.io/bem-js-tutorial/pure.bundles/012-live-init-many-events/012-live-init-many-events.html)
 демонстрирует такой случай на кастомизированном checkbox.
@@ -283,13 +265,13 @@ provide(DOM);
 </span>
 ```
 
-Очевидно, что экзепляр блока должен быть инициализирован, когда пользователь
+Очевидно, что экземпляр блока должен быть инициализирован, когда пользователь
 кликает по элементу `label`.
 
 ```js
-modules.define('i-bem__dom', function(provide, DOM) {
+modules.define('checkbox', ['i-bem__dom'], function(provide, BEMDOM) {
 
-DOM.decl('checkbox', {
+provide(BEMDOM.decl(this.name, {
     ...
     _onClick : function() {
         this.setMod('focused', true);
@@ -301,15 +283,13 @@ DOM.decl('checkbox', {
             this._onClick();
         });
     }
-});
-
-provide(DOM);
+}));
 
 });
 ```
 
 Здесь тоже используется метод `liveBindTo`, чтобы не только проинициализировать
-блок, но и запускать коллбэк на следующих кликах. Заметьте, что здесь
+блок, но и запускать callback на следующих кликах. Заметьте, что здесь
 использован опциональный параметр с именем элемента `label`, т.к. нас интересуют
 клики именно на нем.
 
@@ -320,9 +300,9 @@ provide(DOM);
 `label` и по событию `change` элемента `control` (это узел `input`).
 
 ```js
-modules.define('i-bem__dom', function(provide, DOM) {
+modules.define('checkbox', ['i-bem__dom'], function(provide, BEMDOM) {
 
-DOM.decl('checkbox', {
+provide(BEMDOM.decl(this.name, {
     ...
     _onClick : function() {
         this.setMod('focused', true);
@@ -340,9 +320,7 @@ DOM.decl('checkbox', {
             this._onChange(e);
         });
     }
-});
-
-provide(DOM);
+}));
 
 });
 ```
@@ -351,9 +329,9 @@ provide(DOM);
 фокус уходит из него.
 
 ```js
-modules.define('i-bem__dom', function(provide, DOM) {
+modules.define('checkbox', ['i-bem__dom'], function(provide, BEMDOM) {
 
-DOM.decl('checkbox', {
+provide(BEMDOM.decl(this.name, {
     ...
 },{
     live: function() {
@@ -369,22 +347,20 @@ DOM.decl('checkbox', {
             this.setMod('focused', e.type == 'focusin'? true : false);
         });
     }
-});
-
-provide(DOM);
+}));
 
 });
 ```
 
-Как видно из кода, один и тот же коллбэк можно привязать к нескольким событиям.
+Как видно из кода, один и тот же callback можно привязать к нескольким событиям.
 Для этого имена событий пишутся через пробел.
 
-После добавляения коллбэков на модификаторы, программирование блока закончено.
+После добавления функций callback на модификаторы, программирование блока закончено.
 
 ```js
-modules.define('i-bem__dom', function(provide, DOM) {
+modules.define('checkbox', ['i-bem__dom'], function(provide, BEMDOM) {
 
-DOM.decl('checkbox', {
+provide(BEMDOM.decl(this.name, {
     onSetMod: {
         'focused' : {
             'true' : function() {
@@ -403,9 +379,7 @@ DOM.decl('checkbox', {
     live: function() {
         ...
     }
-});
-
-provide(DOM);
+}));
 
 });
 ```
@@ -418,9 +392,9 @@ JavaScript страницы, или реагируя на события в бр
 получил focus, блок установит себе модификатор `focused` и таким образом
 приобретет нужный внешний вид. При изменении блока — и вручную, и автоматически
 — блок получит модификатор `checked` и задаст атрибут `checked` встроенному
-input, или снимет их.
+input или снимет их.
 
-#### Почему не :checked?
+### Почему не :checked?
 
 Как вы могли заметить, в этом примере выделенность встроенного элемента
 `control` (input) проверяется при помощи модификатора `checked` соответствующего
@@ -450,7 +424,7 @@ input, или снимет их.
 }
 ```
 
-Конечно, можно было бы воспользоваться псевдо-селектором `:checked` как это
+Конечно можно было бы воспользоваться псевдо-селектором `:checked` как это
 сделано здесь:
 [control prototype](http://codepen.io/bbodine1/pen/novBm).
 
@@ -470,19 +444,18 @@ input, или снимет их.
 ```css
 .checkbox_checked
 {
-    background-image: -webkit-linear-gradient(0deg, #333, #333 4px, #555 4px, #555 6px);
     background-image: linear-gradient(0deg, #333, #333 4px, #555 4px, #555 6px);
     background-size: 6px 6px;
 }
 ```
 
-И, конечно, позволяет экономить на парсинге селекторов и делает код более
+И, конечно, позволяет экономить на парсинге селекторов, и делает код более
 консистентным.
 
-### БЭМ события
+## БЭМ-события
 
-Кроме DOM-событий, `i-bem.js` умеет работать с кастомными JavaScript событиями
-на объектах, соответствующих блокам. Эти события назваются `БЭМ события` и
+Кроме DOM-событий `i-bem.js` умеет работать с кастомными JavaScript событиями
+на объектах, соответствующих блокам. Эти события назваются `БЭМ-события` и
 обычно составляют API блока.
 
 Примером порождения таких событий может быть [блок
@@ -504,7 +477,7 @@ input, или снимет их.
 
 Другим примером может служить
 [блок
-`menu`](https://github.com/varya/bem-js-tutorial/tree/master/desktop.blocks/menu).
+`menu`](https://github.com/bem/bem-js-tutorial/tree/master/desktop.blocks/menu).
 Он представляет список пунктов меню в HTML, один из которых может быть выделен.
 
 ```html
@@ -544,7 +517,7 @@ this
 
 Это событие возникает на JavaScript-объекте, соответствующем экземпляру блока.
 Используя это, другой блок может подписаться на БЭМ-событие `current` блока
-`menu`, узнавать о изменении текущего пункта меню и реагировать на это.
+`menu`, узнавать об изменении текущего пункта меню и реагировать на это.
 
 ### Live инициализация по БЭМ-событию вложенного блока
 
@@ -570,7 +543,7 @@ this
 На этом примере вы можете видеть
 [блок
 `map-marks`](https://github.com/varya/bem-js-tutorial/tree/master/components.bundles/014-live-init-bem-event/blocks/map-marks).
-Он связывает вместе блоки меню и карты таким образом, что пользователю кликающий
+Он связывает вместе блоки меню и карты таким образом, что пользователь кликающий
 по меню, может видеть соответствуюшую точку на карте.
 
 Блок `map-marks` содержит блок `menu` и `map`. Это можно увидеть из
@@ -588,9 +561,9 @@ JavaScript реализация блока
 использует live-инициализацию, зависящую от вложенного блока.
 
 ```js
-modules.define('i-bem__dom', ['jquery'], function(provide, $, DOM) {
+modules.define('map-marks', ['i-bem__dom', 'jquery'], function(provide, BEMDOM, $) {
 
-DOM.decl('map-marks', {
+provide(BEMDOM.decl(this.name, {
     ...
 }, {
     live: function() {
@@ -598,25 +571,23 @@ DOM.decl('map-marks', {
             this._showMap(e, data.current);
         });
     }
-});
-
-provide(DOM);
+}));
 
 });
 ```
 
 Методу `liveInitOnBlockInsideEvent` в качестве параметров передаются имя
-события, имя блока и коллбэк.
+события, имя блока и callback.
 
 Как только пользователь кликает по какому-нибудь пункту меню, он становится
 активным, и на блоке `menu` возникает событие `current`. Событие ловится блоком
-`map-marks`, и блок инициализируеются. То есть блок приобретает модификатор
-`js_inited`, и запускается соответствующий коллбэк:
+`map-marks`, и блок инициализируется. То есть блок приобретает модификатор
+`js_inited`, и запускается соответствующий callback:
 
 ```js
-modules.define('i-bem__dom', ['jquery'], function(provide, $, DOM) {
+modules.define('map-marks', ['i-bem__dom', 'jquery'], function(provide, BEMDOM, $) {
 
-DOM.decl('map-marks', {
+provide(BEMDOM.decl(this.name, {
 
   onSetMod: {
       'js' : {
@@ -633,9 +604,7 @@ DOM.decl('map-marks', {
     live: function() {
         ...
     }
-});
-
-provide(DOM);
+}));
 
 });
 ```
@@ -644,9 +613,9 @@ provide(DOM);
 карте, обращаясь к блоку `map`.
 
 ```js
-modules.define('i-bem__dom', ['jquery'], function(provide, $, DOM) {
+modules.define('map-marks', ['i-bem__dom', 'jquery'], function(provide, BEMDOM, $) {
 
-DOM.decl('map-marks', {
+provide(BEMDOM.decl(this.name, {
 
     ...
 
@@ -661,14 +630,7 @@ DOM.decl('map-marks', {
     live: function() {
         ...
     }
-});
-
-provide(DOM);
+}));
 
 });
 ```
-
----------------------------------------
-### Ссылки
- * [Содержание](../00-Intro/00-Intro.ru.md)
- * [Ранее. Модификаторы](../02-Modifiers/02-Modifiers.ru.md)

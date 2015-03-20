@@ -1,2 +1,102 @@
-@import url(blocks/page/page.css);
-@import url(blocks/button/button.css);
+/* blocks/page/page.css begin */
+.page {
+  font: 20px/1 "Lucida Sans Unicode", "Lucida Grande", Verdana, Arial, sans-serif;
+  text-align: center;
+  background-color: #dedede;
+}
+/* blocks/page/page.css end */
+/* blocks/button/button.css begin */
+.button {
+/* text */
+  text-decoration: none;
+  font: 24px/1em 'Droid Sans', sans-serif;
+  font-weight: bold;
+  text-shadow: rgba(255,255,255,0.5) 0 1px 0;
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+  user-select: none;
+/* layout */
+  padding: 0.5em 0.6em 0.4em 0.6em;
+  margin: 0.5em;
+  display: inline-block;
+  position: relative;
+  border-radius: 8px;
+/* effects */
+  border-top: 1px solid rgba(255,255,255,0.8);
+  border-bottom: 1px solid rgba(0,0,0,0.1);
+  background-image: gradient(radial, 50% 0, 100, 50% 0, 0, from(rgba(255,255,255,0)), to(rgba(255,255,255,0.7))), url("blocks/button/__bg/button__bg.png");
+  -webkit-transition: background 0.2s ease-in-out;
+  transition: background 0.2s ease-in-out;
+}
+.button_color_grey {
+  color: #666 !important;
+  background-color: #bfbfbf;
+  box-shadow: inset rgba(255,254,255,0.6) 0 0.3em 0.3em, inset rgba(0,0,0,0.15) 0 -0.1em 0.3em, #999 0 0.1em 3px, #737373 0 0.3em 1px, rgba(0,0,0,0.2) 0 0.5em 5px;
+}
+.button_color_orange {
+  color: #996300 !important;
+  background-color: #ffa600;
+  box-shadow: inset rgba(255,254,255,0.6) 0 0.3em 0.3em, inset rgba(0,0,0,0.15) 0 -0.1em 0.3em, #cc8500 0 0.1em 3px, #996300 0 0.3em 1px, rgba(0,0,0,0.2) 0 0.5em 5px;
+/* drop shadow */
+}
+.button_color_blue {
+  color: #336999 !important;
+  background-color: #80c4ff;
+  box-shadow: inset rgba(255,254,255,0.6) 0 0.3em 0.3em, inset rgba(0,0,0,0.15) 0 -0.1em 0.3em, #5390c6 0 0.1em 3px, #336999 0 0.3em 1px, rgba(0,0,0,0.2) 0 0.5em 5px;
+/* drop shadow */
+}
+.button_color_green {
+  color: #508217 !important;
+  background-color: #9ee052;
+  box-shadow: inset rgba(255,254,255,0.6) 0 0.3em 0.3em, inset rgba(0,0,0,0.15) 0 -0.1em 0.3em, #6bad1f 0 0.1em 3px, #508217 0 0.3em 1px, rgba(0,0,0,0.2) 0 0.5em 5px;
+/* drop shadow */
+}
+.button_color_pink {
+  color: #903 !important;
+  background-color: #ff80aa;
+  box-shadow: inset rgba(255,254,255,0.6) 0 0.3em 0.3em, inset rgba(0,0,0,0.15) 0 -0.1em 0.3em, #d92662 0 0.1em 3px, #b8144b 0 0.3em 1px, rgba(0,0,0,0.2) 0 0.5em 5px;
+/* drop shadow */
+}
+.button_shape_round {
+  border-top: none;
+  border-radius: 1em;
+}
+.button_shape_oval {
+  border-top: none;
+  padding-left: 0.8em;
+  padding-right: 0.8em;
+  border-radius: 5em/2em;
+}
+.button_shape_brackets {
+  border-top: none;
+  border-radius: 0.5em/1em;
+}
+.button_shape_skew {
+  border-top: none;
+  padding-right: 1.2em;
+  padding-left: 0.8em;
+  border-radius: 5em 1em/5em 1em;
+}
+.button_shape_back {
+  border-top-color: rgba(255,255,255,0.5);
+  border-radius: 1.6em 1.6em 1em 1em/4em 4em 1em 1em;
+}
+.button_shape_knife {
+  padding-left: 1.5em;
+  border-radius: 0.2em 0.5em 0.5em 8em/0.2em 0.5em 0.5em 5em;
+}
+.button_shape_shield {
+  border-radius: 0.4em 0.4em 2em 2em/0.4em 0.4em 3em 3em;
+}
+.button_shape_drop {
+  border-top: none;
+  border-radius: 2em 5em 2em 0.6em/2em 4em 2em 0.6em;
+}
+.button_shape_morph {
+  border-top: none;
+  border-radius: 5em/2em;
+  -webkit-transition: border-radius 0.3s ease-in-out;
+  transition: border-radius 0.3s ease-in-out;
+}
+/* blocks/button/button.css end */

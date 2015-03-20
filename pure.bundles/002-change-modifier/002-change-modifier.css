@@ -1,1 +1,103 @@
-@import url(blocks/call-button/call-button.css);
+/* blocks/call-button/call-button.css begin */
+/* http://nicolasgallagher.com/pure-css-gui-icons/demo/#non
+ * http://tutorialzine.com/2010/10/css3-animated-bubble-buttons/
+ * */
+.call-button {
+  font: 30px Calibri, Arial, sans-serif;
+/* A semi-transparent text shadow */
+  text-shadow: 1px 1px 0 rgba(255,255,255,0.4);
+/* Overriding the default underline styling of the links */
+  text-decoration: none !important;
+  white-space: nowrap;
+  display: inline-block;
+  vertical-align: baseline;
+  position: relative;
+  cursor: pointer;
+  padding: 10px 20px;
+  background-repeat: no-repeat;
+/* The following two rules are fallbacks, in case
+	   the browser does not support multiple backgrounds. */
+  background-position: bottom left;
+  background-image: url("blocks/call-button/call-button.png");
+/* Multiple backgrounds version. The background images
+	   are defined individually in color classes */
+  background-position: bottom left, top right, 0 0, 0 0;
+  background-clip: border-box;
+/* Applying a default border raidus of 8px */
+  border-radius: 8px;
+/* A 1px highlight inside of the button */
+  box-shadow: 0 0 1px #fff inset;
+  -webkit-transition: background-position 1s;
+  transition: background-position 1s;
+  border-radius: 4em;
+/* Green color */
+  color: #345903 !important;
+  border: 1px solid #96a37b !important;
+  background-color: #79be1e;
+  background-image: url("blocks/call-button/call-button.png"), url("blocks/call-button/call-button.png"), -webkit-gradient(radial, 50% 100%, 0, 50% 100%, 100, from(#a2d31e), to(rgba(162,211,30,0))), -webkit-gradient(linear, 0% 0%, 0% 100%, from(#82cc27), to(#74b317));
+}
+.call-button:hover {
+/* The first rule is a fallback, in case the browser
+	   does not support multiple backgrounds
+	*/
+  background-position: top left;
+  background-position: top left, bottom right, 0 0, 0 0;
+/* Green color */
+  background-color: #89d228;
+  background-image: url("blocks/call-button/call-button.png"), url("blocks/call-button/call-button.png"), -webkit-gradient(radial, 50% 100%, 0, 50% 100%, 100, from(#b7e52d), to(rgba(183,229,45,0))), -webkit-gradient(linear, 0% 0%, 0% 100%, from(#90de31), to(#7fc01e));
+}
+.call-button:active {
+/* Moving the button 1px to the bottom when clicked */
+  bottom: -1px;
+}
+.call-button__link {
+  display: block;
+  padding-left: 44px;
+}
+.call-button__link:before,
+.call-button__link:after {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 0;
+  margin: -18px 0 0;
+  background: #c55500;
+}
+.call-button__link:before {
+  left: 5px;
+  width: 4px;
+  height: 8px;
+  border-width: 15px 0 15px 6px;
+  margin-left: 24px;
+  border-style: solid;
+  border-color: #fff;
+  background: transparent;
+  border-top-left-radius: 3px 5px;
+  border-bottom-left-radius: 3px 5px;
+  -webkit-transform: rotate(-30deg);
+  transform: rotate(-30deg);
+}
+.call-button_calling {
+  color: #0f4b6d !important;
+  border: 1px solid #84acc3 !important;
+/* A fallback background color */
+  background-color: #48b5f2;
+  background-image: url("blocks/call-button/call-button.png"), url("blocks/call-button/call-button.png"), -webkit-gradient(radial, 50% 100%, 0, 50% 100%, 100, from(#59d0f4), to(rgba(89,208,244,0))), -webkit-gradient(linear, 0% 0%, 0% 100%, from(#4fbbf7), to(#3faeeb));
+}
+.call-button_calling:hover {
+  background-color: #63c7fe;
+  background-image: url("blocks/call-button/call-button.png"), url("blocks/call-button/call-button.png"), -webkit-gradient(radial, 50% 100%, 0, 50% 100%, 100, from(#6dd9fa), to(rgba(109,217,250,0))), -webkit-gradient(linear, 0% 0%, 0% 100%, from(#63c7fe), to(#58bef7));
+}
+.call-button_calling .call-button__link:after {
+  left: 38px;
+  width: 9px;
+  height: 9px;
+  margin-top: -16px;
+  border: double #fff;
+  border-width: 12px 12px 0 0;
+  background: transparent;
+  border-radius: 0 15px 0 0;
+  -webkit-transform: rotate(15deg);
+  transform: rotate(15deg);
+}
+/* blocks/call-button/call-button.css end */

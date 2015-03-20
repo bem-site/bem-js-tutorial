@@ -1,37 +1,28 @@
 /* blocks/page/page.css begin */
-.custom-button
-{
-    display: inline-block;
-    position: relative;
-    color: white;
-    padding: 0.4em;
-    background-color: #f3067c;
-    text-decoration: none;
-    border-radius: 0.6em;
+.custom-button {
+  display: inline-block;
+  position: relative;
+  color: #fff;
+  padding: 0.4em;
+  background-color: #f3067c;
+  text-decoration: none;
+  border-radius: 0.6em;
 }
-
-
 /* blocks/page/page.css end */
 /* ../../desktop.blocks/text/text.css begin */
-.text
-{
-    font-family: "Lucida Grande",Helvetica,Arial,sans-serif;
-    color: #333;
-    font-size: 16px;
+.text {
+  font-family: "Lucida Grande", Helvetica, Arial, sans-serif;
+  color: #333;
+  font-size: 16px;
 }
-
 /* ../../desktop.blocks/text/text.css end */
 /* blocks/translate/translate.css begin */
-.translate__prompt
-{
-    display: none;
+.translate__prompt {
+  display: none;
 }
-
-.translate__prompt_visible
-{
-    display: inline;
-    color: green;
-    margin: 0 0.5em;
+.translate__prompt_visible {
+  display: inline;
+  color: #008000;
+  margin: 0 0.5em;
 }
-
 /* blocks/translate/translate.css end */

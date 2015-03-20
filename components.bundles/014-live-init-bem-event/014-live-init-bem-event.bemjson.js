@@ -3,9 +3,11 @@
     title: 'Live (lazy) initialization on initializing inner block',
     favicon: '/favicon.ico',
     head: [
-        { elem: 'css', url: '_014-live-init-bem-event.css', ie: false },
-        { elem: 'css', url: '_014-live-init-bem-event', ie: true },
+        { elem: 'css', url: '_014-live-init-bem-event.css' },
         { elem: 'meta', attrs: { name: 'description', content: '' }},
+    ],
+    scripts: [
+        { elem: 'js', url: '_014-live-init-bem-event.js' }
     ],
     content:[
         {
@@ -78,7 +80,6 @@
                     }
                 }
             ]
-        },
-        { elem: 'js', url: '_014-live-init-bem-event.js' }
+        }
     ]
 })

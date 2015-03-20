@@ -19,9 +19,11 @@
         title: 'Live (lazy) initialization on DOM event',
         favicon: '/favicon.ico',
         head: [
-            { elem: 'css', url: '_011-live-bind-to.css', ie: false },
-            { elem: 'css', url: '_011-live-bind-to', ie: true },
+            { elem: 'css', url: '_011-live-bind-to.css' },
             { elem: 'meta', attrs: { name: 'description', content: '' }},
+        ],
+        scripts: [
+            { elem: 'js', url: '_011-live-bind-to.js' }
         ],
         content:[
             [
@@ -29,8 +31,7 @@
                 '(<a href="http://archive.simurai.com/lab/buttons/">http://archive.simurai.com/lab/buttons/</a>) ',
                 'illustrate lazy initialization in BEM<br/>'
             ],
-            buttons,
-            { elem: 'js', url: '_011-live-bind-to.js' }
+            buttons
         ]
     }
 }())

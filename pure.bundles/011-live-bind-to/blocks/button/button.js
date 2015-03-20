@@ -1,6 +1,6 @@
-modules.define('i-bem__dom', function(provide, DOM) {
+modules.define('button', ['i-bem__dom'], function(provide, BEMDOM) {
 
-DOM.decl('button', {
+provide(BEMDOM.decl(this.name, {
     onSetMod: {
         'js' : {
             'inited' : function() {
@@ -17,8 +17,6 @@ DOM.decl('button', {
             this.onClick();
         });
     }
-});
-
-provide(DOM);
+}));
 
 });
