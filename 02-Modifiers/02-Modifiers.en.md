@@ -18,7 +18,7 @@ pure.bundles/
         002-change-modifier.html
 ```
 
-In the [002-change-modifier](https://bem.github.io/bem-js-tutorial/pure.bundles/002-change-modifier/002-change-modifier.html)
+In the [002-change-modifier](https://bem-site.github.io/bem-js-tutorial/pure.bundles/002-change-modifier/002-change-modifier.html)
 ([BEMJSON](https://github.com/bem/bem-js-tutorial/blob/master/pure.bundles/002-change-modifier/002-change-modifier.bemjson.js))
 example you can see a button changing its state after a user clicks on it.
 
@@ -128,7 +128,7 @@ pure.bundles/
 
 According to BEM, elements can be modified in the same way as blocks. JavaScript
 methods are similar in both. The
-[003-element-modifier](https://bem.github.io/bem-js-tutorial/pure.bundles/003-element-modifier/003-element-modifier.html)
+[003-element-modifier](https://bem-site.github.io/bem-js-tutorial/pure.bundles/003-element-modifier/003-element-modifier.html)
 example illustrates this.
 
 Similar to the previous example, the `traffic-light` has
@@ -291,7 +291,7 @@ pure.bundles/
 
 It is useful to toggle a modifier if there are 2 values of it to be changed one
 by one. This is what the
-[004-toggle-mod](https://bem.github.io/bem-js-tutorial/pure.bundles/004-toggle-mod/004-toggle-mod.html)
+[004-toggle-mod](https://bem-site.github.io/bem-js-tutorial/pure.bundles/004-toggle-mod/004-toggle-mod.html)
 ([BEMJSON](https://github.com/bem/bem-js-tutorial/blob/master/pure.bundles/004-toggle-mod/004-toggle-mod.bemjson.js))
 example demonstrates.
 
@@ -341,7 +341,7 @@ pure.bundles/
 ```
 
 Removing a modifier from an element (or a block) explained with
-[005-modifier-removing](https://bem.github.io/bem-js-tutorial/pure.bundles/005-modifier-removing/005-modifier-removing.html)
+[005-modifier-removing](https://bem-site.github.io/bem-js-tutorial/pure.bundles/005-modifier-removing/005-modifier-removing.html)
 ([BEMJSON](https://github.com/bem/bem-js-tutorial/blob/master/pure.bundles/005-modifier-removing/005-modifier-removing.bemjson.js))
 example. This is a kind of To-Do list, where each task is a sticky note and can
 be hidden (which means to be marked done) with a click.
@@ -420,7 +420,7 @@ before that happens. It is widely adopted for the cases when you need to prevent
 setting a modifier.
 
 The
-[006-before-set-mod](https://bem.github.io/bem-js-tutorial/pure.bundles/006-before-set-mod/006-before-set-mod.html)
+[006-before-set-mod](https://bem-site.github.io/bem-js-tutorial/pure.bundles/006-before-set-mod/006-before-set-mod.html)
 ([BEMJSON](https://github.com/bem/bem-js-tutorial/blob/master/pure.bundles/006-before-set-mod/006-before-set-mod.bemjson.js))
 example illustrates such a case with an
 [accordion-menu](https://github.com/bem/bem-js-tutorial/tree/master/pure.bundles/006-before-set-mod/blocks/accordion-menu)

@@ -67,7 +67,7 @@ The first example is the most simple. It demonstrates the block structure and
 shows how the JavaScript starts working.
 
 Load the example page
-[001-simple-block](https://bem.github.io/bem-js-tutorial/pure.bundles/001-simple-block/001-simple-block.html) with your console tool open, and you can see the `outerHTML`
+[001-simple-block](https://bem-site.github.io/bem-js-tutorial/pure.bundles/001-simple-block/001-simple-block.html) with your console tool open, and you can see the `outerHTML`
 of the `my-block` on the page.
 
 The BEMJSON declaration of the example

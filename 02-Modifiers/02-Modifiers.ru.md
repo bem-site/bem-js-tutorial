@@ -18,7 +18,7 @@ pure.bundles/
         002-change-modifier.html
 ```
 
-В примере [002-change-modifier](https://bem.github.io/bem-js-tutorial/pure.bundles/002-change-modifier/002-change-modifier.html)
+В примере [002-change-modifier](https://bem-site.github.io/bem-js-tutorial/pure.bundles/002-change-modifier/002-change-modifier.html)
 ([BEMJSON](https://github.com/bem/bem-js-tutorial/blob/master/pure.bundles/002-change-modifier/002-change-modifier.bemjson.js))
 вы можете увидеть кнопку, меняющую свое состояние по клику на неё.
 
@@ -127,7 +127,7 @@ pure.bundles/
 этого методы похожи.
 
 Рассмотрим на примере
-[003-element-modifier](https://bem.github.io/bem-js-tutorial/pure.bundles/003-element-modifier/003-element-modifier.html)
+[003-element-modifier](https://bem-site.github.io/bem-js-tutorial/pure.bundles/003-element-modifier/003-element-modifier.html)
 ([BEMJSON](https://github.com/bem/bem-js-tutorial/blob/master/pure.bundles/003-element-modifier/003-element-modifier.bemjson.js)).
 
 Как и в предыдущих примерах, блок `traffic-light` реализован в технологиях
@@ -294,7 +294,7 @@ pure.bundles/
 
 Если у модификатора 2 значения, и они должны меняться друг за другом, удобно
 воспользоваться переключением (toggle). Это показано в примере
-[004-toggle-mod](https://bem.github.io/bem-js-tutorial/pure.bundles/004-toggle-mod/004-toggle-mod.html)
+[004-toggle-mod](https://bem-site.github.io/bem-js-tutorial/pure.bundles/004-toggle-mod/004-toggle-mod.html)
 ([BEMJSON](https://github.com/bem/bem-js-tutorial/blob/master/pure.bundles/004-toggle-mod/004-toggle-mod.bemjson.js)).
 
 На этой странице вы можете видеть кнопку — блок `swicth` с модификатором
@@ -342,7 +342,7 @@ pure.bundles/
 ```
 
 Удаление модификатора с элемента (или блока) проиллюстрировано примером
-[005-modifier-removing](https://bem.github.io/bem-js-tutorial/pure.bundles/005-modifier-removing/005-modifier-removing.html)
+[005-modifier-removing](https://bem-site.github.io/bem-js-tutorial/pure.bundles/005-modifier-removing/005-modifier-removing.html)
 ([BEMJSON](https://github.com/bem/bem-js-tutorial/blob/master/pure.bundles/005-modifier-removing/005-modifier-removing.bemjson.js)).
 Это страница с todo-листом, в котором каждое дело показано клейким листочком.
 Листочек можно спрятать (пометить, как выполненный), кликнув на него.
@@ -418,7 +418,7 @@ pure.bundles/
 модификатора надо предотвратить.
 
 Пример
-[006-before-set-mod](https://bem.github.io/bem-js-tutorial/pure.bundles/006-before-set-mod/006-before-set-mod.html)
+[006-before-set-mod](https://bem-site.github.io/bem-js-tutorial/pure.bundles/006-before-set-mod/006-before-set-mod.html)
 ([BEMJSON](https://github.com/bem/bem-js-tutorial/blob/master/pure.bundles/006-before-set-mod/006-before-set-mod.bemjson.js))
 демонстрирует такой случай на примере блока
 [accordion-menu](https://github.com/bem/bem-js-tutorial/tree/master/pure.bundles/006-before-set-mod/blocks/accordion-menu).

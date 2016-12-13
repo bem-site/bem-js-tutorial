@@ -63,7 +63,7 @@ pure.bundles/
 ```
 
 On the
-[010-live-init-on-event.html](https://bem.github.io/bem-js-tutorial/pure.bundles/010-live-init-on-event/010-live-init-on-event.html)
+[010-live-init-on-event.html](https://bem-site.github.io/bem-js-tutorial/pure.bundles/010-live-init-on-event/010-live-init-on-event.html)
 ([BEMJSON](https://github.com/bem/bem-js-tutorial/blob/master/pure.bundles/010-live-init-on-event/010-live-init-on-event.bemjson.js))
 page you can see the text in Dutch. Actually, this text is divided into a lot of
 pieces phrase by phrase. Then, they are framed with a `translate` block.
@@ -157,7 +157,7 @@ dynamically changed pages. This you can see with the following example.
 
 ## Delegated initialization
 
-[010_2-delegation.html](https://bem.github.io/bem-js-tutorial/pure.bundles/010_2-delegation/010_2-delegation.html)
+[010_2-delegation.html](https://bem-site.github.io/bem-js-tutorial/pure.bundles/010_2-delegation/010_2-delegation.html)
 
 This page provides absolutely the same `translate` block as the previous one.
 But there is also a piece of crazy inline JavaScript on a page which works when a
@@ -186,7 +186,7 @@ pure.bundles/
 ```
 
 The next [example with 100 BonBon
-buttons](https://bem.github.io/bem-js-tutorial/pure.bundles/011-live-bind-to/011-live-bind-to.html)
+buttons](https://bem-site.github.io/bem-js-tutorial/pure.bundles/011-live-bind-to/011-live-bind-to.html)
 ([BEMJSON](https://github.com/bem/bem-js-tutorial/blob/master/pure.bundles/011-live-bind-to/011-live-bind-to.bemjson.js))
 shows that live events can be reacted not once when initializing a block but every
 time.
@@ -263,7 +263,7 @@ pure.bundles/
 In the previous examples the core watched only one `click` event to decide if a
 block should start working or not. But sometimes reacting just one event is not
 enough. This is illustrated with the
-[012-live-init-many-events](https://bem.github.io/bem-js-tutorial/pure.bundles/012-live-init-many-events/012-live-init-many-events.html)
+[012-live-init-many-events](https://bem-site.github.io/bem-js-tutorial/pure.bundles/012-live-init-many-events/012-live-init-many-events.html)
 ([BEMJSON](https://github.com/bem/bem-js-tutorial/blob/master/pure.bundles/012-live-init-many-events/012-live-init-many-events.bemjson.js))
 example, where you can see customized checkboxes.
 
@@ -563,7 +563,7 @@ The `map-marks` block contains the blocks `menu` and `map`. This can be seen fro
 [bemjson description of the
 page](https://github.com/varya/bem-js-tutorial/blob/master/components.bundles/014-live-init-bem-event/014-live-init-bem-event.bemjson.js)
 or inside the page html
-[014-live-init-bem-event.html](https://bem.github.io/bem-js-tutorial/components.bundles/014-live-init-bem-event/014-live-init-bem-event.html).
+[014-live-init-bem-event.html](https://bem-site.github.io/bem-js-tutorial/components.bundles/014-live-init-bem-event/014-live-init-bem-event.html).
 
 This block is only needed when a user has been started to interact with the
 menu. So the block uses live initialization and it is declared to initialize the

@@ -61,7 +61,7 @@ pure.bundles/
 ```
 
 На странице
-[010-live-init-on-event.html](https://bem.github.io/bem-js-tutorial/pure.bundles/010-live-init-on-event/010-live-init-on-event.html)
+[010-live-init-on-event.html](https://bem-site.github.io/bem-js-tutorial/pure.bundles/010-live-init-on-event/010-live-init-on-event.html)
 ([BEMJSON](https://github.com/bem/bem-js-tutorial/blob/master/pure.bundles/010-live-init-on-event/010-live-init-on-event.bemjson.js))
 вы можете увидеть историю, написанную на голландском языке. На самом деле текст
 разделен на множество маленьких кусочков по фразам. Каждая фраза завернута в
@@ -158,7 +158,7 @@ provide(BEMDOM.decl(this.name, {
 
 ## Делегированная инициализация
 
-[010_2-delegation.html](https://bem.github.io/bem-js-tutorial/pure.bundles/010_2-delegation/010_2-delegation.html)
+[010_2-delegation.html](https://bem-site.github.io/bem-js-tutorial/pure.bundles/010_2-delegation/010_2-delegation.html)
 
 В этом примере используется блок `translate` — тот же самый, что и в предыдущем.
 Но кроме этого там есть страшный JavaScript. Он срабатывает, если пользователь
@@ -187,7 +187,7 @@ pure.bundles/
 ```
 
 Следующий пример — [страница со 100 BonBon
-кнопками](https://bem.github.io/bem-js-tutorial/pure.bundles/011-live-bind-to/011-live-bind-to.html)
+кнопками](https://bem-site.github.io/bem-js-tutorial/pure.bundles/011-live-bind-to/011-live-bind-to.html)
 ([BEMJSON](https://github.com/bem/bem-js-tutorial/blob/master/pure.bundles/011-live-bind-to/011-live-bind-to.bemjson.js))
 — показывает, что реагировать на live события можно всегда, а не только при
 инициализации.
@@ -263,7 +263,7 @@ pure.bundles/
 В предыдущих примерах инициализация блоков проходила по возникновению на них
 события `click`. Но иногда слушать одно-единственное событие недостаточно.
 Пример
-[012-live-init-many-events](https://bem.github.io/bem-js-tutorial/pure.bundles/012-live-init-many-events/012-live-init-many-events.html)
+[012-live-init-many-events](https://bem-site.github.io/bem-js-tutorial/pure.bundles/012-live-init-many-events/012-live-init-many-events.html)
 ([BEMJSON](https://github.com/bem/bem-js-tutorial/blob/master/pure.bundles/012-live-init-many-events/012-live-init-many-events.bemjson.js))
 демонстрирует такой случай на кастомизированном checkbox.
 
@@ -564,7 +564,7 @@ components.bundles/
 Блок `map-marks` содержит блок `menu` и `map`. Это можно увидеть из [bemjson описания
 страницы](https://github.com/varya/bem-js-tutorial/blob/master/components.bundles/014-live-init-bem-event/014-live-init-bem-event.bemjson.js)
 или заглянув в HTML
-[014-live-init-bem-event.html](https://bem.github.io/bem-js-tutorial/components.bundles/014-live-init-bem-event/014-live-init-bem-event.html).
+[014-live-init-bem-event.html](https://bem-site.github.io/bem-js-tutorial/components.bundles/014-live-init-bem-event/014-live-init-bem-event.html).
 
 Этот блок нужен только при взаимодействии пользователя со страницей. Поэтому
 блок использует live-инициализацию, где сказано инициализировать блок только

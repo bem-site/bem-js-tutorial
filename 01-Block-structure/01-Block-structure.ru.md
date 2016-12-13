@@ -68,7 +68,7 @@ pure.bundles/
 Первый пример — самый простой. Он показывает структуру блока и работающий JavaScript.
 
 Загрузите пример
-[001-simple-block](https://bem.github.io/bem-js-tutorial/pure.bundles/001-simple-block/001-simple-block.html) в браузере с открытой консолью, и вы увидите вывод строки,
+[001-simple-block](https://bem-site.github.io/bem-js-tutorial/pure.bundles/001-simple-block/001-simple-block.html) в браузере с открытой консолью, и вы увидите вывод строки,
 соответствующей `outerHTML` блока.
 
 BEMJSON декларация этого примера
