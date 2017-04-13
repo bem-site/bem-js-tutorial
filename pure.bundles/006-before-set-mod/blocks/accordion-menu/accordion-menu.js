@@ -1,11 +1,11 @@
 modules.define('accordion-menu', ['i-bem-dom', 'jquery'], function(provide, bemDom, $) {
 
-provide(bemDom.decl(this.name, {
+provide(bemDom.declBlock(this.name, {
     beforeElemSetMod: {
         'item' : {
             'current' : {
                 'true' : function(elem) {
-                    return !this.hasMod(elem, 'disabled');
+                    return !this._elem(elem).hasMod('disabled', true);
                 }
             }
         }
@@ -15,7 +15,7 @@ provide(bemDom.decl(this.name, {
             'inited' : function() {
                 this._current = this.findElem('item', 'current', true);
                 this.bindTo('item', 'click', function(e) {
-                    this.setMod($(e.currentTarget), 'current', true);
+                  this._elem($(e.currentTarget)).setMod('current', true);
                 });
             }
         }

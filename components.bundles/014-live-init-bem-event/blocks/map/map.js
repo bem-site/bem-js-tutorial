@@ -1,6 +1,6 @@
 modules.define('map', ['i-bem-dom', 'jquery', 'ymaps'], function(provide, bemDom, $, ymaps) {
 
-provide(bemDom.decl(this.name, {
+provide(bemDom.declBlock(this.name, {
 
     onSetMod: {
         'js' : {

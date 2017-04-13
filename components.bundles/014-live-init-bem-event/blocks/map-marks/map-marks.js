@@ -1,6 +1,6 @@
 modules.define('map-marks', ['i-bem-dom', 'jquery'], function(provide, bemDom, $) {
 
-provide(bemDom.decl(this.name, {
+provide(bemDom.declBlock(this.name, {
 
     onSetMod: {
         'js' : {

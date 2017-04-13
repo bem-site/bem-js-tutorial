@@ -95,7 +95,9 @@ provide(bemDom.declBlock(this.name, {
     onSetMod : {
         'js' : {
             'inited' : function() {
-                this.setMod(this.elem('prompt'), 'visible', true);
+
+                this._elem('prompt').setMod('visible', true);
+                
             }
         }
     },
@@ -310,14 +312,14 @@ provide(bemDom.declBlock(this.name, {
     onSetMod : {
         'focused' : {
             'true' : function() {
-                this.elem('control').focus();
+                this._elem('control').focus();
             },
             '' : function() {
-                this.elem('control').blur();
+                this._elem('control').blur();
             }
         },
         'checked' : function(modName, modVal) {
-            this.elem('control').attr('checked', modVal ? 'checked' : false);
+            this._elem('control').attr('checked', modVal ? 'checked' : false);
         }
     },
     ...

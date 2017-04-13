@@ -1,7 +1,6 @@
 # Modifiers
 
-In BEM, modifiers express block states. To put a block into a special state we set a
-modifier on it. Then a block runs a callback associated with this modifier.
+In BEM, modifiers express block states. To put a block into a special state we set a modifier on it. Then a block runs a callback associated with this modifier.
 
 ## Setting a modifier on a block and reacting to it
 
@@ -18,32 +17,20 @@ pure.bundles/
         002-change-modifier.html
 ```
 
-In the [002-change-modifier](https://bem-site.github.io/bem-js-tutorial/pure.bundles/002-change-modifier/002-change-modifier.html)
-([BEMJSON](https://github.com/bem/bem-js-tutorial/blob/master/pure.bundles/002-change-modifier/002-change-modifier.bemjson.js))
-example you can see a button changing its state after a user clicks on it.
+In the [002-change-modifier](https://bem-site.github.io/bem-js-tutorial/pure.bundles/002-change-modifier/002-change-modifier.html) ([BEMJSON](https://github.com/bem/bem-js-tutorial/blob/master/pure.bundles/002-change-modifier/002-change-modifier.bemjson.js)) example you can see a button changing its state after a user clicks on it.
 
 The button is a block named `call-button` and is represented by
-[CSS](https://github.com/bem/bem-js-tutorial/blob/master/pure.bundles/002-change-modifier/blocks/call-button/call-button.css),
-[JavaScript](https://github.com/bem/bem-js-tutorial/blob/master/pure.bundles/002-change-modifier/blocks/call-button/call-button.js)
-and [templates](https://github.com/bem/bem-js-tutorial/blob/master/pure.bundles/002-change-modifier/blocks/call-button/call-button.bemhtml)
-placed into [the block folder](https://github.com/bem/bem-js-tutorial/tree/master/pure.bundles/002-change-modifier/blocks/call-button).
+[CSS](https://github.com/bem/bem-js-tutorial/blob/master/pure.bundles/002-change-modifier/blocks/call-button/call-button.css), [JavaScript](https://github.com/bem/bem-js-tutorial/blob/master/pure.bundles/002-change-modifier/blocks/call-button/call-button.js) and [templates](https://github.com/bem/bem-js-tutorial/blob/master/pure.bundles/002-change-modifier/blocks/call-button/call-button.bemhtml) placed into [the block folder](https://github.com/bem/bem-js-tutorial/tree/master/pure.bundles/002-change-modifier/blocks/call-button).
 
 In JavaScript
 [blocks/call-button/call-button.js](https://github.com/bem/bem-js-tutorial/blob/master/pure.bundles/002-change-modifier/blocks/call-button/call-button.js)
 there is a common BEM DOM block declaration.
 
-The callback associated with `js_inited` modifier runs when a block is
-initialized by the core. In this example it starts with binding to a `click`
-event on the DOM node corresponding to the block. This is done with the `bindTo`
-helper.
+The callback associated with `js_inited` modifier runs when a block is initialized by the core. In this example it starts with binding to a `click` event on the DOM node corresponding to the block. This is done with the `_domEvents` helper.
 
-In the callback it is said to set a `calling` modifier to the block and the `setMod`
-method serves for it.
+In the callback it is said to set a `calling` modifier to the block and the `setMod` method serves for it.
 
-**NOTE** In many cases using `bindTo` for events listening is not the best solution
-as it needs to watch every block of the kind. It becomes even worse with elements of
-the blocks since they are many. You will see below much better way in the `live`
-section.
+**Important** In many cases using `bindTo`??? for events listening is not the best solution as it needs to watch every block of the kind. It becomes even worse with elements of the blocks since they are many. You will see below much better way in the lazy initialization section.
 
 ```js
 modules.define('call-button', ['i-bem-dom'], function(provide, bemDom) {
@@ -52,7 +39,7 @@ provide(bemDom.declBlock(this.name, {
     onSetMod: {
         'js' : {
             'inited' : function() {
-                this.bindTo('click', function() {
+                this._domEvents().on('click', function() {
                     this.setMod('calling');
                 });
             }
@@ -84,7 +71,7 @@ provide(bemDom.declBlock(this.name, {
     onSetMod: {
         'js' : { ... },
         'calling' : function() {
-            this.elem('link').text('Calling...');
+            this._elem('link').text('Calling...');
         }
     }
 }));
@@ -182,9 +169,9 @@ provide(bemDom.declBlock('traffic-light', {
                 },
                 _this = this;
 
-            oldModVal && this.setMod(this.elem(oldModVal), 'status', 'off');
+            oldModVal &&   this._elem(oldModVal).setMod('status', 'off');
 
-            this.setMod(this.elem(modVal), 'status', 'on');
+            this._elem(modVal).setMod('status', 'on');
 
             this.timer = window.setTimeout(function() {
                 _this.setMod('status', nextStatus[modVal]);
@@ -209,16 +196,12 @@ Here a corresponding element is given the `status_on` modifier so that its light
 turns on and the previously active projector is set `status_off`.
 
 Modifiers are set on elements with the already familiar `setMod` helper with an
-optional first parameter which means an element name.
+`_elem` method:
 
-So, by providing different parameters to the same `setMod` function you can:
 
 ```js
-// apply a modifier to a current block
-this.setMod('modName', 'modValue');
-
 // apply a modifier to an element of a current block
-this.setMod(this.elem('elemName'), 'modName', 'modValue');
+this._elem('elemName').setMod('modName', 'modValue');
 ```
 
 Describing the actions related to element modifiers is similar to block modifier actions. By analogy to `onSetMod` property you can user `onElemSetMod` with the
@@ -269,10 +252,10 @@ provide(bemDom.declBlock(this.name, {
     }
 }));
 
-});```
+});
+```
 
-This makes a browser play a traffic light sound when an element is switched into
-`status_on` and to keep silent when the modifier goes off.
+This makes a browser play a traffic light sound when an element is switched into `status_on` and to keep silent when the modifier goes off.
 
 ## Toggling a modifier
 
@@ -289,29 +272,24 @@ pure.bundles/
         004-toggle-mod.html
 ```
 
-It is useful to toggle a modifier if there are 2 values of it to be changed one
-by one. This is what the
-[004-toggle-mod](https://bem-site.github.io/bem-js-tutorial/pure.bundles/004-toggle-mod/004-toggle-mod.html)
-([BEMJSON](https://github.com/bem/bem-js-tutorial/blob/master/pure.bundles/004-toggle-mod/004-toggle-mod.bemjson.js))
-example demonstrates.
+It is useful to toggle a modifier if there are 2 values of it to be changed one by one. This is what the [004-toggle-mod](https://bem-site.github.io/bem-js-tutorial/pure.bundles/004-toggle-mod/004-toggle-mod.html) ([BEMJSON](https://github.com/bem/bem-js-tutorial/blob/master/pure.bundles/004-toggle-mod/004-toggle-mod.bemjson.js)) example demonstrates.
 
 It shows a `switch` block, which is a nice button, with its `switched_off`
 modifier meaning that the button is inactive at the moment.
 
 The
-[switch.js](https://github.com/bem/bem-js-tutorial/blob/master/pure.bundles/004-toggle-mod/blocks/switch/switch.js)
-file of the block instructs the button to react to user clicks and toggle the
-modifier from `switched_off` to `switched_on` and backwards by using the
+[switch.js](https://github.com/bem/bem-js-tutorial/blob/master/pure.bundles/004-toggle-mod/blocks/switch/switch.js) file of the block instructs the button to react to user clicks and toggle the modifier from `switched_off` to `switched_on` and backwards by using the
 `toggleMod` helper.
 
 ```js
 modules.define('switch', ['i-bem-dom'], function(provide, bemDom) {
 
 provide(bemDom.declBlock(this.name, {
-    onSetMod: {
+
+    onSetMod : {
         'js' : {
             'inited' : function() {
-                this.bindTo('click', function() {
+                this._domEvents().on('click', function() {
                     this.toggleMod('switched', 'on', 'off');
                 });
             }
@@ -340,10 +318,7 @@ pure.bundles/
         005-modifier-removing.html
 ```
 
-Removing a modifier from an element (or a block) explained with
-[005-modifier-removing](https://bem-site.github.io/bem-js-tutorial/pure.bundles/005-modifier-removing/005-modifier-removing.html)
-([BEMJSON](https://github.com/bem/bem-js-tutorial/blob/master/pure.bundles/005-modifier-removing/005-modifier-removing.bemjson.js))
-example. This is a kind of To-Do list, where each task is a sticky note and can
+Removing a modifier from an element (or a block) explained with [005-modifier-removing](https://bem-site.github.io/bem-js-tutorial/pure.bundles/005-modifier-removing/005-modifier-removing.html) ([BEMJSON](https://github.com/bem/bem-js-tutorial/blob/master/pure.bundles/005-modifier-removing/005-modifier-removing.bemjson.js)) example. This is a kind of To-Do list, where each task is a sticky note and can
 be hidden (which means to be marked done) with a click.
 
 The list is represented as a `todo` block where every item is name a `task`
@@ -362,9 +337,7 @@ block. As all the tasks are visible by default, it is emphasized by a
 </ul>
 ```
 
-How the block behaves is described in its
-[todo.js](https://github.com/bem/bem-js-tutorial/blob/master/pure.bundles/005-modifier-removing/blocks/todo/todo.js)
-file.
+How the block behaves is described in its [todo.js](https://github.com/bem/bem-js-tutorial/blob/master/pure.bundles/005-modifier-removing/blocks/todo/todo.js) file.
 
 ```js
 modules.define('todo', ['i-bem-dom'], function(provide, bemDom) {
@@ -373,7 +346,7 @@ provide(bemDom.declBlock(this.name, {
     onSetMod: {
         'js' : {
             'inited' : function() {
-                this.bindTo(this.elem('task'), 'click', function(e) {
+                this._domEvents().on(this._elem('task'), 'click', function(e) {
                     this.delMod(e.domElem, 'visible');
                 });
             }
@@ -384,20 +357,14 @@ provide(bemDom.declBlock(this.name, {
 });
 ```
 
-Whenever a user clicks on a `task` element the `visible` modifier is removed
-from it by `delMod` modifier.
+Whenever a user clicks on a `task` element the `visible` modifier is removed from it by `delMod` modifier.
 
-The `delMod` helper can also be used for blocks as the first parameter (an
-element object) is optional.
+The `delMod` helper can also be used for blocks as the first parameter (an element object) is optional.
 
-Notice that the `bindTo` helper works not with a block but with its elements
-here.
+Notice that the `_domEvents` helper works not with a block but with its elements here.
 
-**NOTE:** As it was mentioned above, `bindTo` helper listens for every element of
-the kind. If this block had 100 task elements, that would mean 100 event watchers.
-Moreover, a dynamically added new task should have been provided with an event
-listener as well. There is another way to work with the events fully explained in
-the `live` section. Make sure you have learnt it before starting with a real
+**Important** As it was mentioned above, `bindTo`??? helper listens for every element of the kind. If this block had 100 task elements, that would mean 100 event watchers.
+Moreover, a dynamically added new task should have been provided with an event listener as well. There is another way to work with the events fully explained in the lazy initialization section. Make sure you have learnt it before starting with a real
 powerful application.
 
 ## Before a modifier is set
@@ -415,22 +382,11 @@ pure.bundles/
         006-before-set-mod.html
 ```
 
-Besides the possibility to react on a modifier setting, you can do something
-before that happens. It is widely adopted for the cases when you need to prevent
-setting a modifier.
+Besides the possibility to react on a modifier setting, you can do something before that happens. It is widely adopted for the cases when you need to prevent setting a modifier.
 
-The
-[006-before-set-mod](https://bem-site.github.io/bem-js-tutorial/pure.bundles/006-before-set-mod/006-before-set-mod.html)
-([BEMJSON](https://github.com/bem/bem-js-tutorial/blob/master/pure.bundles/006-before-set-mod/006-before-set-mod.bemjson.js))
-example illustrates such a case with an
-[accordion-menu](https://github.com/bem/bem-js-tutorial/tree/master/pure.bundles/006-before-set-mod/blocks/accordion-menu)
-block.
+The [006-before-set-mod](https://bem-site.github.io/bem-js-tutorial/pure.bundles/006-before-set-mod/006-before-set-mod.html ([BEMJSON](https://github.com/bem/bem-js-tutorial/blob/master/pure.bundles/006-before-set-mod/006-before-set-mod.bemjson.js)) example illustrates such a case with an [accordion-menu](https://github.com/bem/bem-js-tutorial/tree/master/pure.bundles/006-before-set-mod/blocks/accordion-menu) block.
 
-You can see a menu with a few items on a page. Each of them can reveal
-its subitems when being clicked. To do that you need bind to a `click` event on
-the menu items, set `current` modifier into `true` for the related item and
-ensure that previously selected item is closed (which means its `current`
-modifier is set into `false`).
+You can see a menu with a few items on a page. Each of them can reveal its subitems when being clicked. To do that you need bind to a `click` event on the menu items, set `current` modifier into `true` for the related item and ensure that previously selected item is closed (which means its `current` modifier is set into `false`).
 
 ```js
 modules.define('accordion-menu',
@@ -443,8 +399,8 @@ provide(bemDom.declBlock(this.name, {
             'inited' : function() {
                 this._current = this.findElem('item', 'current', true);
 
-                this.bindTo('item', 'click', function(e) {
-                    this.setMod($(e.currentTarget), 'current', true);
+                this._domEvents().on('item', 'click', function(e) {
+                    this._elem($(e.currentTarget)).setMod('current', true);
                 });
             }
         }
@@ -467,18 +423,9 @@ provide(bemDom.declBlock(this.name, {
 });
 ```
 
-**NOTE:** You may also take notice that jQuery is used here to wrap the elements and
-this provides some changes into the code. The bem-core library is based on a
-[ymaps/modules](https://github.com/ymaps/modules/blob/master/README.md)
-module system. With it each module should be declared before using.
+**Important** You may also take notice that jQuery is used here to wrap the elements and this provides some changes into the code. The bem-core library is based on a [ymaps/modules](https://github.com/ymaps/modules/blob/master/README.md) module system. With it each module should be declared before using.
 
-The example becomes more interesting when a disabled item appears. Such an item
-has to prevent its being in the `current` state. That is always possible to put
-an additional condition in the modifier callback but the core provides more
-elegant solution. Similar to `onSetMod` and `onElemSetMod` properties you can
-use `beforeSetMod` and `beforeElemSetMod` to instruct the block component what
-to do previously. It is also prevents setting a modifier when a callback related
-to the 'before' part returns `false`.
+The example becomes more interesting when a disabled item appears. Such an item has to prevent its being in the `current` state. That is always possible to put an additional condition in the modifier callback but the core provides more elegant solution. Similar to `onSetMod` and `onElemSetMod` properties you can use `beforeSetMod` and `beforeElemSetMod` to instruct the block component what to do previously. It is also prevents setting a modifier when a callback related to the 'before' part returns `false`.
 
 ```js
 modules.define('accordion-menu',
@@ -489,7 +436,8 @@ provide(bemDom.declBlock(this.name, {
         'item' : {
             'current' : {
                 'true' : function(elem) {
-                    return !this.hasMod(elem, 'disabled');
+                    return !this._elem(elem).hasMod('disabled', true);
+
                 }
             }
         }
@@ -500,5 +448,4 @@ provide(bemDom.declBlock(this.name, {
 });
 ```
 
-Here it checks if the clicked item is disabled and prevents such an item to be
-`current`.
+Here it checks if the clicked item is disabled and prevents such an item to be `current`.

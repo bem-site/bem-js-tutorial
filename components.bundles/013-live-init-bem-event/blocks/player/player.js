@@ -1,6 +1,6 @@
 modules.define('player', ['i-bem-dom', 'jquery'], function(provide, bemDom, $) {
 
-provide(bemDom.decl(this.name, {
+provide(bemDom.declBlock(this.name, {
     rotate: function() {
         var player = this;
 

@@ -1,16 +1,16 @@
 modules.define('call-button', ['i-bem-dom'], function(provide, bemDom) {
 
-provide(bemDom.decl(this.name, {
+provide(bemDom.declBlock(this.name, {
     onSetMod: {
         'js' : {
             'inited' : function() {
-                this.bindTo('click', function() {
+                this._domEvents().on('click', function() {
                     this.setMod('calling');
                 });
             }
         },
         'calling' : function() {
-            this.elem('link').text('Calling...');
+            this._elem('link').text('Calling...');
         }
     }
 }));

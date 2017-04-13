@@ -1,17 +1,17 @@
 modules.define('checkbox', ['i-bem-dom'], function(provide, bemDom) {
 
-provide(bemDom.decl(this.name, {
+provide(bemDom.declBlock(this.name, {
     onSetMod: {
         'focused' : {
             'true' : function() {
-                this.elem('control').focus();
+                this._elem('control').focus();
             },
             '' : function() {
-                this.elem('control').blur();
+                this._elem('control').blur();
             }
         },
         'checked' : function(modName, modVal) {
-            this.elem('control').attr('checked', modVal ? 'checked' : false);
+            this._elem('control').attr('checked', modVal ? 'checked' : false);
         }
     },
     _onClick : function() {
