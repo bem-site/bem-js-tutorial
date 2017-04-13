@@ -98,7 +98,7 @@ In this case it is
 a module represented as a `dom` element of `i-bem` block from
 [bem-core](https://en.bem.info/libs/bem-core/) library.
 
-Inside you can use the `bemDom` object and its `decl` method to describe a block.
+Inside you can use the `bemDom` object and its `declBlock` method to describe a block.
 
 The block name is the first parameter.
 

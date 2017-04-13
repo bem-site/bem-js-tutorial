@@ -187,8 +187,8 @@ provide(bemDom.declBlock('traffic-light', {
 The arguments passed into the modifier callback are:
 
  1. Modifier name,
- 1. Modifier value to be set,
- 1. Previous modifier value.
+ 2. Modifier value to be set,
+ 3. Previous modifier value.
 
 With these, the actions can be a bit different depending on the modifier value.
 
@@ -204,13 +204,15 @@ Modifiers are set on elements with the already familiar `setMod` helper with an
 this._elem('elemName').setMod('modName', 'modValue');
 ```
 
-Describing the actions related to element modifiers is similar to block modifier actions. By analogy to `onSetMod` property you can user `onElemSetMod` with the
-following syntax:
+Describing the actions related to element modifiers is similar to block modifier actions:
 
 ```js
-bemDom.declBlock('my-block', {
-    onElemSetMod: {
-        'elemName' : {
+modules.define('my-block__elemName', ['i-bem-dom'], function(provide, bemDom) {
+
+provide(bemDom.declElem('my-block',  'elemName', {
+
+      onSetMod: {
+
           'foo' : function() {
               // Runs when an element gets any value of `foo` modifier
           },
@@ -222,8 +224,10 @@ bemDom.declBlock('my-block', {
                   // Runs when `bar` modifier is removed from an element
               }
           }
-        }
-    }
+      },
+
+    }));
+
 });
 ```
 
@@ -364,8 +368,7 @@ The `delMod` helper can also be used for blocks as the first parameter (an eleme
 Notice that the `_domEvents` helper works not with a block but with its elements here.
 
 **Important** As it was mentioned above, `bindTo`??? helper listens for every element of the kind. If this block had 100 task elements, that would mean 100 event watchers.
-Moreover, a dynamically added new task should have been provided with an event listener as well. There is another way to work with the events fully explained in the lazy initialization section. Make sure you have learnt it before starting with a real
-powerful application.
+Moreover, a dynamically added new task should have been provided with an event listener as well. There is another way to work with the events fully explained in the lazy initialization section. Make sure you have learnt it before starting with a real powerful application.
 
 ## Before a modifier is set
 
