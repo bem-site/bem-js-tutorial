@@ -1,6 +1,6 @@
-modules.define('accordion-menu', ['i-bem__dom', 'jquery'], function(provide, BEMDOM, $) {
+modules.define('accordion-menu', ['i-bem-dom', 'jquery'], function(provide, bemDom, $) {
 
-provide(BEMDOM.decl(this.name, {
+provide(bemDom.decl(this.name, {
     beforeElemSetMod: {
         'item' : {
             'current' : {

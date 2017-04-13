@@ -63,25 +63,20 @@ pure.bundles/
         001-simple-block.html
 ```
 
-The first example is the most simple. It demonstrates the block structure and
-shows how the JavaScript starts working.
+The first example is the most simple. It demonstrates the block structure and shows how the JavaScript starts working.
 
-Load the example page
-[001-simple-block](https://bem-site.github.io/bem-js-tutorial/pure.bundles/001-simple-block/001-simple-block.html) with your console tool open, and you can see the `outerHTML`
+Load the example page [001-simple-block](https://bem-site.github.io/bem-js-tutorial/pure.bundles/001-simple-block/001-simple-block.html) with your console tool open, and you can see the `outerHTML`
 of the `my-block` on the page.
 
-The BEMJSON declaration of the example
-[001-simple-block.bemjson.js](https://github.com/bem/bem-js-tutorial/blob/master/pure.bundles/001-simple-block/001-simple-block.bemjson.js) describes a simple page with only one
+The BEMJSON declaration of the example [001-simple-block.bemjson.js](https://github.com/bem/bem-js-tutorial/blob/master/pure.bundles/001-simple-block/001-simple-block.bemjson.js) describes a simple page with only one
 `my-block` component.
 
-The `my-block` component is represented on the
-[001-simple-block/blocks](https://github.com/bem/bem-js-tutorial/tree/master/pure.bundles/001-simple-block/blocks/my-block) level with a JavaScript file. The
-[my-block.js](https://github.com/bem/bem-js-tutorial/blob/master/pure.bundles/001-simple-block/blocks/my-block/my-block.js) file is filled with a simple piece of code.
+The `my-block` component is represented on the [001-simple-block/blocks](https://github.com/bem/bem-js-tutorial/tree/master/pure.bundles/001-simple-block/blocks/my-block) level with a JavaScript file. The [my-block.js](https://github.com/bem/bem-js-tutorial/blob/master/pure.bundles/001-simple-block/blocks/my-block/my-block.js) file is filled with a simple piece of code.
 
 ```js
-modules.define('my-block', ['i-bem__dom'], function(provide, BEMDOM) {
+modules.define('my-block', ['i-bem-dom'], function(provide, bemDom) {
 
-provide(BEMDOM.decl(this.name, {
+provide(bemDom.declBlock(this.name, {
     onSetMod: {
         'js' : {
             'inited' : function() {
@@ -103,7 +98,7 @@ In this case it is
 a module represented as a `dom` element of `i-bem` block from
 [bem-core](https://en.bem.info/libs/bem-core/) library.
 
-Inside you can use the `BEMDOM` object and its `decl` method to describe a block.
+Inside you can use the `bemDom` object and its `decl` method to describe a block.
 
 The block name is the first parameter.
 
@@ -115,7 +110,7 @@ see one of them, an `onSetMod` property in the example. It is used to store
 callbacks to run when a block gets a modifier.
 
 ```js
-BEMDOM.decl(this.name, {
+bemDom.declBlock(this.name, {
     onSetMod: {
         'foo' : function() {
             // Runs when a block gets any value of `foo` modifier.

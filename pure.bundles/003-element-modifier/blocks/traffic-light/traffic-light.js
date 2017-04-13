@@ -1,8 +1,8 @@
-modules.define('traffic-light', ['i-bem__dom'], function(provide, BEMDOM) {
+modules.define('traffic-light', ['i-bem-dom'], function(provide, bemDom) {
 
 var goSound = new Audio('blocks/traffic-light/__go/traffic-light__go.mp3');
 
-provide(BEMDOM.decl(this.name, {
+provide(bemDom.decl(this.name, {
     onSetMod: {
         'js' : {
             'inited' : function() {

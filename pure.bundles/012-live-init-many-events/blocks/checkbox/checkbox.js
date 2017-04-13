@@ -1,6 +1,6 @@
-modules.define('checkbox', ['i-bem__dom'], function(provide, BEMDOM) {
+modules.define('checkbox', ['i-bem-dom'], function(provide, bemDom) {
 
-provide(BEMDOM.decl(this.name, {
+provide(bemDom.decl(this.name, {
     onSetMod: {
         'focused' : {
             'true' : function() {

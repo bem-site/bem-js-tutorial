@@ -67,22 +67,18 @@ pure.bundles/
 
 Первый пример — самый простой. Он показывает структуру блока и работающий JavaScript.
 
-Загрузите пример
-[001-simple-block](https://bem-site.github.io/bem-js-tutorial/pure.bundles/001-simple-block/001-simple-block.html) в браузере с открытой консолью, и вы увидите вывод строки,
+Загрузите пример [001-simple-block](https://bem-site.github.io/bem-js-tutorial/pure.bundles/001-simple-block/001-simple-block.html) в браузере с открытой консолью, и вы увидите вывод строки,
 соответствующей `outerHTML` блока.
 
-BEMJSON декларация этого примера
-[001-simple-block.bemjson.js](https://github.com/bem/bem-js-tutorial/blob/master/pure.bundles/001-simple-block/001-simple-block.bemjson.js) описывает простую страницу с
+BEMJSON декларация этого примера [001-simple-block.bemjson.js](https://github.com/bem/bem-js-tutorial/blob/master/pure.bundles/001-simple-block/001-simple-block.bemjson.js) описывает простую страницу с
 одним-единственным блоком `my-block`.
 
-Компонент `my-block` расположен на уровне переопределения
-[001-simple-block/blocks](https://github.com/bem/bem-js-tutorial/tree/master/pure.bundles/001-simple-block/blocks/my-block) и содержит JavaScript файл. Это файл
-[my-block.js](https://github.com/bem/bem-js-tutorial/blob/master/pure.bundles/001-simple-block/blocks/my-block/my-block.js), в нём довольно простой код.
+Компонент `my-block` расположен на уровне переопределения [001-simple-block/blocks](https://github.com/bem/bem-js-tutorial/tree/master/pure.bundles/001-simple-block/blocks/my-block) и содержит JavaScript файл. Это файл [my-block.js](https://github.com/bem/bem-js-tutorial/blob/master/pure.bundles/001-simple-block/blocks/my-block/my-block.js), в нём довольно простой код.
 
 ```js
-modules.define('my-block', ['i-bem__dom'], function(provide, BEMDOM) {
+modules.define('my-block', ['i-bem-dom'], function(provide, bemDom) {
 
-provide(BEMDOM.decl(this.name, {
+provide(bemDom.declBlock(this.name, {
     onSetMod: {
         'js' : {
             'inited' : function() {
@@ -103,7 +99,7 @@ provide(BEMDOM.decl(this.name, {
 реализованный как элемент `dom` блока `i-bem` библиотеки
 [bem-core](https://en.bem.info/libs/bem-core/).
 
-Далее внутри вы можете использовать объект `BEMDOM` и его метод `decl` для описания
+Далее внутри вы можете использовать объект `bemDom` и его метод `decl` для описания
 вашего блока.
 
 Первый параметр — имя блока.
@@ -116,7 +112,7 @@ provide(BEMDOM.decl(this.name, {
 назначается соответствующий модификатор.
 
 ```js
-BEMDOM.decl(this.name, {
+bemDom.declBlock(this.name, {
     onSetMod: {
         'foo' : function() {
             // Вызывается, если блоку назначается любое значение модификатора 'foo'.

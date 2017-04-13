@@ -1,6 +1,6 @@
-modules.define('button', ['i-bem__dom'], function(provide, BEMDOM) {
+modules.define('button', ['i-bem-dom'], function(provide, bemDom) {
 
-provide(BEMDOM.decl(this.name, {
+provide(bemDom.decl(this.name, {
     onSetMod: {
         'js' : {
             'inited' : function() {

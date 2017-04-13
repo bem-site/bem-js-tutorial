@@ -1,6 +1,6 @@
-modules.define('dj', ['i-bem__dom'], function(provide, BEMDOM) {
+modules.define('dj', ['i-bem-dom'], function(provide, bemDom) {
 
-provide(BEMDOM.decl(this.name, {
+provide(bemDom.decl(this.name, {
     onSetMod: {
         'running' : {
             'true' : function() {

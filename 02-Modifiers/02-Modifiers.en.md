@@ -40,15 +40,15 @@ helper.
 In the callback it is said to set a `calling` modifier to the block and the `setMod`
 method serves for it.
 
-**NOTE:** In many cases using `bindTo` for events listening is not the best solution
+**NOTE** In many cases using `bindTo` for events listening is not the best solution
 as it needs to watch every block of the kind. It becomes even worse with elements of
 the blocks since they are many. You will see below much better way in the `live`
 section.
 
 ```js
-modules.define('call-button', ['i-bem__dom'], function(provide, BEMDOM) {
+modules.define('call-button', ['i-bem-dom'], function(provide, bemDom) {
 
-provide(BEMDOM.decl(this.name, {
+provide(bemDom.declBlock(this.name, {
     onSetMod: {
         'js' : {
             'inited' : function() {
@@ -57,9 +57,9 @@ provide(BEMDOM.decl(this.name, {
                 });
             }
         }
-
-...
-
+      }
+    }));
+  });
 ```
 
 Take into account that here we use a boolean modifier, which has no value. But
@@ -78,9 +78,9 @@ block change its appearance. If you need additional changes on a block,
 place them into a function corresponding to the modifier. Like the following:
 
 ```js
-modules.define('call-button', ['i-bem__dom'], function(provide, BEMDOM) {
+modules.define('call-button', ['i-bem-dom'], function(provide, bemDom) {
 
-provide(BEMDOM.decl(this.name, {
+provide(bemDom.declBlock(this.name, {
     onSetMod: {
         'js' : { ... },
         'calling' : function() {
@@ -141,17 +141,18 @@ It contains three light elements `stop`, `slow` and `go` each of which can have 
 `status` modifier with its `on` and `off` value.
 
 ```js
-modules.define('traffic-light', ['i-bem__dom'], function(provide, BEMDOM) {
+modules.define('traffic-light', ['i-bem-dom'], function(provide, bemDom) {
 
-provide(BEMDOM.decl(this.name, {
+provide(bemDom.declBlock(this.name, {
     onSetMod: {
         'js' : {
             'inited' : function() {
                 ...
                 this.setMod('status', 'stop');
             }
-        },
-        ...
+        }
+    }
+
 }));
 
 });
@@ -165,9 +166,9 @@ The `status` modifier is declared with its callback, once for all its values. Th
 is a good way to get rid of copy&paste if the corresponding states work similarly.
 
 ```js
-modules.define('traffic-light', ['i-bem__dom'], function(provide, BEMDOM) {
+modules.define('traffic-light', ['i-bem-dom'], function(provide, bemDom) {
 
-provide(BEMDOM.decl('traffic-light', {
+provide(bemDom.declBlock('traffic-light', {
     onSetMod: {
         'js' : { ... },
 
@@ -220,12 +221,11 @@ this.setMod('modName', 'modValue');
 this.setMod(this.elem('elemName'), 'modName', 'modValue');
 ```
 
-Describing the actions related to element modifiers is similar to block modifier
-actions. By analogy to `onSetMod` property you can user `onElemSetMod` with the
+Describing the actions related to element modifiers is similar to block modifier actions. By analogy to `onSetMod` property you can user `onElemSetMod` with the
 following syntax:
 
 ```js
-DOM.decl('my-block', {
+bemDom.declBlock('my-block', {
     onElemSetMod: {
         'elemName' : {
           'foo' : function() {
@@ -247,11 +247,11 @@ DOM.decl('my-block', {
 In this example, only the `go` element is provided with a special functionality.
 
 ```js
-modules.define('traffic-light', ['i-bem__dom'], function(provide, BEMDOM) {
+modules.define('traffic-light', ['i-bem-dom'], function(provide, bemDom) {
 
 var goSound = new Audio('blocks/traffic-light/__go/traffic-light__go.mp3');
 
-provide(BEMDOM.decl(this.name, {
+provide(bemDom.declBlock(this.name, {
     onSetMod: { ... },
 
     onElemSetMod: {
@@ -305,9 +305,9 @@ modifier from `switched_off` to `switched_on` and backwards by using the
 `toggleMod` helper.
 
 ```js
-modules.define('switch', ['i-bem__dom'], function(provide, BEMDOM) {
+modules.define('switch', ['i-bem-dom'], function(provide, bemDom) {
 
-provide(BEMDOM.decl(this.name, {
+provide(bemDom.declBlock(this.name, {
     onSetMod: {
         'js' : {
             'inited' : function() {
@@ -359,7 +359,7 @@ block. As all the tasks are visible by default, it is emphasized by a
       Visit bem.info to learn more.
     </a>
   </li>
-  ...
+</ul>
 ```
 
 How the block behaves is described in its
@@ -367,9 +367,9 @@ How the block behaves is described in its
 file.
 
 ```js
-modules.define('todo', ['i-bem__dom'], function(provide, BEMDOM) {
+modules.define('todo', ['i-bem-dom'], function(provide, bemDom) {
 
-provide(BEMDOM.decl(this.name, {
+provide(bemDom.declBlock(this.name, {
     onSetMod: {
         'js' : {
             'inited' : function() {
@@ -434,9 +434,9 @@ modifier is set into `false`).
 
 ```js
 modules.define('accordion-menu',
-        ['i-bem__dom', 'jquery'], function(provide, BEMDOM, $) {
+        ['i-bem-dom', 'jquery'], function(provide, bemDom, $) {
 
-provide(BEMDOM.decl(this.name, {
+provide(bemDom.declBlock(this.name, {
 
     onSetMod: {
         'js' : {
@@ -482,9 +482,9 @@ to the 'before' part returns `false`.
 
 ```js
 modules.define('accordion-menu',
-        ['i-bem__dom', 'jquery'], function(provide, BEMDOM, $) {
+        ['i-bem-dom', 'jquery'], function(provide, bemDom, $) {
 
-provide(BEMDOM.decl(this.name, {
+provide(bemDom.declBlock(this.name, {
     beforeElemSetMod: {
         'item' : {
             'current' : {
