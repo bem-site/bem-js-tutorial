@@ -1,23 +1,20 @@
-modules.define('translate', ['i-bem__dom'], function(provide, BEMDOM) {
+modules.define('translate', ['i-bem-dom'], function(provide, bemDom) {
 
-provide(BEMDOM.decl(this.name, {
+provide(bemDom.declBlock(this.name, {
     onSetMod: {
         'js' : {
             'inited' : function() {
-                this.setMod(this.elem('prompt'), 'visible', true);
-            }
-        }
-    },
-    onElemSetMod: {
-        'prompt': {
-            'visible': function(elem) {
-                elem.text(this.params['prompt']);
+                var prompt = this._elem('prompt');
+                prompt.domElem.text(this.params.prompt);
+                prompt.setMod('visible', true);
             }
         }
     }
 },{
-    live: function() {
-        this.liveInitOnEvent('click');
+    lazyInit: true,
+
+    onInit: function() {
+        this._domEvents().on('click', function() {});
     }
 }));
 

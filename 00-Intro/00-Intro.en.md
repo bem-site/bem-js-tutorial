@@ -15,4 +15,4 @@ components.
  * [**Block structure**](../01-Block-structure/01-Block-structure.en.md): Block HTML and JavaScript structure. The very first example.
  * [**Modifiers**](../02-Modifiers/02-Modifiers.en.md): Setting, toggling and removing modifiers.
 Reacting on a block being assigned a modifier and further tricks.
- * [**Live initialization**](../03-Live-initialization/03-Live-initialization.en.md): Initialization features and good practices.
+ * [**Live (lazy) initialization**](../03-Live-initialization/03-Live-initialization.en.md): Initialization features and good practices.

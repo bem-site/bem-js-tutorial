@@ -1,17 +1,17 @@
-modules.define('checkbox', ['i-bem__dom'], function(provide, BEMDOM) {
+modules.define('checkbox', ['i-bem-dom'], function(provide, bemDom) {
 
-provide(BEMDOM.decl(this.name, {
+provide(bemDom.declBlock(this.name, {
     onSetMod: {
         'focused' : {
             'true' : function() {
-                this.elem('control').focus();
+                this._elem('control').domElem.focus();
             },
             '' : function() {
-                this.elem('control').blur();
+                this._elem('control').domElem.blur();
             }
         },
         'checked' : function(modName, modVal) {
-            this.elem('control').attr('checked', modVal ? 'checked' : false);
+            this._elem('control').domElem.attr('checked', modVal ? 'checked' : false);
         }
     },
     _onClick : function() {
@@ -19,20 +19,17 @@ provide(BEMDOM.decl(this.name, {
     },
     _onChange : function(e) {
         this.setMod('checked', e.target.checked);
+    },
+    _onFocusChange : function(e) {
+        this.setMod('focused', e.type == 'focusin');
     }
 },{
-    live: function() {
-        this.liveBindTo('label', 'click', function() {
-            this._onClick();
-        });
+    lazyInit: true,
 
-        this.liveBindTo('control', 'change', function(e){
-            this._onChange(e);
-        });
-
-        this.liveBindTo('control', 'focusin focusout', function(e){
-            this.setMod('focused', e.type == 'focusin');
-        })
+    onInit: function() {
+        this._domEvents('label').on('click', this.prototype._onClick);
+        this._domEvents('control').on('change', this.prototype._onChange);
+        this._domEvents('control').on('focusin focusout', this.prototype._onFocusChange);
     }
 }));
 

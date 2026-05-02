@@ -33,22 +33,17 @@ DOM-блока.
 
 Callback, соответствующий модификатору `js_inited`, запускается, когда ядро
 инициализирует блок. В этом примере всё начинается с назначения обработчика для
-события `click` на DOM-узле блока. Для этого используется метод `bindTo`. А callback
-устанавливает блоку модификатор `calling` при помощи метода `setMod`.
-
-**ВАЖНО:** В большинстве случаев не рекомендуется использовать `bindTo` для работы
-с событиями, потому что он навешивает обработчик на событие для каждого отдельного
-экземпляра блока. Это особенно ощутимо, если таких блоков на странице много. Чуть
-позже в описании `live` секции вы найдёте рекомендованный способ.
+события `click` на DOM-узле блока. Для этого используется метод `_domEvents()`.
+Callback устанавливает блоку модификатор `calling` при помощи метода `setMod`.
 
 ```js
-modules.define('call-button', ['i-bem__dom'], function(provide, BEMDOM) {
+modules.define('call-button', ['i-bem-dom'], function(provide, bemDom) {
 
-provide(BEMDOM.decl(this.name, {
+provide(bemDom.declBlock(this.name, {
     onSetMod: {
         'js' : {
             'inited' : function() {
-                this.bindTo('click', function() {
+                this._domEvents().on('click', function() {
                     this.setMod('calling');
                 });
             }
@@ -74,13 +69,13 @@ this.setMod('status', 'off');
 их в функции callback на установку модификатора. Например, так:
 
 ```js
-modules.define('call-button', ['i-bem__dom'], function(provide, BEMDOM) {
+modules.define('call-button', ['i-bem-dom'], function(provide, bemDom) {
 
-provide(BEMDOM.decl(this.name, {
+provide(bemDom.declBlock(this.name, {
     onSetMod: {
         'js' : { ... },
         'calling' : function() {
-            this.elem('link').text('Calling...');
+            this._elem('link').domElem.text('Calling...');
         }
     }
 }));
@@ -91,7 +86,7 @@ provide(BEMDOM.decl(this.name, {
 Здесь вы можете производить любые вычисления и совершать любые действия с
 блоком. А раз есть доступ к DOM-узлу блока и вложенным в него элементам, то
 структуру блока тоже можно поменять. Для обращения к элементам блока используется
-метод `elem`, а в качестве параметра передаётся имя элемента.
+метод `_elem`, а в качестве параметра передаётся имя элемента.
 
 Концепция известных состояний блока, выраженных модификаторами, — это очень
 мощный и эффективный способ описания интерфейсных компонентов.
@@ -101,7 +96,7 @@ provide(BEMDOM.decl(this.name, {
 делать.
 
 Действия модификаторов описываются декларативно. Это позволяет разработчику
-расширить функциональность модификатора при реиспользовании или полностью её
+расширить функциональность модификатора при повторном использовании или полностью её
 переопределить. Ниже это продемонстрировано.
 
 ## Установка модификатора для элемента
@@ -139,9 +134,9 @@ pure.bundles/
 модификатор `status` со значениями `on` и `off`.
 
 ```js
-modules.define('traffic-light', ['i-bem__dom'], function(provide, BEMDOM) {
+modules.define('traffic-light', ['i-bem-dom'], function(provide, bemDom) {
 
-provide(BEMDOM.decl(this.name, {
+provide(bemDom.declBlock(this.name, {
     onSetMod: {
         'js' : {
             'inited' : function() {
@@ -164,9 +159,9 @@ provide(BEMDOM.decl(this.name, {
 модификаторов.
 
 ```js
-modules.define('traffic-light', ['i-bem__dom'], function(provide, BEMDOM) {
+modules.define('traffic-light', ['i-bem-dom'], function(provide, bemDom) {
 
-provide(BEMDOM.decl('traffic-light', {
+provide(bemDom.declBlock('traffic-light', {
     onSetMod: {
         'js' : { ... },
 
@@ -180,9 +175,9 @@ provide(BEMDOM.decl('traffic-light', {
                 },
                 _this = this;
 
-            oldModVal && this.setMod(this.elem(oldModVal), 'status', 'off');
+            oldModVal && this._elem(oldModVal).setMod('status', 'off');
 
-            this.setMod(this.elem(modVal), 'status', 'on');
+            this._elem(modVal).setMod('status', 'on');
 
             this.timer = window.setTimeout(function() {
                 _this.setMod('status', nextStatus[modVal]);
@@ -208,7 +203,7 @@ provide(BEMDOM.decl('traffic-light', {
 включается, а предыдущий активный прожектор получает модификатор `status_off`.
 
 Для установки модификаторов на элементы используется уже знакомый метод
-`setMod`, но в него передаётся дополнительный первый параметр — имя элемента.
+`setMod`, но вызывать его нужно на экземпляре элемента, найденном через `_elem`.
 
 То есть, используя разные параметры, методом `setMod` можно:
 
@@ -217,29 +212,27 @@ provide(BEMDOM.decl('traffic-light', {
 this.setMod('modName', 'modValue');
 
 // назначить модификатор элементу блока
-this.setMod(this.elem('elemName'), 'modName', 'modValue');
+this._elem('elemName').setMod('modName', 'modValue');
 ```
 
-Программирование действий, соответствующих модификаторам элементов, похоже на тоже
-самое для модификаторов блоков. По аналогии с `onSetMod`, можно воспользоваться
-свойством `onElemSetMod` со следующим синтаксисом:
+Программирование действий, соответствующих модификаторам элементов, похоже на то
+же самое для модификаторов блоков. Для элемента можно объявить JS-реализацию
+через `bemDom.declElem` и описать свойство `onSetMod`:
 
 ```js
-DOM.decl('my-block', {
-    onElemSetMod: {
-        'elemName' : {
-          'foo' : function() {
-              // Запускается, если элемент получает любое значение
-              // модификатора `foo`
+bemDom.declElem('my-block', 'elemName', {
+    onSetMod: {
+      'foo' : function() {
+          // Запускается, если элемент получает любое значение
+          // модификатора `foo`
+      },
+      'bar' : {
+          'qux' : function() {
+              // Запускается при установке на элементе значения `qux` для
+              // модификатора `bar`
           },
-          'bar' : {
-              'qux' : function() {
-                  // Запускается при установке на элементе значения `qux` для
-                  // модификатора `bar`
-              },
-              '' : function() {
-                  // Запускается при удалении модификатора `bar` с элемента
-              }
+          '' : function() {
+              // Запускается при удалении модификатора `bar` с элемента
           }
         }
     }
@@ -249,33 +242,33 @@ DOM.decl('my-block', {
 В этом примере какая-то функциональность есть только у элемента `go`.
 
 ```js
-modules.define('traffic-light', ['i-bem__dom'], function(provide, BEMDOM) {
+modules.define('traffic-light', ['i-bem-dom'], function(provide, bemDom) {
 
 var goSound = new Audio('blocks/traffic-light/__go/traffic-light__go.mp3');
 
-provide(BEMDOM.decl(this.name, {
-    onSetMod: { ... },
+bemDom.declElem('traffic-light', 'go', {
+    onSetMod: {
+        'status' : {
+            'on' : function() {
+                goSound.play();
+            },
 
-    onElemSetMod: {
-        'go' : {
-            'status' : {
-                'on' : function() {
-                    goSound.play();
-                },
-
-                'off' : function() {
-                    goSound.pause();
-                }
+            'off' : function() {
+                goSound.pause();
             }
         }
     }
+});
+
+provide(bemDom.declBlock(this.name, {
+    onSetMod: { ... }
 }));
 
 });
 ```
 
-Это включает звук светофора, когда элемент переключен в состояние `switched_on`,
-и выключает его при назначении модификатора `switched_off`.
+Это включает звук светофора, когда элемент переключен в состояние `status_on`,
+и выключает его при назначении модификатора `status_off`.
 
 ## Переключение (toggle) модификатора
 
@@ -306,13 +299,13 @@ pure.bundles/
 `swicthed_off` в `switched_on` и обратно при помощи метода `toggleMod`.
 
 ```js
-modules.define('switch', ['i-bem__dom'], function(provide, BEMDOM) {
+modules.define('switch', ['i-bem-dom'], function(provide, bemDom) {
 
-provide(BEMDOM.decl(this.name, {
+provide(bemDom.declBlock(this.name, {
     onSetMod: {
         'js' : {
             'inited' : function() {
-                this.bindTo('click', function() {
+                this._domEvents().on('click', function() {
                     this.toggleMod('switched', 'on', 'off');
                 });
             }
@@ -323,8 +316,8 @@ provide(BEMDOM.decl(this.name, {
 });
 ```
 
-Конечно, то же самое работает и для элементов, если передать элемент в качестве
-первого опционального параметра.
+Конечно, то же самое работает и для элементов, если вызвать `toggleMod` на
+экземпляре элемента.
 
 ## Удаление модификатора
 
@@ -366,14 +359,16 @@ pure.bundles/
 [todo.js](https://github.com/bem/bem-js-tutorial/blob/master/pure.bundles/005-modifier-removing/blocks/todo/todo.js).
 
 ```js
-modules.define('todo', ['i-bem__dom'], function(provide, BEMDOM) {
+modules.define('todo', ['i-bem-dom', 'jquery'], function(provide, bemDom, $) {
 
-provide(BEMDOM.decl(this.name, {
+var Task = bemDom.declElem('todo', 'task');
+
+provide(bemDom.declBlock(this.name, {
     onSetMod: {
         'js' : {
             'inited' : function() {
-                this.bindTo(this.elem('task'), 'click', function(e) {
-                    this.delMod(e.domElem, 'visible');
+                this._domEvents('task').on('click', function(e) {
+                    $(e.currentTarget).bem(Task).delMod('visible');
                 });
             }
         }
@@ -386,17 +381,12 @@ provide(BEMDOM.decl(this.name, {
 Как только пользователь кликает на элемент `task`, его модификатор `visible`
 удаляется при помощи метода `delMod`.
 
-Поскольку первый параметр (объект элемента) — опциональный, этот же метод можно
-применять и к блокам.
+Обратите внимание, что здесь метод `_domEvents('task')` подписывает блок на
+DOM-события его элементов `task`.
 
-Обратите внимание, что здесь метод `bindTo` работает не с блоком, а с
-элементами.
-
-**ВАЖНО:** Как было сказано выше, метод `bindTo` вешает обработчик на каждый такой
-элемент. Если бы у блока было 100 элементов, он бы назначил 100 обработчиков.
-Кроме того, динамически добавляемые элементы должны тоже получать отдельный
-обработчик. Другой, лучший, способ работы с событиями изложен при описании секции
-`live`. Дочитайте до этого места прежде чем начинать разрабатывать сложный блок.
+**ВАЖНО:** Такой обработчик назначается при инициализации экземпляра блока. Для
+больших списков и динамически добавляемых элементов используйте ленивую
+инициализацию через `lazyInit` и `onInit`, которая описана дальше.
 
 ## До установки модификатора
 
@@ -431,32 +421,35 @@ pure.bundles/
 
 ```js
 modules.define('accordion-menu',
-        ['i-bem__dom', 'jquery'], function(provide, BEMDOM, $) {
+        ['i-bem-dom', 'jquery'], function(provide, bemDom, $) {
 
-provide(BEMDOM.decl(this.name, {
+var Item = bemDom.declElem('accordion-menu', 'item', {
+    onSetMod: {
+        'current' : {
+            'true' : function() {
+                this._block().setCurrentItem(this);
+            }
+        }
+    }
+});
+
+provide(bemDom.declBlock(this.name, {
 
     onSetMod: {
         'js' : {
             'inited' : function() {
-                this._current = this.findElem('item', 'current', true);
+                this._current = this._elem({ elem : Item, modName : 'current', modVal : true });
 
-                this.bindTo('item', 'click', function(e) {
-                    this.setMod($(e.currentTarget), 'current', true);
+                this._domEvents('item').on('click', function(e) {
+                    $(e.currentTarget).bem(Item).setMod('current', true);
                 });
             }
         }
     },
 
-    onElemSetMod: {
-        'item' : {
-            'current' : {
-                'true' : function(elem) {
-                    this.delMod(this._current, 'current');
-
-                    this._current = elem;
-                }
-            }
-        }
+    setCurrentItem: function(item) {
+        this._current && this._current !== item && this._current.delMod('current');
+        this._current = item;
     }
 
 }));
@@ -472,28 +465,25 @@ provide(BEMDOM.decl(this.name, {
 Пример с меню становится более интересным, если у меню могут быть неактивные
 (disabled) пункты. Такой пункт меню не может быть в состоянии `current`.
 Конечно, всегда можно добавить дополнительную проверку в callback на установку
-модификатора, но bem-core предлагает более элегантное решение. По аналогии со
-свойствами `onSetMod` и `onElemSetMod` можно воспользоваться свойствами
-`beforeSetMod` и `beforeElemSetMod`, чтобы сообщить блоку, что делать до
-установки модификатора. А если такой callback возвращает `false`, это
+модификатора, но bem-core предлагает более элегантное решение. В декларации
+элемента можно воспользоваться свойством `beforeSetMod`, чтобы сообщить элементу,
+что делать до установки модификатора. А если такой callback возвращает `false`, это
 предотвратит установку модификатора.
 
 ```js
 modules.define('accordion-menu',
-        ['i-bem__dom', 'jquery'], function(provide, BEMDOM, $) {
+        ['i-bem-dom', 'jquery'], function(provide, bemDom, $) {
 
-provide(BEMDOM.decl(this.name, {
-    beforeElemSetMod: {
-        'item' : {
-            'current' : {
-                'true' : function(elem) {
-                    return !this.hasMod(elem, 'disabled');
-                }
+var Item = bemDom.declElem('accordion-menu', 'item', {
+    beforeSetMod: {
+        'current' : {
+            'true' : function() {
+                return !this.hasMod('disabled');
             }
         }
     },
     ...
-}));
+});
 
 });
 ```

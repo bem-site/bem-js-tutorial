@@ -1,34 +1,36 @@
-modules.define('accordion-menu', ['i-bem__dom', 'jquery'], function(provide, BEMDOM, $) {
+modules.define('accordion-menu', ['i-bem-dom', 'jquery'], function(provide, bemDom, $) {
 
-provide(BEMDOM.decl(this.name, {
-    beforeElemSetMod: {
-        'item' : {
-            'current' : {
-                'true' : function(elem) {
-                    return !this.hasMod(elem, 'disabled');
-                }
+var Item = bemDom.declElem('accordion-menu', 'item', {
+    beforeSetMod: {
+        'current' : {
+            'true' : function() {
+                return !this.hasMod('disabled');
             }
         }
     },
     onSetMod: {
+        'current' : {
+            'true' : function() {
+                this._block().setCurrentItem(this);
+            }
+        }
+    }
+});
+
+provide(bemDom.declBlock(this.name, {
+    onSetMod: {
         'js' : {
             'inited' : function() {
-                this._current = this.findElem('item', 'current', true);
-                this.bindTo('item', 'click', function(e) {
-                    this.setMod($(e.currentTarget), 'current', true);
+                this._current = this._elem({ elem : Item, modName : 'current', modVal : true });
+                this._domEvents('item').on('click', function(e) {
+                    $(e.currentTarget).bem(Item).setMod('current', true);
                 });
             }
         }
     },
-    onElemSetMod: {
-        'item' : {
-            'current' : {
-                'true' : function(elem) {
-                    this.delMod(this._current, 'current');
-                    this._current = elem;
-                }
-            }
-        }
+    setCurrentItem: function(item) {
+        this._current && this._current !== item && this._current.delMod('current');
+        this._current = item;
     }
 }));
 

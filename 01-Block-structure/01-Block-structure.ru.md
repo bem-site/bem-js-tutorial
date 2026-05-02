@@ -80,9 +80,9 @@ BEMJSON декларация этого примера
 [my-block.js](https://github.com/bem/bem-js-tutorial/blob/master/pure.bundles/001-simple-block/blocks/my-block/my-block.js), в нём довольно простой код.
 
 ```js
-modules.define('my-block', ['i-bem__dom'], function(provide, BEMDOM) {
+modules.define('my-block', ['i-bem-dom'], function(provide, bemDom) {
 
-provide(BEMDOM.decl(this.name, {
+provide(bemDom.declBlock(this.name, {
     onSetMod: {
         'js' : {
             'inited' : function() {
@@ -99,11 +99,11 @@ provide(BEMDOM.decl(this.name, {
 
 Поэтому первой строчкой указывается, какой модуль использует компонент. В данном
 случае это модуль
-[`i-bem__dom`](https://github.com/bem/bem-core/blob/v3/common.blocks/i-bem/__dom/i-bem__dom.js),
-реализованный как элемент `dom` блока `i-bem` библиотеки
+[`i-bem-dom`](https://github.com/bem/bem-core/blob/v4/common.blocks/i-bem-dom/i-bem-dom.js),
+реализованный в библиотеке
 [bem-core](https://en.bem.info/libs/bem-core/).
 
-Далее внутри вы можете использовать объект `BEMDOM` и его метод `decl` для описания
+Далее внутри вы можете использовать объект `bemDom` и его метод `declBlock` для описания
 вашего блока.
 
 Первый параметр — имя блока.
@@ -116,7 +116,7 @@ provide(BEMDOM.decl(this.name, {
 назначается соответствующий модификатор.
 
 ```js
-BEMDOM.decl(this.name, {
+bemDom.declBlock(this.name, {
     onSetMod: {
         'foo' : function() {
             // Вызывается, если блоку назначается любое значение модификатора 'foo'.

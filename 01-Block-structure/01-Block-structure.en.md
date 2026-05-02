@@ -79,9 +79,9 @@ The `my-block` component is represented on the
 [my-block.js](https://github.com/bem/bem-js-tutorial/blob/master/pure.bundles/001-simple-block/blocks/my-block/my-block.js) file is filled with a simple piece of code.
 
 ```js
-modules.define('my-block', ['i-bem__dom'], function(provide, BEMDOM) {
+modules.define('my-block', ['i-bem-dom'], function(provide, bemDom) {
 
-provide(BEMDOM.decl(this.name, {
+provide(bemDom.declBlock(this.name, {
     onSetMod: {
         'js' : {
             'inited' : function() {
@@ -99,11 +99,11 @@ ymaps/modules](https://github.com/ymaps/modules/blob/master/README.md),
 so the first line defines which modules to use for the component.
 
 In this case it is
-[`i-bem__dom`](https://github.com/bem/bem-core/blob/v3/common.blocks/i-bem/__dom/i-bem__dom.js),
-a module represented as a `dom` element of `i-bem` block from
+[`i-bem-dom`](https://github.com/bem/bem-core/blob/v4/common.blocks/i-bem-dom/i-bem-dom.js),
+a module from the
 [bem-core](https://en.bem.info/libs/bem-core/) library.
 
-Inside you can use the `BEMDOM` object and its `decl` method to describe a block.
+Inside you can use the `bemDom` object and its `declBlock` method to describe a block.
 
 The block name is the first parameter.
 
@@ -115,7 +115,7 @@ see one of them, an `onSetMod` property in the example. It is used to store
 callbacks to run when a block gets a modifier.
 
 ```js
-BEMDOM.decl(this.name, {
+bemDom.declBlock(this.name, {
     onSetMod: {
         'foo' : function() {
             // Runs when a block gets any value of `foo` modifier.

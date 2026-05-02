@@ -1,25 +1,28 @@
-modules.define('map-marks', ['i-bem__dom', 'jquery'], function(provide, BEMDOM, $) {
+modules.define('map-marks', ['i-bem-dom', 'map', 'menu'], function(provide, bemDom, Map, Menu) {
 
-provide(BEMDOM.decl(this.name, {
+provide(bemDom.declBlock(this.name, {
 
     onSetMod: {
         'js' : {
             'inited' : function () {
-                this._menu = this.findBlockInside('menu');
-                this._map = this.findBlockInside('map');
+                this._menu = this.findChildBlock(Menu);
+                this._map = this.findChildBlock(Map);
             }
         }
     },
-    _showMap: function(e, elem) {
-        var params = this._menu.elemParams(elem);
+    _onMenuCurrent: function(e, data) {
+        this._showMap(data.current);
+    },
+    _showMap: function(elem) {
+        var params = elem.params;
         this._map.showAddress(params['address']);
     }
 
 }, {
-    live: function() {
-        this.liveInitOnBlockInsideEvent('current', 'menu', function(e, data){
-            this._showMap(e, data.current);
-        });
+    lazyInit : true,
+
+    onInit : function() {
+        this._events(Menu).on('current', this.prototype._onMenuCurrent);
     }
 }));
 
