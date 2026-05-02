@@ -17,20 +17,23 @@
 
 Это называется «живая» или «ленивая» инициализация.
 
-## Статический метод live
+## Статические свойства lazyInit и onInit
 
-Инструкции по ленивой инициализации блока даются в статическом методе `live`.
+Инструкции по ленивой инициализации блока даются в статических свойствах
+`lazyInit` и `onInit`.
 
 ```js
-modules.define('my-block', ['i-bem__dom'], function(provide, BEMDOM) {
+modules.define('my-block', ['i-bem-dom'], function(provide, bemDom) {
 
-provide(BEMDOM.decl(this.name, {
+provide(bemDom.declBlock(this.name, {
     onSetMod: {
         ...
     },
     ...
 }, {
-    live: function() {
+    lazyInit: true,
+
+    onInit: function() {
         // Здесь можно сказать, когда инициализировать экземпляр блока
     }
 }));
@@ -39,11 +42,11 @@ provide(BEMDOM.decl(this.name, {
 ```
 
 В предыдущих примерах вообще не было статических методов. Это рассматривалось
-как то, что свойство `live` имеет значение `false`.
+как то, что свойство `lazyInit` имеет значение `false`.
 
-А в данном примере это функция, так что ядро понимает, что блок не нужно сразу
-инициализировать, а нужно подождать возникновения специальных условий. Это может
-быть, например, DOM-событие на блоке или элементе.
+А в данном примере `lazyInit: true` говорит ядру, что блок не нужно сразу
+инициализировать. В `onInit` можно подписаться на условия, которые создадут
+экземпляр блока: например, на DOM-событие блока или элемента.
 
 ## Инициализация блока по DOM-событию
 
@@ -93,13 +96,15 @@ JavaScript-объект, соответствующий экземпляру б�
 событие `click`.
 
 ```js
-modules.define('translate', ['i-bem__dom'], function(provide, BEMDOM) {
+modules.define('translate', ['i-bem-dom'], function(provide, bemDom) {
 
-provide(BEMDOM.decl(this.name, {
+provide(bemDom.declBlock(this.name, {
     ...
 },{
-    live: function() {
-        this.liveInitOnEvent('click');
+    lazyInit: true,
+
+    onInit: function() {
+        this._domEvents().on('click', function() {});
     }
 }));
 
@@ -110,25 +115,24 @@ provide(BEMDOM.decl(this.name, {
 конструктор — функцию, проассоциированную с этим модификатором.
 
 ```js
-modules.define('translate', ['i-bem__dom'], function(provide, BEMDOM) {
+modules.define('translate', ['i-bem-dom'], function(provide, bemDom) {
 
-provide(BEMDOM.decl(this.name, {
+provide(bemDom.declBlock(this.name, {
     onSetMod: {
         'js' : {
             'inited' : function() {
-                this.setMod(this.elem('prompt'), 'visible', true);
-            }
-        }
-    },
-    onElemSetMod: {
-        'prompt': {
-            'visible': function(elem) {
-                elem.text(this.params['prompt']);
+                var prompt = this._elem('prompt');
+                prompt.domElem.text(this.params.prompt);
+                prompt.setMod('visible', true);
             }
         }
     }
 },{
-    ...
+    lazyInit: true,
+
+    onInit: function() {
+        this._domEvents().on('click', function() {});
+    }
 }));
 
 });
@@ -169,9 +173,9 @@ provide(BEMDOM.decl(this.name, {
 
 Ядро фреймворка i-bem слушает события на объекте `document`. Когда пользователь
 кликает по блокам, событие поднимается наверх до `document`, и ядро инициализирует
-блок, следуя инструкциям в секции `live`.
+блок, следуя инструкциям из `onInit`.
 
-## Обработчики live событий
+## Обработчики событий ленивой инициализации
 
 ```files
 pure.bundles/
@@ -189,16 +193,16 @@ pure.bundles/
 Следующий пример — [страница со 100 BonBon
 кнопками](https://bem-site.github.io/bem-js-tutorial/pure.bundles/011-live-bind-to/011-live-bind-to.html)
 ([BEMJSON](https://github.com/bem/bem-js-tutorial/blob/master/pure.bundles/011-live-bind-to/011-live-bind-to.bemjson.js))
-— показывает, что реагировать на live события можно всегда, а не только при
-инициализации.
+— показывает, что реагировать на события ленивой инициализации можно всегда, а
+не только при инициализации.
 
-У представленного на странице блока `button` есть live инициализация. Было бы
+У представленного на странице блока `button` есть ленивая инициализация. Было бы
 неразумно инициализировать их все сразу, и на каждом слушать событие `click`.
 
 ```js
-modules.define('button', ['i-bem__dom'], function(provide, BEMDOM) {
+modules.define('button', ['i-bem-dom'], function(provide, bemDom) {
 
-provide(BEMDOM.decl(this.name, {
+provide(bemDom.declBlock(this.name, {
     onSetMod: {
         'js' : {
             'inited' : function() {
@@ -208,37 +212,41 @@ provide(BEMDOM.decl(this.name, {
             }
         }
     },
-    ...
+    _onClick: function() {
+        console.log('Here I can track clicks');
+    }
 },{
-    live: function() {
-        this.liveBindTo('click');
+    lazyInit: true,
+
+    onInit: function() {
+        this._domEvents().on('click', this.prototype._onClick);
     }
 }));
 
 });
 ```
 
-Также как и в предыдущем примере (где использовался `liveInitOnEvent`), этот код
+Так же как и в предыдущем примере, этот код
 инициализирует блок и запускает callback модификатора `js_inited`.
 
-Но разница состоит в том, что `liveBindTo` говорит запускать callback не только при
+Разница состоит в том, что `_domEvents().on()` запускает callback не только при
 инициализации, а каждый раз когда пользователь кликает по кнопке.
 
 ```js
-modules.define('button', ['i-bem__dom'], function(provide, BEMDOM) {
+modules.define('button', ['i-bem-dom'], function(provide, bemDom) {
 
-provide(BEMDOM.decl(this.name, {
+provide(bemDom.declBlock(this.name, {
     onSetMod: {
         ...
     },
-    onClick: function() {
+    _onClick: function() {
         console.log('Here I can track clicks');
     }
 },{
-    live: function() {
-        this.liveBindTo('click', function(e) {
-            this.onClick();
-        });
+    lazyInit: true,
+
+    onInit: function() {
+        this._domEvents().on('click', this.prototype._onClick);
     }
 }));
 
@@ -280,26 +288,26 @@ pure.bundles/
 кликает по элементу `label`.
 
 ```js
-modules.define('checkbox', ['i-bem__dom'], function(provide, BEMDOM) {
+modules.define('checkbox', ['i-bem-dom'], function(provide, bemDom) {
 
-provide(BEMDOM.decl(this.name, {
+provide(bemDom.declBlock(this.name, {
     ...
     _onClick : function() {
         this.setMod('focused', true);
     },
     ...
 },{
-    live: function() {
-        this.liveBindTo('label', 'click', function() {
-            this._onClick();
-        });
+    lazyInit: true,
+
+    onInit: function() {
+        this._domEvents('label').on('click', this.prototype._onClick);
     }
 }));
 
 });
 ```
 
-Здесь тоже используется метод `liveBindTo`, чтобы не только проинициализировать
+Здесь тоже используется метод `_domEvents().on()`, чтобы не только проинициализировать
 блок, но и запускать callback на следующих кликах. Заметьте, что здесь
 использован опциональный параметр с именем элемента `label`, т.к. нас интересуют
 клики именно на нём.
@@ -307,14 +315,14 @@ provide(BEMDOM.decl(this.name, {
 Кроме того, контрол может быть изменен с клавиатуры (или другим JavaScript), и
 это тоже нужно учесть.
 
-Внутри метода `live` можно поместить столько инструкций по инициализации,
+Внутри метода `onInit` можно поместить столько инструкций по инициализации,
 сколько нужно для данного блока. Здесь она случается по клику на элементе
 `label` и по событию `change` элемента `control` (это узел `input`).
 
 ```js
-modules.define('checkbox', ['i-bem__dom'], function(provide, BEMDOM) {
+modules.define('checkbox', ['i-bem-dom'], function(provide, bemDom) {
 
-provide(BEMDOM.decl(this.name, {
+provide(bemDom.declBlock(this.name, {
     ...
     _onClick : function() {
         this.setMod('focused', true);
@@ -323,14 +331,11 @@ provide(BEMDOM.decl(this.name, {
         this.setMod('checked', e.target.checked);
     }
 },{
-    live: function() {
-        this.liveBindTo('label', 'click', function() {
-            this._onClick();
-        });
+    lazyInit: true,
 
-        this.liveBindTo('control', 'change', function(e){
-            this._onChange(e);
-        });
+    onInit: function() {
+        this._domEvents('label').on('click', this.prototype._onClick);
+        this._domEvents('control').on('change', this.prototype._onChange);
     }
 }));
 
@@ -341,23 +346,17 @@ provide(BEMDOM.decl(this.name, {
 фокус уходит из него.
 
 ```js
-modules.define('checkbox', ['i-bem__dom'], function(provide, BEMDOM) {
+modules.define('checkbox', ['i-bem-dom'], function(provide, bemDom) {
 
-provide(BEMDOM.decl(this.name, {
+provide(bemDom.declBlock(this.name, {
     ...
 },{
-    live: function() {
-        this.liveBindTo('label', 'click', function() {
-            this._onClick();
-        });
+    lazyInit: true,
 
-        this.liveBindTo('control', 'change', function(e) {
-            this._onChange(e);
-        });
-
-        this.liveBindTo('control', 'focusin focusout', function(e) {
-            this.setMod('focused', e.type == 'focusin');
-        });
+    onInit: function() {
+        this._domEvents('label').on('click', this.prototype._onClick);
+        this._domEvents('control').on('change', this.prototype._onChange);
+        this._domEvents('control').on('focusin focusout', this.prototype._onFocusChange);
     }
 }));
 
@@ -370,25 +369,27 @@ provide(BEMDOM.decl(this.name, {
 После добавления функций callback на модификаторы, программирование блока закончено.
 
 ```js
-modules.define('checkbox', ['i-bem__dom'], function(provide, BEMDOM) {
+modules.define('checkbox', ['i-bem-dom'], function(provide, bemDom) {
 
-provide(BEMDOM.decl(this.name, {
+provide(bemDom.declBlock(this.name, {
     onSetMod: {
         'focused' : {
             'true' : function() {
-                this.elem('control').focus();
+                this._elem('control').domElem.focus();
             },
             '' : function() {
-                this.elem('control').blur();
+                this._elem('control').domElem.blur();
             }
         },
         'checked' : function(modName, modVal) {
-            this.elem('control').attr('checked', modVal ? 'checked' : false);
+            this._elem('control').domElem.attr('checked', modVal ? 'checked' : false);
         }
     },
     ...
 },{
-    live: function() {
+    lazyInit: true,
+
+    onInit: function() {
         ...
     }
 }));
@@ -478,12 +479,12 @@ JavaScript страницы, или реагируя на события в бр
 том случае, если пользователь кликает по ссылке левой кнопкой, и ссылка не является
 неактивной в данный момент.
 
-Запускается это событие при помощи метода `emit`.
+Запускается это событие при помощи метода `_emit`.
 
 ```js
   _onClick : function(e) {
       e.preventDefault();
-      this.hasMod('disabled') || this.emit('click');
+      this.hasMod('disabled') || this._emit('click');
   }
 ```
 
@@ -523,19 +524,18 @@ JavaScript страницы, или реагируя на события в бр
 данные о текущем пункте.
 
 ```js
-this
-    .delMod(prev, 'state')
-    .emit('current', {
-        prev    : prev,
-        current : elem
-    });
+prev && prev !== this && prev.delMod('state');
+menu._emit('current', {
+    prev    : prev,
+    current : this
+});
 ```
 
 Это событие возникает на JavaScript-объекте, соответствующем экземпляру блока.
 Используя это, другой блок может подписаться на БЭМ-событие `current` блока
 `menu`, узнавать об изменении текущего пункта меню и реагировать на это.
 
-### Live инициализация по БЭМ-событию вложенного блока
+### Ленивая инициализация по БЭМ-событию вложенного блока
 
 ```files
 components.bundles/
@@ -567,31 +567,36 @@ components.bundles/
 [014-live-init-bem-event.html](https://bem-site.github.io/bem-js-tutorial/components.bundles/014-live-init-bem-event/014-live-init-bem-event.html).
 
 Этот блок нужен только при взаимодействии пользователя со страницей. Поэтому
-блок использует live-инициализацию, где сказано инициализировать блок только
-тогда, когда на вложенном в него блоке `menu` возникнет событие `current`.
+блок использует ленивую инициализацию: экземпляр создаётся только тогда, когда
+на вложенном в него блоке `menu` возникает событие `current`.
 
 JavaScript реализация блока
 [map-marks.js](https://github.com/varya/bem-js-tutorial/blob/master/components.bundles/014-live-init-bem-event/blocks/map-marks/map-marks.js)
-использует live-инициализацию, зависящую от вложенного блока.
+использует подписку на БЭМ-событие вложенного блока из статического метода
+`onInit`.
 
 ```js
-modules.define('map-marks', ['i-bem__dom', 'jquery'], function(provide, BEMDOM, $) {
+modules.define('map-marks', ['i-bem-dom', 'map', 'menu'], function(provide, bemDom, Map, Menu) {
 
-provide(BEMDOM.decl(this.name, {
-    ...
+provide(bemDom.declBlock(this.name, {
+    _onMenuCurrent: function(e, data) {
+        this._showMap(data.current);
+    }
 }, {
-    live: function() {
-        this.liveInitOnBlockInsideEvent('current', 'menu', function(e, data) {
-            this._showMap(e, data.current);
-        });
+    lazyInit: true,
+
+    onInit: function() {
+        this._events(Menu).on('current', this.prototype._onMenuCurrent);
     }
 }));
 
 });
 ```
 
-Методу `liveInitOnBlockInsideEvent` в качестве параметров передаются имя события,
-имя блока и callback.
+Методу `_events(Menu).on()` передаются имя события и callback.
+Так как подписка выполнена из класса блока, обработчик сначала инициализирует
+ближайший экземпляр `map-marks`, внутри которого произошло событие, а затем
+вызывает callback в контексте этого экземпляра.
 
 Как только пользователь кликает по какому-нибудь пункту меню, он становится
 активным, и на блоке `menu` возникает событие `current`. Событие ловится блоком
@@ -599,15 +604,15 @@ provide(BEMDOM.decl(this.name, {
 `js_inited`, и запускается соответствующий callback:
 
 ```js
-modules.define('map-marks', ['i-bem__dom', 'jquery'], function(provide, BEMDOM, $) {
+modules.define('map-marks', ['i-bem-dom', 'map', 'menu'], function(provide, bemDom, Map, Menu) {
 
-provide(BEMDOM.decl(this.name, {
+provide(bemDom.declBlock(this.name, {
 
   onSetMod: {
       'js' : {
           'inited' : function () {
-              this._menu = this.findBlockInside('menu');
-              this._map = this.findBlockInside('map');
+              this._menu = this.findChildBlock(Menu);
+              this._map = this.findChildBlock(Map);
           }
       }
   },
@@ -615,8 +620,10 @@ provide(BEMDOM.decl(this.name, {
   ...
 
 }, {
-    live: function() {
-        ...
+    lazyInit: true,
+
+    onInit: function() {
+        this._events(Menu).on('current', this.prototype._onMenuCurrent);
     }
 }));
 
@@ -627,22 +634,24 @@ provide(BEMDOM.decl(this.name, {
 обращаясь к блоку `map`.
 
 ```js
-modules.define('map-marks', ['i-bem__dom', 'jquery'], function(provide, BEMDOM, $) {
+modules.define('map-marks', ['i-bem-dom', 'map', 'menu'], function(provide, bemDom, Map, Menu) {
 
-provide(BEMDOM.decl(this.name, {
+provide(bemDom.declBlock(this.name, {
 
     ...
 
-    _showMap: function(e, elem) {
-        var params = this._menu.elemParams(elem);
+    _showMap: function(elem) {
+        var params = elem.params;
         this._map.showAddress(params['address']);
     }
 
     ...
 
 }, {
-    live: function() {
-        ...
+    lazyInit: true,
+
+    onInit: function() {
+        this._events(Menu).on('current', this.prototype._onMenuCurrent);
     }
 }));
 

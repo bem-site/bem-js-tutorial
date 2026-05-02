@@ -32,27 +32,20 @@ In JavaScript
 [blocks/call-button/call-button.js](https://github.com/bem/bem-js-tutorial/blob/master/pure.bundles/002-change-modifier/blocks/call-button/call-button.js)
 there is a common BEM DOM block declaration.
 
-The callback associated with `js_inited` modifier runs when a block is
+The callback associated with the `js_inited` modifier runs when a block is
 initialized by the core. In this example it starts with binding to a `click`
-event on the DOM node corresponding to the block. This is done with the `bindTo`
-helper.
+event on the DOM node corresponding to the block. This is done with `_domEvents()`.
 
-In the callback it is said to set a `calling` modifier to the block and the `setMod`
-method serves for it.
-
-**NOTE:** In many cases using `bindTo` for events listening is not the best solution
-as it needs to watch every block of the kind. It becomes even worse with elements of
-the blocks since they are many. You will see below much better way in the `live`
-section.
+The callback sets a `calling` modifier to the block with the `setMod` method.
 
 ```js
-modules.define('call-button', ['i-bem__dom'], function(provide, BEMDOM) {
+modules.define('call-button', ['i-bem-dom'], function(provide, bemDom) {
 
-provide(BEMDOM.decl(this.name, {
+provide(bemDom.declBlock(this.name, {
     onSetMod: {
         'js' : {
             'inited' : function() {
-                this.bindTo('click', function() {
+                this._domEvents().on('click', function() {
                     this.setMod('calling');
                 });
             }
@@ -78,13 +71,13 @@ block change its appearance. If you need additional changes on a block,
 place them into a function corresponding to the modifier. Like the following:
 
 ```js
-modules.define('call-button', ['i-bem__dom'], function(provide, BEMDOM) {
+modules.define('call-button', ['i-bem-dom'], function(provide, bemDom) {
 
-provide(BEMDOM.decl(this.name, {
+provide(bemDom.declBlock(this.name, {
     onSetMod: {
         'js' : { ... },
         'calling' : function() {
-            this.elem('link').text('Calling...');
+            this._elem('link').domElem.text('Calling...');
         }
     }
 }));
@@ -94,8 +87,8 @@ provide(BEMDOM.decl(this.name, {
 
 Here you can run your calculations, or code any functionality of the block. As
 there is access to the block DOM node and its children, the DOM structure can
-also be changed. With the `elem` helper you can select the elements of the block
-by their names.
+also be changed. With the `_elem` helper you can get the block element instance
+by its name and then use its DOM node.
 
 The concept of pre-defined block states expressed with modifiers is a very
 powerful and efficient way to describe an interface component.
@@ -141,9 +134,9 @@ It contains three light elements `stop`, `slow` and `go` each of which can have 
 `status` modifier with its `on` and `off` value.
 
 ```js
-modules.define('traffic-light', ['i-bem__dom'], function(provide, BEMDOM) {
+modules.define('traffic-light', ['i-bem-dom'], function(provide, bemDom) {
 
-provide(BEMDOM.decl(this.name, {
+provide(bemDom.declBlock(this.name, {
     onSetMod: {
         'js' : {
             'inited' : function() {
@@ -165,9 +158,9 @@ The `status` modifier is declared with its callback, once for all its values. Th
 is a good way to get rid of copy&paste if the corresponding states work similarly.
 
 ```js
-modules.define('traffic-light', ['i-bem__dom'], function(provide, BEMDOM) {
+modules.define('traffic-light', ['i-bem-dom'], function(provide, bemDom) {
 
-provide(BEMDOM.decl('traffic-light', {
+provide(bemDom.declBlock('traffic-light', {
     onSetMod: {
         'js' : { ... },
 
@@ -181,9 +174,9 @@ provide(BEMDOM.decl('traffic-light', {
                 },
                 _this = this;
 
-            oldModVal && this.setMod(this.elem(oldModVal), 'status', 'off');
+            oldModVal && this._elem(oldModVal).setMod('status', 'off');
 
-            this.setMod(this.elem(modVal), 'status', 'on');
+            this._elem(modVal).setMod('status', 'on');
 
             this.timer = window.setTimeout(function() {
                 _this.setMod('status', nextStatus[modVal]);
@@ -207,8 +200,8 @@ With these, the actions can be a bit different depending on the modifier value.
 Here a corresponding element is given the `status_on` modifier so that its light
 turns on and the previously active projector is set `status_off`.
 
-Modifiers are set on elements with the already familiar `setMod` helper with an
-optional first parameter which means an element name.
+Modifiers are set on elements with the already familiar `setMod` helper called
+on an element instance found through `_elem`.
 
 So, by providing different parameters to the same `setMod` function you can:
 
@@ -217,27 +210,25 @@ So, by providing different parameters to the same `setMod` function you can:
 this.setMod('modName', 'modValue');
 
 // apply a modifier to an element of a current block
-this.setMod(this.elem('elemName'), 'modName', 'modValue');
+this._elem('elemName').setMod('modName', 'modValue');
 ```
 
 Describing the actions related to element modifiers is similar to block modifier
-actions. By analogy to `onSetMod` property you can user `onElemSetMod` with the
-following syntax:
+actions. Declare the element with `bemDom.declElem` and use the `onSetMod`
+property:
 
 ```js
-DOM.decl('my-block', {
-    onElemSetMod: {
-        'elemName' : {
-          'foo' : function() {
-              // Runs when an element gets any value of `foo` modifier
+bemDom.declElem('my-block', 'elemName', {
+    onSetMod: {
+      'foo' : function() {
+          // Runs when an element gets any value of `foo` modifier
+      },
+      'bar' : {
+          'qux' : function() {
+              // Runs when an element gets 'qux' value of 'bar' modifier
           },
-          'bar' : {
-              'qux' : function() {
-                  // Runs when an element gets 'qux' value of 'bar' modifier
-              },
-              '' : function() {
-                  // Runs when `bar` modifier is removed from an element
-              }
+          '' : function() {
+              // Runs when `bar` modifier is removed from an element
           }
         }
     }
@@ -247,29 +238,30 @@ DOM.decl('my-block', {
 In this example, only the `go` element is provided with a special functionality.
 
 ```js
-modules.define('traffic-light', ['i-bem__dom'], function(provide, BEMDOM) {
+modules.define('traffic-light', ['i-bem-dom'], function(provide, bemDom) {
 
 var goSound = new Audio('blocks/traffic-light/__go/traffic-light__go.mp3');
 
-provide(BEMDOM.decl(this.name, {
-    onSetMod: { ... },
+bemDom.declElem('traffic-light', 'go', {
+    onSetMod: {
+        'status' : {
+            'on' : function() {
+                goSound.play();
+            },
 
-    onElemSetMod: {
-        'go' : {
-            'status' : {
-                'on' : function() {
-                    goSound.play();
-                },
-
-                'off' : function() {
-                    goSound.pause();
-                }
+            'off' : function() {
+                goSound.pause();
             }
         }
     }
+});
+
+provide(bemDom.declBlock(this.name, {
+    onSetMod: { ... }
 }));
 
-});```
+});
+```
 
 This makes a browser play a traffic light sound when an element is switched into
 `status_on` and to keep silent when the modifier goes off.
@@ -305,13 +297,13 @@ modifier from `switched_off` to `switched_on` and backwards by using the
 `toggleMod` helper.
 
 ```js
-modules.define('switch', ['i-bem__dom'], function(provide, BEMDOM) {
+modules.define('switch', ['i-bem-dom'], function(provide, bemDom) {
 
-provide(BEMDOM.decl(this.name, {
+provide(bemDom.declBlock(this.name, {
     onSetMod: {
         'js' : {
             'inited' : function() {
-                this.bindTo('click', function() {
+                this._domEvents().on('click', function() {
                     this.toggleMod('switched', 'on', 'off');
                 });
             }
@@ -322,8 +314,8 @@ provide(BEMDOM.decl(this.name, {
 });
 ```
 
-Indeed, the same goes for elements which an additional first parameter for the
-helper method.
+Indeed, the same goes for elements when `toggleMod` is called on an element
+instance.
 
 ## Deleting a modifier
 
@@ -367,14 +359,16 @@ How the block behaves is described in its
 file.
 
 ```js
-modules.define('todo', ['i-bem__dom'], function(provide, BEMDOM) {
+modules.define('todo', ['i-bem-dom', 'jquery'], function(provide, bemDom, $) {
 
-provide(BEMDOM.decl(this.name, {
+var Task = bemDom.declElem('todo', 'task');
+
+provide(bemDom.declBlock(this.name, {
     onSetMod: {
         'js' : {
             'inited' : function() {
-                this.bindTo(this.elem('task'), 'click', function(e) {
-                    this.delMod(e.domElem, 'visible');
+                this._domEvents('task').on('click', function(e) {
+                    $(e.currentTarget).bem(Task).delMod('visible');
                 });
             }
         }
@@ -387,18 +381,12 @@ provide(BEMDOM.decl(this.name, {
 Whenever a user clicks on a `task` element the `visible` modifier is removed
 from it by `delMod` modifier.
 
-The `delMod` helper can also be used for blocks as the first parameter (an
-element object) is optional.
+Notice that `_domEvents('task')` subscribes the block to DOM events from its
+`task` elements.
 
-Notice that the `bindTo` helper works not with a block but with its elements
-here.
-
-**NOTE:** As it was mentioned above, `bindTo` helper listens for every element of
-the kind. If this block had 100 task elements, that would mean 100 event watchers.
-Moreover, a dynamically added new task should have been provided with an event
-listener as well. There is another way to work with the events fully explained in
-the `live` section. Make sure you have learnt it before starting with a real
-powerful application.
+**NOTE:** This handler is attached when a block instance is initialized. For large
+lists and dynamically added elements, use lazy initialization through `lazyInit`
+and `onInit`, which is explained later.
 
 ## Before a modifier is set
 
@@ -434,32 +422,35 @@ modifier is set into `false`).
 
 ```js
 modules.define('accordion-menu',
-        ['i-bem__dom', 'jquery'], function(provide, BEMDOM, $) {
+        ['i-bem-dom', 'jquery'], function(provide, bemDom, $) {
 
-provide(BEMDOM.decl(this.name, {
+var Item = bemDom.declElem('accordion-menu', 'item', {
+    onSetMod: {
+        'current' : {
+            'true' : function() {
+                this._block().setCurrentItem(this);
+            }
+        }
+    }
+});
+
+provide(bemDom.declBlock(this.name, {
 
     onSetMod: {
         'js' : {
             'inited' : function() {
-                this._current = this.findElem('item', 'current', true);
+                this._current = this._elem({ elem : Item, modName : 'current', modVal : true });
 
-                this.bindTo('item', 'click', function(e) {
-                    this.setMod($(e.currentTarget), 'current', true);
+                this._domEvents('item').on('click', function(e) {
+                    $(e.currentTarget).bem(Item).setMod('current', true);
                 });
             }
         }
     },
 
-    onElemSetMod: {
-        'item' : {
-            'current' : {
-                'true' : function(elem) {
-                    this.delMod(this._current, 'current');
-
-                    this._current = elem;
-                }
-            }
-        }
+    setCurrentItem: function(item) {
+        this._current && this._current !== item && this._current.delMod('current');
+        this._current = item;
     }
 
 }));
@@ -474,28 +465,25 @@ module system. With it each module should be declared before using.
 
 The example becomes more interesting when a disabled item appears. Such an item
 has to prevent its being in the `current` state. That is always possible to put
-an additional condition in the modifier callback but the core provides more
-elegant solution. Similar to `onSetMod` and `onElemSetMod` properties you can
-use `beforeSetMod` and `beforeElemSetMod` to instruct the block component what
-to do previously. It is also prevents setting a modifier when a callback related
-to the 'before' part returns `false`.
+an additional condition in the modifier callback but the core provides a more
+elegant solution. In an element declaration, use `beforeSetMod` to instruct the
+element what to do before setting a modifier. It also prevents setting a modifier
+when a callback related to the 'before' part returns `false`.
 
 ```js
 modules.define('accordion-menu',
-        ['i-bem__dom', 'jquery'], function(provide, BEMDOM, $) {
+        ['i-bem-dom', 'jquery'], function(provide, bemDom, $) {
 
-provide(BEMDOM.decl(this.name, {
-    beforeElemSetMod: {
-        'item' : {
-            'current' : {
-                'true' : function(elem) {
-                    return !this.hasMod(elem, 'disabled');
-                }
+var Item = bemDom.declElem('accordion-menu', 'item', {
+    beforeSetMod: {
+        'current' : {
+            'true' : function() {
+                return !this.hasMod('disabled');
             }
         }
     },
     ...
-}));
+});
 
 });
 ```

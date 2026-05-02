@@ -1,20 +1,20 @@
-modules.define('player', ['i-bem__dom', 'jquery'], function(provide, BEMDOM, $) {
+modules.define('player', ['i-bem-dom', 'jquery'], function(provide, bemDom, $) {
 
-provide(BEMDOM.decl(this.name, {
+provide(bemDom.declBlock(this.name, {
     rotate: function() {
         var player = this;
 
         this._angle = this._angle || 0;
         this._rotate = setInterval(function(){
             player._angle += 3;
-            player.elem('vinyl').rotate(player._angle);
+            player._elem('vinyl').domElem.rotate(player._angle);
         }, 5);
     },
     stop: function() {
         clearInterval(this._rotate);
     }
 },{
-    live: true
+    lazyInit : true
 }));
 
 });

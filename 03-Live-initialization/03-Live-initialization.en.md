@@ -1,4 +1,4 @@
-# Live initialization
+# Live (lazy) initialization
 
 Before a block starts to function the core initializes it. At the end of this
 process the block gets `js_inited` modifier, which you are already familiar
@@ -18,21 +18,23 @@ operating on them.
 
 This is the so-called live (lazy) initialization.
 
-## 'live' static method
+## lazyInit and onInit static properties
 
-The instructions to initialize a block lazy can be given in a predefined `live`
-static method.
+The instructions to initialize a block lazily can be given with predefined
+`lazyInit` and `onInit` static properties.
 
 ```js
-modules.define('my-block', ['i-bem__dom'], function(provide, BEMDOM) {
+modules.define('my-block', ['i-bem-dom'], function(provide, bemDom) {
 
-provide(BEMDOM.decl(this.name, {
+provide(bemDom.declBlock(this.name, {
     onSetMod: {
         ...
     },
     ...
 }, {
-    live: function() {
+    lazyInit: true,
+
+    onInit: function() {
         // Here you can code when to initialize this block instance
     }
 }));
@@ -40,12 +42,12 @@ provide(BEMDOM.decl(this.name, {
 });
 ```
 
-In the previous examples, there was not static methods at all and this is equal
-to setting the `live` property as `false`.
+In the previous examples, there were no static methods at all. This is equal to
+setting the `lazyInit` property to `false`.
 
-Here, as it is a function, the core understands that the instances of this block
-should not be initialized before something special happens. This can be that a
-DOM event fires of the block DOM node or on an element.
+Here, `lazyInit: true` tells the core that the block should not be initialized
+before something special happens. In `onInit`, you can subscribe to conditions
+that create a block instance, such as a DOM event on the block or on an element.
 
 ## Initializing a block on DOM event
 
@@ -95,13 +97,15 @@ file of the block it is said to initialize it only after a `click` launches on
 the block DOM node.
 
 ```js
-modules.define('translate', ['i-bem__dom'], function(provide, BEMDOM) {
+modules.define('translate', ['i-bem-dom'], function(provide, bemDom) {
 
-provide(BEMDOM.decl(this.name, {
+provide(bemDom.declBlock(this.name, {
     ...
 },{
-    live: function() {
-        this.liveInitOnEvent('click');
+    lazyInit: true,
+
+    onInit: function() {
+        this._domEvents().on('click', function() {});
     }
 }));
 
@@ -112,25 +116,24 @@ When clicked, the core applies `js_inited` modifier to the block instance and
 runs constructor, the function set to this modifier.
 
 ```js
-modules.define('translate', ['i-bem__dom'], function(provide, BEMDOM) {
+modules.define('translate', ['i-bem-dom'], function(provide, bemDom) {
 
-provide(BEMDOM.decl(this.name, {
+provide(bemDom.declBlock(this.name, {
     onSetMod: {
         'js' : {
             'inited' : function() {
-                this.setMod(this.elem('prompt'), 'visible', true);
-            }
-        }
-    },
-    onElemSetMod: {
-        'prompt': {
-            'visible': function(elem) {
-                elem.text(this.params['prompt']);
+                var prompt = this._elem('prompt');
+                prompt.domElem.text(this.params.prompt);
+                prompt.setMod('visible', true);
             }
         }
     }
 },{
-    ...
+    lazyInit: true,
+
+    onInit: function() {
+        this._domEvents().on('click', function() {});
+    }
 }));
 
 });
@@ -143,12 +146,12 @@ In face, the translation could be placed into the `prompt` at the beginning sinc
 it was invisible for a user anyway. But just to illustrate how the parameters can
 be taken, its was placed into the `data-bem`.
 
-Coming back to the live initialization, you can see that on a page with many
+Coming back to lazy initialization, you can see that on a page with many
 blocks of the kind the core initializes only those on which the event runs. This
 approach saves the browser memory and makes the page function faster.
 
 There is an [event delegation](https://davidwalsh.name/event-delegate) idea
-behind live initialization. Thus, there is only one listener for the `click`
+behind lazy initialization. Thus, there is only one listener for the `click`
 event on the `document` object, not a lot of them for every block on a
 page.
 
@@ -166,11 +169,11 @@ blocks to the page. Then, with clicking on the phrases of this fresh joke you ca
 see that it work absolutely the same as the other `translate` blocks being on the
 page at the beginning.
 
-The core of i-bem framework listens to the events on the `document` object. So,
-when a user clicks any `translate` block, this click bubbles up to the `document`
-and core initializes the block as it was instructed it its `live` section.
+The core of i-bem framework listens to events on the `document` object. So, when
+a user clicks any `translate` block, this click bubbles up to the `document`, and
+the core initializes the block as instructed in `onInit`.
 
-### Binding to live events
+### Binding lazy initialization events
 
 ```files
 pure.bundles/
@@ -188,17 +191,17 @@ pure.bundles/
 The next [example with 100 BonBon
 buttons](https://bem-site.github.io/bem-js-tutorial/pure.bundles/011-live-bind-to/011-live-bind-to.html)
 ([BEMJSON](https://github.com/bem/bem-js-tutorial/blob/master/pure.bundles/011-live-bind-to/011-live-bind-to.bemjson.js))
-shows that live events can be reacted not once when initializing a block but every
+shows that DOM events can be handled not once when initializing a block but every
 time.
 
-This `button` block is again equipped with live initialization instructions since
+This `button` block is again equipped with lazy initialization instructions since
 it would be madness to initialize all the 100 buttons at once and then listen to
 the clicks on each of them.
 
 ```js
-modules.define('button', ['i-bem__dom'], function(provide, BEMDOM) {
+modules.define('button', ['i-bem-dom'], function(provide, bemDom) {
 
-provide(BEMDOM.decl(this.name, {
+provide(bemDom.declBlock(this.name, {
     onSetMod: {
         'js' : {
             'inited' : function() {
@@ -208,44 +211,48 @@ provide(BEMDOM.decl(this.name, {
             }
         }
     },
-    ...
-},{
-    live: function() {
-        this.liveBindTo('click');
-    }
-}));
-
-});
-```
-
-Similar to the examples with `liveInitOnEvent` this code initializes a block
-instance and runs the `js_inited` modifier callback.
-
-Unlike the `liveInitOnEvent` the `liveBindTo` method runs its callback not
-just once but every time a user clicks the button.
-
-```js
-modules.define('button', ['i-bem__dom'], function(provide, BEMDOM) {
-
-provide(BEMDOM.decl(this.name, {
-    onSetMod: {
-        ...
-    },
-    onClick: function() {
+    _onClick: function() {
         console.log('Here I can track clicks');
     }
 },{
-    live: function() {
-        this.liveBindTo('click', function(e) {
-            this.onClick();
-        });
+    lazyInit: true,
+
+    onInit: function() {
+        this._domEvents().on('click', this.prototype._onClick);
     }
 }));
 
 });
 ```
 
-## Live initialization on many events
+Similar to the previous example, this code initializes a block instance and runs
+the `js_inited` modifier callback.
+
+Unlike a one-time initialization trigger, `_domEvents().on()` runs its callback
+every time a user clicks the button.
+
+```js
+modules.define('button', ['i-bem-dom'], function(provide, bemDom) {
+
+provide(bemDom.declBlock(this.name, {
+    onSetMod: {
+        ...
+    },
+    _onClick: function() {
+        console.log('Here I can track clicks');
+    }
+},{
+    lazyInit: true,
+
+    onInit: function() {
+        this._domEvents().on('click', this.prototype._onClick);
+    }
+}));
+
+});
+```
+
+## Lazy initialization on many events
 
 ```files
 pure.bundles/
@@ -280,26 +287,26 @@ It is obvious an instance of this block has to be initialized when a user clicks
 its `label` element.
 
 ```js
-modules.define('checkbox', ['i-bem__dom'], function(provide, BEMDOM) {
+modules.define('checkbox', ['i-bem-dom'], function(provide, bemDom) {
 
-provide(BEMDOM.decl(this.name, {
+provide(bemDom.declBlock(this.name, {
     ...
     _onClick : function() {
         this.setMod('focused', true);
     },
     ...
 },{
-    live: function() {
-        this.liveBindTo('label', 'click', function() {
-            this._onClick();
-        });
+    lazyInit: true,
+
+    onInit: function() {
+        this._domEvents('label').on('click', this.prototype._onClick);
     }
 }));
 
 });
 ```
 
-The same `liveBindTo` method is used here to initialized the block and listen to
+The same `_domEvents().on()` method is used here to initialize the block and listen to
 its next clicks. Notice that here it is provided with an additional parameter
 (the first one) with the name of a block element whose clicks we are interested
 in.
@@ -307,14 +314,14 @@ in.
 But more than that, the control can be changed with a keyboard (or from another
 JavaScript piece) and this must also be taken into account.
 
-You can put in the `live` method as many instructions about how to initialize as
+You can put in the `onInit` method as many instructions about how to initialize as
 you need. Here it happens after a `click` event on the `label` element and also
 after a `change` event on the embedded `control` element, which is native `input`.
 
 ```js
-modules.define('checkbox', ['i-bem__dom'], function(provide, BEMDOM) {
+modules.define('checkbox', ['i-bem-dom'], function(provide, bemDom) {
 
-provide(BEMDOM.decl(this.name, {
+provide(bemDom.declBlock(this.name, {
     ...
     _onClick : function() {
         this.setMod('focused', true);
@@ -323,14 +330,11 @@ provide(BEMDOM.decl(this.name, {
         this.setMod('checked', e.target.checked);
     }
 },{
-    live: function() {
-        this.liveBindTo('label', 'click', function() {
-            this._onClick();
-        });
+    lazyInit: true,
 
-        this.liveBindTo('control', 'change', function(e){
-            this._onChange(e);
-        });
+    onInit: function() {
+        this._domEvents('label').on('click', this.prototype._onClick);
+        this._domEvents('control').on('change', this.prototype._onChange);
     }
 }));
 
@@ -340,23 +344,17 @@ provide(BEMDOM.decl(this.name, {
 The block should also be inited when focused in or focused out.
 
 ```js
-modules.define('checkbox', ['i-bem__dom'], function(provide, BEMDOM) {
+modules.define('checkbox', ['i-bem-dom'], function(provide, bemDom) {
 
-provide(BEMDOM.decl(this.name, {
+provide(bemDom.declBlock(this.name, {
     ...
 },{
-    live: function() {
-        this.liveBindTo('label', 'click', function() {
-            this._onClick();
-        });
+    lazyInit: true,
 
-        this.liveBindTo('control', 'change', function(e) {
-            this._onChange(e);
-        });
-
-        this.liveBindTo('control', 'focusin focusout', function(e) {
-            this.setMod('focused', e.type == 'focusin');
-        });
+    onInit: function() {
+        this._domEvents('label').on('click', this.prototype._onClick);
+        this._domEvents('control').on('change', this.prototype._onChange);
+        this._domEvents('control').on('focusin focusout', this.prototype._onFocusChange);
     }
 }));
 
@@ -369,25 +367,27 @@ callback if list their names separated with a space.
 Then, with adding modifiers functionality to the components, it can be finished.
 
 ```js
-modules.define('checkbox', ['i-bem__dom'], function(provide, BEMDOM) {
+modules.define('checkbox', ['i-bem-dom'], function(provide, bemDom) {
 
-provide(BEMDOM.decl(this.name, {
+provide(bemDom.declBlock(this.name, {
     onSetMod: {
         'focused' : {
             'true' : function() {
-                this.elem('control').focus();
+                this._elem('control').domElem.focus();
             },
             '' : function() {
-                this.elem('control').blur();
+                this._elem('control').domElem.blur();
             }
         },
         'checked' : function(modName, modVal) {
-            this.elem('control').attr('checked', modVal ? 'checked' : false);
+            this._elem('control').domElem.attr('checked', modVal ? 'checked' : false);
         }
     },
     ...
 },{
-    live: function() {
+    lazyInit: true,
+
+    onInit: function() {
         ...
     }
 }));
@@ -476,12 +476,12 @@ Its JavaScript functionality is to trigger the `click` event on the correspondin
 JavaScript object whenever a user clicks the left button if the current link is not
 disabled.
 
-An event is triggered with the help of `emit` method of the block.
+An event is triggered with the help of the `_emit` method of the block.
 
 ```js
   _onClick : function(e) {
       e.preventDefault();
-      this.hasMod('disabled') || this.emit('click');
+      this.hasMod('disabled') || this._emit('click');
   }
 ```
 
@@ -521,19 +521,18 @@ The menu listens to the DOM clicks on its `item-selector` elements and emits the
 data.
 
 ```js
-this
-    .delMod(prev, 'state')
-    .emit('current', {
-        prev    : prev,
-        current : elem
-    });
+prev && prev !== this && prev.delMod('state');
+menu._emit('current', {
+    prev    : prev,
+    current : this
+});
 ```
 
 This event fires on the JavaScript object corresponding to the menu block instance.
 With that, any other block subscribed to the `current` BEM event of the menu can
 learn when it changes its current item and react on it.
 
-## Live initialization on BEM event of an inner block
+## Lazy initialization on a BEM event of an inner block
 
 ```files
 components.bundles/
@@ -565,47 +564,51 @@ page](https://github.com/varya/bem-js-tutorial/blob/master/components.bundles/01
 or inside the page html
 [014-live-init-bem-event.html](https://bem-site.github.io/bem-js-tutorial/components.bundles/014-live-init-bem-event/014-live-init-bem-event.html).
 
-This block is only needed when a user has been started to interact with the
-menu. So the block uses live initialization and it is declared to initialize the
-block only when the `current` BEM event fires on the included `menu` block.
+This block is only needed when a user starts interacting with the menu. So the
+block uses lazy initialization: an instance is created only when the `current`
+BEM event fires on the included `menu` block.
 
 The JavaScript implementation of the block
 [map-marks.js](https://github.com/varya/bem-js-tutorial/blob/master/components.bundles/014-live-init-bem-event/blocks/map-marks/map-marks.js)
-uses live initialization depending on the inner block.
+subscribes to the BEM event of an inner block from the static `onInit` method.
 
 ```js
-modules.define('map-marks', ['i-bem__dom', 'jquery'], function(provide, BEMDOM, $) {
+modules.define('map-marks', ['i-bem-dom', 'map', 'menu'], function(provide, bemDom, Map, Menu) {
 
-provide(BEMDOM.decl(this.name, {
-    ...
+provide(bemDom.declBlock(this.name, {
+    _onMenuCurrent: function(e, data) {
+        this._showMap(data.current);
+    }
 }, {
-    live: function() {
-        this.liveInitOnBlockInsideEvent('current', 'menu', function(e, data) {
-            this._showMap(e, data.current);
-        });
+    lazyInit: true,
+
+    onInit: function() {
+        this._events(Menu).on('current', this.prototype._onMenuCurrent);
     }
 }));
 
 });
 ```
 
-The `liveInitOnBlockInsideEvent` methods requests the names of an event and the
-included block s well as a callback.
+The `_events(Menu).on()` method receives the event name and a callback. Because
+the subscription is made from the block class, the handler first initializes the
+closest `map-marks` instance where the event happened, and then calls the
+callback in the context of this instance.
 
 Once a user clicks a menu item, it becomes current and the menu block emits
-`current` event. Being catched, it initializes the `map-marks` block, which means
-it gets `js_inited` modifier ans the related method runs:
+`current` event. Being caught, it initializes the `map-marks` block, which means
+it gets the `js_inited` modifier and the related method runs:
 
 ```js
-modules.define('map-marks', ['i-bem__dom', 'jquery'], function(provide, BEMDOM, $) {
+modules.define('map-marks', ['i-bem-dom', 'map', 'menu'], function(provide, bemDom, Map, Menu) {
 
-provide(BEMDOM.decl(this.name, {
+provide(bemDom.declBlock(this.name, {
 
   onSetMod: {
       'js' : {
           'inited' : function () {
-              this._menu = this.findBlockInside('menu');
-              this._map = this.findBlockInside('map');
+              this._menu = this.findChildBlock(Menu);
+              this._map = this.findChildBlock(Map);
           }
       }
   },
@@ -613,8 +616,10 @@ provide(BEMDOM.decl(this.name, {
   ...
 
 }, {
-    live: function() {
-        ...
+    lazyInit: true,
+
+    onInit: function() {
+        this._events(Menu).on('current', this.prototype._onMenuCurrent);
     }
 }));
 
@@ -625,22 +630,24 @@ Then the callback runs the `_showMap` method of the block instance. This shows a
 mark on a map using the `map` block.
 
 ```js
-modules.define('map-marks', ['i-bem__dom', 'jquery'], function(provide, BEMDOM, $) {
+modules.define('map-marks', ['i-bem-dom', 'map', 'menu'], function(provide, bemDom, Map, Menu) {
 
-provide(BEMDOM.decl(this.name, {
+provide(bemDom.declBlock(this.name, {
 
     ...
 
-    _showMap: function(e, elem) {
-        var params = this._menu.elemParams(elem);
+    _showMap: function(elem) {
+        var params = elem.params;
         this._map.showAddress(params['address']);
     }
 
     ...
 
 }, {
-    live: function() {
-        ...
+    lazyInit: true,
+
+    onInit: function() {
+        this._events(Menu).on('current', this.prototype._onMenuCurrent);
     }
 }));
 

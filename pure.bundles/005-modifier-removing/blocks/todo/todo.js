@@ -1,11 +1,13 @@
-modules.define('todo', ['i-bem__dom', 'jquery'], function(provide, BEMDOM, $) {
+modules.define('todo', ['i-bem-dom', 'jquery'], function(provide, bemDom, $) {
 
-provide(BEMDOM.decl(this.name, {
+var Task = bemDom.declElem('todo', 'task');
+
+provide(bemDom.declBlock(this.name, {
     onSetMod: {
         'js' : {
             'inited' : function() {
-                this.bindTo(this.elem('task'), 'click', function(e) {
-                    this.delMod($(e.currentTarget), 'visible');
+                this._domEvents('task').on('click', function(e) {
+                    $(e.currentTarget).bem(Task).delMod('visible');
                 });
             }
         }

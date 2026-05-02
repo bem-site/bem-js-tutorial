@@ -1,28 +1,30 @@
-modules.define('dj', ['i-bem__dom'], function(provide, BEMDOM) {
+modules.define('dj', ['i-bem-dom', 'checkbox', 'player'], function(provide, bemDom, Checkbox, Player) {
 
-provide(BEMDOM.decl(this.name, {
+provide(bemDom.declBlock(this.name, {
     onSetMod: {
         'running' : {
             'true' : function() {
                 var dj = this;
 
-                dj.findBlocksInside('player').forEach(function(player) {
+                dj.findChildBlocks(Player).forEach(function(player) {
                     player.rotate();
                 });
             },
             '': function() {
                 var dj = this;
 
-                dj.findBlocksInside('player').forEach(function(player) {
+                dj.findChildBlocks(Player).forEach(function(player) {
                     player.stop();
                 });
             }
         }
     }
 },{
-    live: function() {
-        this.liveInitOnBlockInsideEvent({ modName: 'checked', modVal: '*' }, 'checkbox', function(data) {
-            this.setMod('running', data.target.hasMod('checked'));
+    lazyInit : true,
+
+    onInit : function() {
+        this._events(Checkbox).on({ modName : 'checked', modVal : '*' }, function(e) {
+            this.setMod('running', e.target.hasMod('checked'));
         });
     }
 }));
